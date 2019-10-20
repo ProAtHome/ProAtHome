@@ -1,6 +1,5 @@
 package com.proathome.REST;
 
-import com.proathome.modelos.Cliente;
 import com.proathome.controladores.ControladorCliente;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -78,5 +77,13 @@ public class RESTCliente {
         }
         
     }//Fin método agregarEvaluacion.
+    
+    @POST
+    @Path("/agregarUbicacion")
+    public void agregarUbicacion(String datos){
+        
+        
+        
+    }//Fin método agregarUbicacion,
 
 }

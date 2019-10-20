@@ -124,7 +124,7 @@ public class ControladorProfesor {
         profesor.cuenta.setBanco(String.valueOf(jsonCuentaBancaria.get("banco")));
         profesor.cuenta.setDireccionFacturacion(String.valueOf(jsonCuentaBancaria.get("direccionFacturacion")));
         profesor.cuenta.setTipoPago(String.valueOf(jsonCuentaBancaria.get("tipoDePago")));
-        profesor.cuenta.setNumeroCuenta(Integer.parseInt(String.valueOf(jsonCuentaBancaria.get("numeroCuenta"))));
+        profesor.cuenta.setNumeroCuenta(String.valueOf(jsonCuentaBancaria.get("numeroCuenta")));
         
     }//Fin método nuevaCuentaBancaria.
 
@@ -141,7 +141,7 @@ public class ControladorProfesor {
                 agregarDatos.setInt(1, idProfesor);
                 agregarDatos.setString(2, profesor.cuenta.getTipoPago());
                 agregarDatos.setString(3, profesor.cuenta.getBanco());
-                agregarDatos.setInt(4, profesor.cuenta.getNumeroCuenta());
+                agregarDatos.setString(4, profesor.cuenta.getNumeroCuenta());
                 agregarDatos.setString(5, profesor.cuenta.getDireccionFacturacion());
                 agregarDatos.execute();
 
@@ -165,6 +165,18 @@ public class ControladorProfesor {
         
         
         
-    }
+    }//Fin método nuevaEvaluacion.
+    
+    public void nuevaUbicacion(JSONObject jsonUbicacion){
+        
+        
+        
+    }//Fin método nuevaUbicacion.
+    
+    public void guardarUbicacion(){
+        
+        
+        
+    }//Fin método guardarUbicacion.
     
 }

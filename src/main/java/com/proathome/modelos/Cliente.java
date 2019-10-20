@@ -1,19 +1,12 @@
 package com.proathome.modelos;
 
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import com.proathome.mysql.ConexionMySQL;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 /*
  *
  * Clase Modelo Cliente.
  * 
- */
+*/
 
 public class Cliente {
    
@@ -22,6 +15,7 @@ public class Cliente {
     private int edad;
     public static CuentaBancaria cuenta;
     public static EvaluacionCliente evaluacion;
+    public static Ubicacion ubicacion;
     
     public Cliente(){
         

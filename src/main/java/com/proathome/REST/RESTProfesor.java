@@ -1,6 +1,5 @@
 package com.proathome.REST;
 
-import com.proathome.modelos.Profesor;
 import com.proathome.controladores.ControladorProfesor;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

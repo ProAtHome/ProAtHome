@@ -1,11 +1,10 @@
-
 package com.proathome.modelos;
 
 public class EvaluacionProfesor {
     
     /*
     *
-    * Clase Modelo EvaluacionProfesor.
+    * Clase Modelo de Evaluacion Profesor.
     * 
     */
     

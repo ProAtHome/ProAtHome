@@ -79,7 +79,7 @@ public class ControladorCliente {
         cliente.cuenta.setBanco(String.valueOf(jsonCuentaBancaria.get("banco")));
         cliente.cuenta.setDireccionFacturacion(String.valueOf(jsonCuentaBancaria.get("direccionFacturacion")));
         cliente.cuenta.setTipoPago(String.valueOf(jsonCuentaBancaria.get("tipoDePago")));
-        cliente.cuenta.setNumeroCuenta(Integer.parseInt(String.valueOf(jsonCuentaBancaria.get("numeroCuenta"))));
+        cliente.cuenta.setNumeroCuenta(String.valueOf(jsonCuentaBancaria.get("numeroCuenta")));
         
     }//Fin método nuevaCuentaBancaria.
     
@@ -96,7 +96,7 @@ public class ControladorCliente {
                 agregarDatos.setInt(1, idCliente);
                 agregarDatos.setString(2, cliente.cuenta.getTipoPago());
                 agregarDatos.setString(3, cliente.cuenta.getBanco());
-                agregarDatos.setInt(4, cliente.cuenta.getNumeroCuenta());
+                agregarDatos.setString(4, cliente.cuenta.getNumeroCuenta());
                 agregarDatos.setString(5, cliente.cuenta.getDireccionFacturacion());
                 agregarDatos.execute();
                 
@@ -162,5 +162,17 @@ public class ControladorCliente {
         }
         
     }//Fin método guardarEvaluacion.
+    
+    public void nuevaUbicacion(JSONObject jsonUbicacion){
+        
+        
+        
+    }//Fin método nuevaUbicacion.
+    
+    public void guardarUbicacion(){
+        
+        
+        
+    }//Fin método guardarUbicacion.
 
 }

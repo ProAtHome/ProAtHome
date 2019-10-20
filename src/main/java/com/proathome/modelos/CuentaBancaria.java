@@ -1,10 +1,14 @@
-
 package com.proathome.modelos;
 
 public class CuentaBancaria {
     
-    private String banco, tipoPago, direccionFacturacion;
-    private int numeroCuenta;
+    /*
+    *
+    * Clase Modelo de Cuenta Bancaria.
+    * 
+    */
+    
+    private String banco, tipoPago, direccionFacturacion, numeroCuenta;
     
     public CuentaBancaria(){
         
@@ -34,11 +38,11 @@ public class CuentaBancaria {
         this.direccionFacturacion = direccionFacturacion;
     }
 
-    public int getNumeroCuenta() {
+    public String getNumeroCuenta() {
         return numeroCuenta;
     }
 
-    public void setNumeroCuenta(int numeroCuenta) {
+    public void setNumeroCuenta(String numeroCuenta) {
         this.numeroCuenta = numeroCuenta;
     }
       

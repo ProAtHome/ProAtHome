@@ -1,21 +1,12 @@
 package com.proathome.modelos;
 
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import com.proathome.mysql.ConexionMySQL;
-import org.json.simple.JSONObject;
 
 /*
  *
  * Clase Modelo Profesor.
  * 
- */
+*/
 
 public class Profesor {
 
@@ -24,6 +15,7 @@ public class Profesor {
     private int edad;
     public static CuentaBancaria cuenta;
     public static EvaluacionProfesor evaluacion;
+    public static Ubicacion ubicacion;
 
     public Profesor() {
         
