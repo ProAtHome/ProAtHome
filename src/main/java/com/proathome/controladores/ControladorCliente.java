@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import com.proathome.mysql.ConexionMySQL;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import org.json.simple.JSONObject;
 
 public class ControladorCliente {
@@ -21,6 +23,57 @@ public class ControladorCliente {
     private Cliente cliente = new Cliente();
     private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
+    
+    public void iniciarSesion(String correo, String contrasena){
+        
+        conectar = mysql.conectar();
+        
+        if(conectar != null){
+            
+            try{
+                
+                String query = "SELECT * FROM clientes WHERE correo = ? AND contrasena = ?";
+                PreparedStatement obtenerDatos = conectar.prepareStatement(query);
+                obtenerDatos.setString(1, correo);
+                obtenerDatos.setString(2, contrasena);
+                ResultSet resultado = obtenerDatos.executeQuery();
+                
+                if(resultado.next()){
+                    
+                    cliente.setIdCliente(resultado.getInt("idclientes"));
+                    cliente.setNombre(resultado.getString("nombre"));
+                    cliente.setCorreo(resultado.getString("correo"));
+                    cliente.setEdad(resultado.getInt("edad"));
+                    cliente.setFechaNacimiento(resultado.getDate("fechaNacimiento"));
+                    cliente.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
+                    cliente.setContrasena(resultado.getString("contrasena"));
+                    conectar.close();
+                    
+                }else{
+                    
+                    conectar.close();
+                    
+                }
+                
+            }catch(SQLException ex){
+                
+                System.out.println(ex.getMessage());
+                
+            }
+            
+        }else{
+            
+            System.out.println("Error en la conexión iniciarSesion.");
+            
+        }
+        
+    }//Fin método iniciarSesion.
+    
+    public Cliente datosSesion(){
+        
+        return cliente;
+        
+    }//Fin método datosSesion.
 
     public void nuevoCliente(JSONObject jsonCliente) {
 

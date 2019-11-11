@@ -1,9 +1,12 @@
 package com.proathome.REST;
 
+import com.google.gson.Gson;
 import com.proathome.controladores.ControladorCliente;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.json.simple.JSONObject;
@@ -23,6 +26,19 @@ public class RESTCliente {
     
     private ControladorCliente cliente = new ControladorCliente();
     private JSONParser parser = new JSONParser();
+    private Gson gson = new Gson();
+    
+    @GET
+    @Path("/sesionCliente/{correo}/{contrasena}")
+    public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena){
+        
+        System.out.println(correo + contrasena);
+        cliente.iniciarSesion(correo, contrasena);
+        String sesion = gson.toJson(cliente.datosSesion());
+        
+        return sesion;
+        
+    }//Fin método sesionCliente.
     
     @POST
     @Path("/agregarCliente")

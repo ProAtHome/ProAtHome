@@ -12,13 +12,21 @@ public class Cliente {
    
     private String nombre, correo, contrasena;
     private java.sql.Date fechaNacimiento, fechaRegistro;
-    private int edad;
+    private int edad, idCliente;
     public static CuentaBancaria cuenta;
     public static EvaluacionCliente evaluacion;
     public static Ubicacion ubicacion;
     
     public Cliente(){
         
+    }
+
+    public int getIdCliente() {
+        return idCliente;
+    }
+
+    public void setIdCliente(int idCliente) {
+        this.idCliente = idCliente;
     }
 
     public String getNombre() {
