@@ -1,5 +1,6 @@
 package com.proathome.REST;
 
+import com.google.gson.Gson;
 import com.proathome.controladores.ControladorProfesor;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -25,7 +26,20 @@ public class RESTProfesor {
     
     private ControladorProfesor profesor = new ControladorProfesor();
     private JSONParser parser = new JSONParser();
-
+    private Gson gson = new Gson();
+    
+    @GET
+    @Path("/sesionProfesor/{correo}/{contrasena}")
+    public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena){
+        
+        profesor.iniciarSesion(correo, contrasena);
+        String sesion = gson.toJson(profesor.datosSesion());
+        System.out.println(sesion);
+        
+        return sesion;
+        
+    }//Fin método sesionCliente.
+    
     @POST
     @Path("/agregarProfesor")
     public void agregarProfesor(String datos) {

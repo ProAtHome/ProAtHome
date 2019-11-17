@@ -12,13 +12,45 @@ public class Profesor {
 
     private String nombre, correo, contrasena, clv;
     private java.sql.Date fechaNacimiento, fechaRegistro;
-    private int edad;
+    private int edad, idProfesor;
     public static CuentaBancaria cuenta;
     public static EvaluacionProfesor evaluacion;
     public static Ubicacion ubicacion;
 
     public Profesor() {
         
+    }
+
+    public int getIdProfesor() {
+        return idProfesor;
+    }
+
+    public void setIdProfesor(int idProfesor) {
+        this.idProfesor = idProfesor;
+    }
+
+    public static CuentaBancaria getCuenta() {
+        return cuenta;
+    }
+
+    public static void setCuenta(CuentaBancaria cuenta) {
+        Profesor.cuenta = cuenta;
+    }
+
+    public static EvaluacionProfesor getEvaluacion() {
+        return evaluacion;
+    }
+
+    public static void setEvaluacion(EvaluacionProfesor evaluacion) {
+        Profesor.evaluacion = evaluacion;
+    }
+
+    public static Ubicacion getUbicacion() {
+        return ubicacion;
+    }
+
+    public static void setUbicacion(Ubicacion ubicacion) {
+        Profesor.ubicacion = ubicacion;
     }
 
     public String getNombre() {

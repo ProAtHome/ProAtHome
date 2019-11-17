@@ -32,9 +32,9 @@ public class RESTCliente {
     @Path("/sesionCliente/{correo}/{contrasena}")
     public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena){
         
-        System.out.println(correo + contrasena);
         cliente.iniciarSesion(correo, contrasena);
         String sesion = gson.toJson(cliente.datosSesion());
+        System.out.println(sesion);
         
         return sesion;
         

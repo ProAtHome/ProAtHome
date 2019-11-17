@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import com.proathome.mysql.ConexionMySQL;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import org.json.simple.JSONObject;
 
 public class ControladorCliente {
@@ -23,6 +22,7 @@ public class ControladorCliente {
     private Cliente cliente = new Cliente();
     private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
+    private boolean clienteRegistrado = false;
     
     public void iniciarSesion(String correo, String contrasena){
         
@@ -48,9 +48,11 @@ public class ControladorCliente {
                     cliente.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
                     cliente.setContrasena(resultado.getString("contrasena"));
                     conectar.close();
+                    clienteRegistrado = true;
                     
                 }else{
                     
+                    clienteRegistrado = false;
                     conectar.close();
                     
                 }
@@ -71,8 +73,16 @@ public class ControladorCliente {
     
     public Cliente datosSesion(){
         
-        return cliente;
-        
+        if(clienteRegistrado){
+            
+            return cliente;
+            
+        }else{
+            
+            return null;
+            
+        }
+          
     }//Fin método datosSesion.
 
     public void nuevoCliente(JSONObject jsonCliente) {

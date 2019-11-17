@@ -1,7 +1,6 @@
 package com.proathome.controladores;
 
 import com.proathome.modelos.CuentaBancaria;
-import com.proathome.modelos.EvaluacionProfesor;
 import com.proathome.modelos.Profesor;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,12 +18,73 @@ public class ControladorProfesor {
     *
     *Clase controladora de Profesores.
     *
-    */
-    
+     */
     private Profesor profesor = new Profesor();
     private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
     private JSONObject jsonTodos;
+    private boolean profesorRegistrado = false;
+
+    public void iniciarSesion(String correo, String contrasena) {
+
+        conectar = mysql.conectar();
+
+        if (conectar != null) {
+
+            try {
+
+                String query = "SELECT * FROM profesores WHERE correo = ? AND contrasena = ?";
+                PreparedStatement obtenerDatos = conectar.prepareStatement(query);
+                obtenerDatos.setString(1, correo);
+                obtenerDatos.setString(2, contrasena);
+                ResultSet resultado = obtenerDatos.executeQuery();
+
+                if (resultado.next()) {
+
+                    profesor.setIdProfesor(resultado.getInt("idprofesores"));
+                    profesor.setNombre(resultado.getString("nombre"));
+                    profesor.setCorreo(resultado.getString("correo"));
+                    profesor.setEdad(resultado.getInt("edad"));
+                    profesor.setFechaNacimiento(resultado.getDate("fechaNacimiento"));
+                    profesor.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
+                    profesor.setContrasena(resultado.getString("contrasena"));
+                    conectar.close();
+                    profesorRegistrado = true;
+
+                } else {
+
+                    profesorRegistrado = false;
+                    conectar.close();
+
+                }
+
+            } catch (SQLException ex) {
+
+                System.out.println(ex.getMessage());
+
+            }
+
+        } else {
+
+            System.out.println("Error en la conexión iniciarSesion.");
+
+        }
+
+    }//Fin método iniciarSesion.
+
+    public Profesor datosSesion() {
+
+        if (profesorRegistrado) {
+
+            return profesor;
+
+        } else {
+
+            return null;
+
+        }
+
+    }//Fin método datosSesion.
 
     public void nuevoProfesor(JSONObject jsonProfesor) {
 
@@ -117,15 +177,15 @@ public class ControladorProfesor {
         }
 
     }//Fin método guardarProfesor.
-    
-    public void nuevaCuentaBancaria(JSONObject jsonCuentaBancaria){
-        
+
+    public void nuevaCuentaBancaria(JSONObject jsonCuentaBancaria) {
+
         profesor.cuenta = new CuentaBancaria();
         profesor.cuenta.setBanco(String.valueOf(jsonCuentaBancaria.get("banco")));
         profesor.cuenta.setDireccionFacturacion(String.valueOf(jsonCuentaBancaria.get("direccionFacturacion")));
         profesor.cuenta.setTipoPago(String.valueOf(jsonCuentaBancaria.get("tipoDePago")));
         profesor.cuenta.setNumeroCuenta(String.valueOf(jsonCuentaBancaria.get("numeroCuenta")));
-        
+
     }//Fin método nuevaCuentaBancaria.
 
     public void guardarCuentaBancaria(int idProfesor) {
@@ -160,23 +220,17 @@ public class ControladorProfesor {
         }
 
     }//Fin método guardarCuentaBancaria.
-    
-    public void nuevaEvaluacion(JSONObject jsonEvaluacionProfesor){
-        
-        
-        
+
+    public void nuevaEvaluacion(JSONObject jsonEvaluacionProfesor) {
+
     }//Fin método nuevaEvaluacion.
-    
-    public void nuevaUbicacion(JSONObject jsonUbicacion){
-        
-        
-        
+
+    public void nuevaUbicacion(JSONObject jsonUbicacion) {
+
     }//Fin método nuevaUbicacion.
-    
-    public void guardarUbicacion(){
-        
-        
-        
+
+    public void guardarUbicacion() {
+
     }//Fin método guardarUbicacion.
-    
+
 }
