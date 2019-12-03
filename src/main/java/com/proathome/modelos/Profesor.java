@@ -10,7 +10,7 @@ import java.sql.Date;
 
 public class Profesor {
 
-    private String nombre, correo, contrasena, clv;
+    private String nombre, correo, contrasena, clv, foto, descripcion;
     private java.sql.Date fechaNacimiento, fechaRegistro;
     private int edad, idProfesor;
     public static CuentaBancaria cuenta;
@@ -21,6 +21,22 @@ public class Profesor {
         
     }
 
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
+    }
+    
     public int getIdProfesor() {
         return idProfesor;
     }

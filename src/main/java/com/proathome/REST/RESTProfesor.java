@@ -40,6 +40,35 @@ public class RESTProfesor {
         
     }//Fin método sesionCliente.
     
+    @GET
+    @Path("perfilProfesor/{idProfesor}")
+    public String perfilCliente(@PathParam("idProfesor") int idProfesor){
+        
+       profesor.perfilProfesor(idProfesor);
+       String perfil = gson.toJson(profesor.datosSesion());
+       System.out.println(perfil);
+       
+       return perfil;
+        
+    }//Fin método perfilCliente.
+    
+    @POST
+    @Path("/actualizarFoto")
+    public void actualizarFoto(String datos){
+        
+        try{
+            
+            JSONObject jsonFoto = (JSONObject)parser.parse(datos);
+            profesor.actualizarFoto(jsonFoto);
+            
+        }catch(ParseException ex){
+            
+            System.out.println(ex.getMessage());
+            
+        }
+        
+    }//Fin método actializarFoto.
+    
     @POST
     @Path("/agregarProfesor")
     public void agregarProfesor(String datos) {

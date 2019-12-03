@@ -43,11 +43,8 @@ public class ControladorProfesor {
 
                     profesor.setIdProfesor(resultado.getInt("idprofesores"));
                     profesor.setNombre(resultado.getString("nombre"));
-                    profesor.setCorreo(resultado.getString("correo"));
-                    profesor.setEdad(resultado.getInt("edad"));
-                    profesor.setFechaNacimiento(resultado.getDate("fechaNacimiento"));
-                    profesor.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
-                    profesor.setContrasena(resultado.getString("contrasena"));
+                    profesor.setFoto(resultado.getString("foto"));
+
                     conectar.close();
                     profesorRegistrado = true;
 
@@ -71,6 +68,88 @@ public class ControladorProfesor {
         }
 
     }//Fin método iniciarSesion.
+
+    public void actualizarFoto(JSONObject foto) {
+
+        profesor.setFoto(String.valueOf(foto.get("nombre")));
+        profesor.setIdProfesor(Integer.parseInt(String.valueOf(foto.get("idProfesor"))));
+
+        conectar = mysql.conectar();
+
+        if (conectar != null) {
+
+            try {
+
+                String query = "UPDATE profesores SET foto = ? WHERE idprofesores = ?";
+                PreparedStatement actualizar = conectar.prepareStatement(query);
+                actualizar.setString(1, profesor.getFoto());
+                actualizar.setInt(2, profesor.getIdProfesor());
+                actualizar.executeUpdate();
+
+                conectar.close();
+
+            } catch (SQLException ex) {
+
+                System.out.println(ex.getMessage());
+
+            }
+
+        } else {
+
+            System.out.println("Error en la conexión actualizarFoto.");
+
+        }
+
+    }//Fin método actualizarFoto.
+
+    public void perfilProfesor(int idProfesor) {
+
+        conectar = mysql.conectar();
+
+        if (conectar != null) {
+
+            try {
+
+                String query = "SELECT * FROM profesores WHERE idprofesores = ?";
+                PreparedStatement obtenerDatos = conectar.prepareStatement(query);
+                obtenerDatos.setInt(1, idProfesor);
+                ResultSet resultado = obtenerDatos.executeQuery();
+
+                if (resultado.next()) {
+
+                    profesor.setIdProfesor(resultado.getInt("idprofesores"));
+                    profesor.setNombre(resultado.getString("nombre"));
+                    profesor.setCorreo(resultado.getString("correo"));
+                    profesor.setContrasena(resultado.getString("contrasena"));
+                    profesor.setEdad(resultado.getInt("edad"));
+                    profesor.setFechaNacimiento(resultado.getDate("fechaNacimiento"));
+                    profesor.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
+                    profesor.setFoto(resultado.getString("foto"));
+                    profesor.setDescripcion(resultado.getString("descripcion"));
+
+                    conectar.close();
+                    profesorRegistrado = true;
+
+                } else {
+
+                    profesorRegistrado = false;
+                    conectar.close();
+
+                }
+
+            } catch (SQLException ex) {
+
+                System.out.println(ex.getMessage());
+
+            }
+
+        } else {
+
+            System.out.println("Error en la conexión iniciarSesion.");
+
+        }
+
+    }//Fin método perfilProfesor.
 
     public Profesor datosSesion() {
 
@@ -220,17 +299,5 @@ public class ControladorProfesor {
         }
 
     }//Fin método guardarCuentaBancaria.
-
-    public void nuevaEvaluacion(JSONObject jsonEvaluacionProfesor) {
-
-    }//Fin método nuevaEvaluacion.
-
-    public void nuevaUbicacion(JSONObject jsonUbicacion) {
-
-    }//Fin método nuevaUbicacion.
-
-    public void guardarUbicacion() {
-
-    }//Fin método guardarUbicacion.
 
 }

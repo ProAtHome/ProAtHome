@@ -10,7 +10,7 @@ import java.sql.Date;
 
 public class Cliente {
    
-    private String nombre, correo, contrasena;
+    private String nombre, correo, contrasena, foto, descripcion;
     private java.sql.Date fechaNacimiento, fechaRegistro;
     private int edad, idCliente;
     public static CuentaBancaria cuenta;
@@ -19,6 +19,22 @@ public class Cliente {
     
     public Cliente(){
         
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getFoto() {
+        return foto;
+    }
+
+    public void setFoto(String foto) {
+        this.foto = foto;
     }
 
     public int getIdCliente() {
