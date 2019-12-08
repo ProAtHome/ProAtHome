@@ -69,6 +69,47 @@ public class ControladorProfesor {
 
     }//Fin método iniciarSesion.
 
+    public void datosActualizarPerfil(JSONObject datos) {
+
+        profesor.setIdProfesor(Integer.parseInt(String.valueOf(datos.get("idProfesor"))));
+        profesor.setNombre(String.valueOf(datos.get("nombre")));
+        profesor.setCorreo(String.valueOf(datos.get("correo")));
+        profesor.setDescripcion(String.valueOf(datos.get("descripcion")));
+
+    }//Fin método datosActualizarPerfil.
+
+    public void actualizarDatosPerfil() {
+
+        conectar = mysql.conectar();
+
+        if (conectar != null) {
+
+            try {
+
+                String query = "UPDATE profesores SET nombre = ?, correo = ?, descripcion = ? WHERE idprofesores = ?";
+                PreparedStatement actualizar = conectar.prepareStatement(query);
+                actualizar.setString(1, profesor.getNombre());
+                actualizar.setString(2, profesor.getCorreo());
+                actualizar.setString(3, profesor.getDescripcion());
+                actualizar.setInt(4, profesor.getIdProfesor());
+                actualizar.executeUpdate();
+
+                conectar.close();
+
+            } catch (SQLException ex) {
+
+                System.out.println(ex.getMessage());
+
+            }
+
+        } else {
+
+            System.out.println("Error en la conexión en actualizarDatosPerfil.");
+
+        }
+
+    }//Fin método actualizarDatosPerfil.
+
     public void actualizarFoto(JSONObject foto) {
 
         profesor.setFoto(String.valueOf(foto.get("nombre")));
@@ -257,6 +298,49 @@ public class ControladorProfesor {
 
     }//Fin método guardarProfesor.
 
+    public CuentaBancaria obtenerCuentaBancaria(int idProfesor) {
+
+        profesor.cuenta = new CuentaBancaria();
+        conectar = mysql.conectar();
+
+        if (conectar != null) {
+
+            try {
+
+                Statement estado = conectar.createStatement();
+                ResultSet resultado = estado.executeQuery("SELECT * FROM datosbancariosprofesores WHERE profesores_idprofesores = " + idProfesor);
+
+                if (resultado.next()) {
+
+                    profesor.cuenta.setBanco(resultado.getString("banco"));
+                    profesor.cuenta.setDireccionFacturacion(resultado.getString("direccionFacturacion"));
+                    profesor.cuenta.setTipoPago(resultado.getString("tipoDePago"));
+                    profesor.cuenta.setNumeroCuenta(resultado.getString("numeroCuenta"));
+
+                } else {
+
+                    return null;
+
+                }
+
+                conectar.close();
+
+            } catch (SQLException ex) {
+
+                System.out.println(ex.getMessage());
+
+            }
+
+        } else {
+
+            System.out.println("Error en la conexión obtenerCuentaBancaria.");
+
+        }
+
+        return profesor.cuenta;
+
+    }//Fin método obtenerCuentaBancaria.
+
     public void nuevaCuentaBancaria(JSONObject jsonCuentaBancaria) {
 
         profesor.cuenta = new CuentaBancaria();
@@ -294,7 +378,40 @@ public class ControladorProfesor {
 
         } else {
 
-            System.out.println("Error en la conexión agregarCuentaBancaria.");
+            System.out.println("Error en la conexión guardarCuentaBancaria.");
+
+        }
+
+    }//Fin método guardarCuentaBancaria.
+
+    public void actualizarCuentaBancaria(int idProfesor) {
+
+        conectar = mysql.conectar();
+
+        if (conectar != null) {
+
+            try {
+
+                String query = "UPDATE datosbancariosprofesores SET tipoDePago = ?, banco = ?, numeroCuenta = ?, direccionFacturacion = ? WHERE profesores_idprofesores = ?";
+                PreparedStatement agregarDatos = conectar.prepareStatement(query);
+                agregarDatos.setString(1, profesor.cuenta.getTipoPago());
+                agregarDatos.setString(2, profesor.cuenta.getBanco());
+                agregarDatos.setString(3, profesor.cuenta.getNumeroCuenta());
+                agregarDatos.setString(4, profesor.cuenta.getDireccionFacturacion());
+                agregarDatos.setInt(5, idProfesor);
+                agregarDatos.executeUpdate();
+
+                conectar.close();
+
+            } catch (SQLException ex) {
+
+                System.out.println(ex.getMessage());
+
+            }
+
+        } else {
+
+            System.out.println("Error en la conexión guardarCuentaBancaria.");
 
         }
 

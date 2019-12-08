@@ -55,6 +55,24 @@ public class RESTCliente {
     }//Fin método perfilCliente.
     
     @POST
+    @Path("guardarSesion")
+    public void guardarSesion(String datos){
+        
+        try{
+            
+            JSONObject datosJSON = (JSONObject)parser.parse(datos);
+            cliente.nuevaSesion(datosJSON);
+            cliente.guardarSesion();
+            
+        }catch(ParseException ex){
+            
+            System.out.println(ex.getMessage());
+            
+        }
+        
+    }//Fin método guardarSesion.
+    
+    @POST
     @Path("/actualizarFoto")
     public void actualizarFoto(String datos){
         

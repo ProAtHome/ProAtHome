@@ -24,6 +24,18 @@ public class ControladorCliente {
     private Connection conectar;
     private boolean clienteRegistrado = false;
     
+    public void nuevaSesion(JSONObject datos){
+        
+        
+        
+    }//Fin método nuevaSesion.
+    
+    public void guardarSesion(){
+        
+        
+        
+    }//Fin método guardarSesion.
+    
     public CuentaBancaria obtenerCuentaBancaria(int idCliente){
                 
         cliente.cuenta = new CuentaBancaria();
