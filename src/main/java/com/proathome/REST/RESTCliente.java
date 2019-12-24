@@ -2,7 +2,7 @@ package com.proathome.REST;
 
 import com.google.gson.Gson;
 import com.proathome.controladores.ControladorCliente;
-import java.sql.SQLException;
+import com.proathome.controladores.ControladorSesion;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -11,6 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -24,75 +25,58 @@ public class RESTCliente {
     *
     * Métodos (Servicios) de Clientes. 
     *
-    */
-    
+     */
     private ControladorCliente cliente = new ControladorCliente();
+    private ControladorSesion sesiones = new ControladorSesion();
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
-    
+
     @GET
     @Path("/sesionCliente/{correo}/{contrasena}")
-    public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena){
-        
+    public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena) {
+
         cliente.iniciarSesion(correo, contrasena);
         String sesion = gson.toJson(cliente.datosSesion());
         System.out.println(sesion);
-        
+        System.out.println(sesion);
         return sesion;
-        
+
     }//Fin método sesionCliente.
-    
+
     @GET
-    @Path("perfilCliente/{idCliente}")
-    public String perfilCliente(@PathParam("idCliente") int idCliente){
-        
-       cliente.perfilCliente(idCliente);
-       String perfil = gson.toJson(cliente.datosSesion());
-       System.out.println(perfil);
-       
-       return perfil;
-        
+    @Path("/perfilCliente/{idCliente}")
+    public String perfilCliente(@PathParam("idCliente") int idCliente) {
+
+        cliente.perfilCliente(idCliente);
+        String perfil = gson.toJson(cliente.datosSesion());
+        System.out.println(perfil);
+
+        return perfil;
+
     }//Fin método perfilCliente.
-    
-    @POST
-    @Path("guardarSesion")
-    public void guardarSesion(String datos){
-        
-        try{
-            
-            JSONObject datosJSON = (JSONObject)parser.parse(datos);
-            cliente.nuevaSesion(datosJSON);
-            cliente.guardarSesion();
-            
-        }catch(ParseException ex){
-            
-            System.out.println(ex.getMessage());
-            
-        }
-        
-    }//Fin método guardarSesion.
-    
+
     @POST
     @Path("/actualizarFoto")
-    public void actualizarFoto(String datos){
-        
-        try{
-            
-            JSONObject jsonFoto = (JSONObject)parser.parse(datos);
+    public void actualizarFoto(String datos) {
+
+        try {
+
+            JSONObject jsonFoto = (JSONObject) parser.parse(datos);
             cliente.actualizarFoto(jsonFoto);
-            
-        }catch(ParseException ex){
-            
+
+        } catch (ParseException ex) {
+
             System.out.println(ex.getMessage());
-            
+
         }
-        
+
     }//Fin método actializarFoto.
-    
+
     @POST
     @Path("/agregarCliente")
-    public void agregarCliente(String datos) {
+    public Response agregarCliente(String datos) {
 
+        System.out.println(datos);
         try {
 
             JSONObject jsonCliente = (JSONObject) parser.parse(datos);
@@ -104,42 +88,58 @@ public class RESTCliente {
             System.out.println(ex.getMessage());
 
         }
+        
+         return Response.ok("Registro Exitoso.",MediaType.APPLICATION_JSON).build();
 
     }//Fin método agregarCliente.
-    
+
     @GET
-    @Path("obtenerDatosBancarios/{idCliente}")
-    public String obtenerDatosBancarios(@PathParam("idCliente") int idCliente){
-        
+    @Path("/obtenerDatosBancarios/{idCliente}")
+    public String obtenerDatosBancarios(@PathParam("idCliente") int idCliente) {
+
         Gson gson = new Gson();
         String jsonDatos = gson.toJson(cliente.obtenerCuentaBancaria(idCliente));
-        
+
         return jsonDatos;
-        
+
     }//Fin método obtenerDatosBancarios.
+
+    @GET
+    @Path("/obtenerSesiones/{idCliente}")
+    public String obtenerSesiones(@PathParam("idCliente") int idCliente){
+        
+        Gson gson = new Gson();
+        String jsonArray = "";
+        
+        sesiones.obtenerSesiones(idCliente);
+        jsonArray = gson.toJson(sesiones);
+        
+        return jsonArray;
+        
+    }//Fin método obtenerSesiones.
     
     @POST
     @Path("/agregarCuentaBancaria")
-    public void agregarCuentaBancaria(String datos){
-        
-        try{
-        
-            JSONObject jsonCuenta = (JSONObject)parser.parse(datos);
+    public void agregarCuentaBancaria(String datos) {
+
+        try {
+
+            JSONObject jsonCuenta = (JSONObject) parser.parse(datos);
             cliente.nuevaCuentaBancaria(jsonCuenta);
             cliente.guardarCuentaBancaria(Integer.parseInt(String.valueOf(jsonCuenta.get("idCliente"))));
-            
-        }catch(ParseException ex){
-            
+
+        } catch (ParseException ex) {
+
             System.out.println(ex.getMessage());
-            
+
         }
-        
+
     }//Fin método agregarCuentaBancaria.
-    
+
     @PUT
     @Path("/actualizarCuentaCliente")
-    public void actualizarCuentaCliente(String datos){
-        
+    public void actualizarCuentaCliente(String datos) {
+
         try {
 
             JSONObject jsonCuentaBancaria = (JSONObject) parser.parse(datos);
@@ -151,43 +151,61 @@ public class RESTCliente {
             System.out.println(ex.getMessage());
 
         }
-        
+
     }//Fin método agregarCuentaBancaria.
-    
+
     @POST
     @Path("/agregarEvaluacion")
-    public void agregarEvaluacion(String datos){
-        
-        try{
-            
+    public void agregarEvaluacion(String datos) {
+
+        try {
+
             JSONObject jsonEvaluacion = (JSONObject) parser.parse(datos);
             cliente.nuevaEvaluacion(jsonEvaluacion);
             cliente.guardarEvaluacion(Integer.parseInt(String.valueOf(jsonEvaluacion.get("idCliente"))));
+
+        } catch (ParseException ex) {
+
+            System.out.println(ex.getMessage());
+
+        }
+
+    }//Fin método agregarEvaluacion.
+
+    @POST
+    @Path("/agregarSesion")
+    public void agregarSesion(String datos) {
+
+        try {
+
+            JSONObject datosJSON = (JSONObject)parser.parse(datos);
+            cliente.nuevaSesion(datosJSON);
+            cliente.guardarSesion();
             
         }catch(ParseException ex){
             
             System.out.println(ex.getMessage());
             
         }
-        
-    }//Fin método agregarEvaluacion.
-    
+
+    }//Fin método agregarSesion.
+
     @PUT
     @Path("/informacionPerfil")
-    public void actualizaDatosPerfil(String datos){
-        
-        try{
-            
-            JSONObject datosJSON = (JSONObject)parser.parse(datos);
+    public void actualizaDatosPerfil(String datos) {
+
+        try {
+
+            JSONObject datosJSON = (JSONObject) parser.parse(datos);
             cliente.datosActualizarPerfil(datosJSON);
             cliente.actualizarDatosPerfil();
-            
-        }catch(ParseException ex){
-            
+
+        } catch (ParseException ex) {
+
             System.out.println(ex.getMessage());
-            
+
         }
-        
+
     }//Fin método actualizarInfoPerfil.
-    
+
 }

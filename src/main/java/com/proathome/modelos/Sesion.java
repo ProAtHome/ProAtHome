@@ -2,12 +2,52 @@ package com.proathome.modelos;
 
 public class Sesion {
     
-    private int idsesiones, profesores_idprofesores, clientes_idclientes;
-    private String horario, lugar, tiempo, extras, tipoClase;
-    private UbicacionSesion ubicacion;
+    private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion;
+    private String horario, lugar, tiempo, extras, tipoClase, nivel, profesor;
+    private double latitud, longitud;
 
     public int getIdsesiones() {
         return idsesiones;
+    }
+
+    public String getProfesor() {
+        return profesor;
+    }
+
+    public void setProfesor(String profesor) {
+        this.profesor = profesor;
+    }
+
+    public int getUbicacion_idubicacion() {
+        return ubicacion_idubicacion;
+    }
+
+    public void setUbicacion_idubicacion(int ubicacion_idubicacion) {
+        this.ubicacion_idubicacion = ubicacion_idubicacion;
+    }
+
+    public double getLatitud() {
+        return latitud;
+    }
+
+    public void setLatitud(double latitud) {
+        this.latitud = latitud;
+    }
+
+    public double getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(double longitud) {
+        this.longitud = longitud;
+    }
+
+    public String getNivel() {
+        return nivel;
+    }
+
+    public void setNivel(String nivel) {
+        this.nivel = nivel;
     }
 
     public void setIdsesiones(int idsesiones) {
@@ -69,7 +109,5 @@ public class Sesion {
     public void setTipoClase(String tipoClase) {
         this.tipoClase = tipoClase;
     }
-    
-    
-    
+      
 }

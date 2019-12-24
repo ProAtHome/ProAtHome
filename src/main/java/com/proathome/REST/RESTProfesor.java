@@ -2,6 +2,7 @@ package com.proathome.REST;
 
 import com.google.gson.Gson;
 import com.proathome.controladores.ControladorProfesor;
+import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -26,8 +27,20 @@ public class RESTProfesor {
     */
     
     private ControladorProfesor profesor = new ControladorProfesor();
+    private ObjetoUbicacion objetoUbicaciones= new ObjetoUbicacion();
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
+    
+    @GET
+    @Path("/obtenerSesiones")
+    public String obtenerSesiones2(){
+        
+        objetoUbicaciones.obtenerSesionesEstudiantes();
+        String jsonUbicaciones = gson.toJson(objetoUbicaciones);
+        
+        return jsonUbicaciones;
+    
+    }//Fin método obtenerSesiones.
     
     @GET
     @Path("/sesionProfesor/{correo}/{contrasena}")
@@ -35,13 +48,11 @@ public class RESTProfesor {
         
         profesor.iniciarSesion(correo, contrasena);
         String sesion = gson.toJson(profesor.datosSesion());
-        System.out.println(sesion);
         
         return sesion;
         
     }//Fin método sesionCliente.
-
-    
+   
     @GET
     @Path("perfilProfesor/{idProfesor}")
     public String perfilProfesor(@PathParam("idProfesor") int idProfesor){
@@ -93,7 +104,6 @@ public class RESTProfesor {
     @Path("obtenerDatosBancarios/{idProfesor}")
     public String obtenerDatosBancarios(@PathParam("idProfesor") int idProfesor){
         
-        Gson gson = new Gson();
         String jsonDatos = gson.toJson(profesor.obtenerCuentaBancaria(idProfesor));
         
         return jsonDatos;

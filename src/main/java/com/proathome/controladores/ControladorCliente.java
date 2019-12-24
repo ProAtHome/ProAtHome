@@ -3,6 +3,7 @@ package com.proathome.controladores;
 import com.proathome.modelos.Cliente;
 import com.proathome.modelos.CuentaBancaria;
 import com.proathome.modelos.EvaluacionCliente;
+import com.proathome.modelos.Sesion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -20,19 +21,60 @@ public class ControladorCliente {
     *
      */
     private Cliente cliente = new Cliente();
+    private Sesion sesion = new Sesion();
     private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
     private boolean clienteRegistrado = false;
     
     public void nuevaSesion(JSONObject datos){
         
-        
+        sesion.setClientes_idclientes(Integer.parseInt(String.valueOf(datos.get("idCliente"))));
+        sesion.setHorario(String.valueOf(datos.get("horario")));
+        sesion.setLugar(String.valueOf(datos.get("lugar")));
+        sesion.setTiempo(String.valueOf(datos.get("tiempo")));
+        sesion.setNivel(String.valueOf(datos.get("nivel")));
+        sesion.setExtras(String.valueOf(datos.get("extras")));
+        sesion.setTipoClase(String.valueOf(datos.get("tipoClase")));
+        sesion.setLatitud(Double.valueOf(String.valueOf(datos.get("latitud"))));
+        sesion.setLongitud(Double.valueOf(String.valueOf(datos.get("longitud"))));
         
     }//Fin método nuevaSesion.
     
     public void guardarSesion(){
         
+        conectar = mysql.conectar();
         
+        if(conectar != null){
+            
+            try{
+                
+                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, nivel, extras, tipoClase, latitud, longitud) "
+                        + "VALUES (?,?,?,?,?,?,?,?,?)";
+                PreparedStatement agregarDatos = conectar.prepareStatement(query);
+                agregarDatos.setInt(1, sesion.getClientes_idclientes());
+                agregarDatos.setString(2, sesion.getHorario());
+                agregarDatos.setString(3, sesion.getLugar());
+                agregarDatos.setString(4, sesion.getTiempo());
+                agregarDatos.setString(5, sesion.getNivel());
+                agregarDatos.setString(6, sesion.getExtras());
+                agregarDatos.setString(7, sesion.getTipoClase());
+                agregarDatos.setDouble(8, sesion.getLatitud());
+                agregarDatos.setDouble(9, sesion.getLongitud());
+                agregarDatos.execute();
+                
+                conectar.close();
+                
+            }catch(SQLException ex){
+                
+                System.out.println(ex.getMessage());
+                
+            }        
+            
+        }else{
+            
+            System.out.println("Error en la conexión en guardarSesion.");
+            
+        }
         
     }//Fin método guardarSesion.
     
