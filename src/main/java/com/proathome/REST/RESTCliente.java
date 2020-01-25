@@ -37,8 +37,7 @@ public class RESTCliente {
 
         cliente.iniciarSesion(correo, contrasena);
         String sesion = gson.toJson(cliente.datosSesion());
-        System.out.println(sesion);
-        System.out.println(sesion);
+        
         return sesion;
 
     }//Fin método sesionCliente.
@@ -71,6 +70,25 @@ public class RESTCliente {
         }
 
     }//Fin método actializarFoto.
+    
+    @POST
+    @Path("/agregarClienteWeb")
+    public void agregarClienteWeb(String datos) {
+
+        System.out.println(datos);
+        try {
+
+            JSONObject jsonCliente = (JSONObject) parser.parse(datos);
+            cliente.nuevoCliente(jsonCliente);
+            cliente.guardarCliente();
+
+        } catch (ParseException ex) {
+
+            System.out.println(ex.getMessage());
+
+        }
+
+    }//Fin método agregarCliente.
 
     @POST
     @Path("/agregarCliente")

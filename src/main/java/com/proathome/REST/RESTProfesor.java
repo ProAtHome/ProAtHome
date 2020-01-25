@@ -11,6 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -48,7 +49,7 @@ public class RESTProfesor {
         
         profesor.iniciarSesion(correo, contrasena);
         String sesion = gson.toJson(profesor.datosSesion());
-        
+        System.out.println(sesion);
         return sesion;
         
     }//Fin método sesionCliente.
@@ -83,8 +84,8 @@ public class RESTProfesor {
     }//Fin método actializarFoto.
     
     @POST
-    @Path("/agregarProfesor")
-    public void agregarProfesor(String datos) {
+    @Path("/agregarProfesorWeb")
+    public void agregarProfesorWeb(String datos) {
 
         try {
 
@@ -97,6 +98,26 @@ public class RESTProfesor {
             System.out.println(ex.getMessage());
 
         }
+
+    }//Fin método agregarProfesor.
+    
+    @POST
+    @Path("/agregarProfesor")
+    public Response agregarProfesor(String datos) {
+
+        try {
+
+            JSONObject jsonProfesor = (JSONObject) parser.parse(datos);
+            profesor.nuevoProfesor(jsonProfesor);
+            profesor.guardarProfesor();
+
+        } catch (ParseException ex) {
+
+            System.out.println(ex.getMessage());
+
+        }
+        
+        return Response.ok("Registro Exitoso.",MediaType.APPLICATION_JSON).build();
 
     }//Fin método agregarProfesor.
     
