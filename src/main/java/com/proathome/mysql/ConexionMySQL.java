@@ -29,7 +29,7 @@ public class ConexionMySQL {
         
         try{
             
-            String a = db + url +user + pass;
+            String a = db + url + user + pass;
    
             Class.forName("com.mysql.jdbc.Driver");
             link = DriverManager.getConnection(this.url, this.user, this.pass);
@@ -41,6 +41,7 @@ public class ConexionMySQL {
         }
         
         return link;
+        
     }//Fin método conectar.
     
     public void probarConexion(){

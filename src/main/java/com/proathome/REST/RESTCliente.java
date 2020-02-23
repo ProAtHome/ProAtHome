@@ -207,10 +207,10 @@ public class RESTCliente {
         }
 
     }//Fin método agregarSesion.
-
+    
     @PUT
-    @Path("/informacionPerfil")
-    public void actualizaDatosPerfil(String datos) {
+    @Path("/informacionPerfilWeb")
+    public void actualizaDatosPerfilWeb(String datos) {
 
         try {
 
@@ -223,6 +223,26 @@ public class RESTCliente {
             System.out.println(ex.getMessage());
 
         }
+
+    }//Fin método informacionPerfilWeb.
+
+    @PUT
+    @Path("/informacionPerfil")
+    public Response actualizaDatosPerfil(String datos) {
+
+        try {
+
+            JSONObject datosJSON = (JSONObject) parser.parse(datos);
+            cliente.datosActualizarPerfil(datosJSON);
+            cliente.actualizarDatosPerfil();
+
+        } catch (ParseException ex) {
+
+            System.out.println(ex.getMessage());
+
+        }
+        
+        return Response.ok("Actualización exitosa", MediaType.APPLICATION_JSON).build();
 
     }//Fin método actualizarInfoPerfil.
 
