@@ -16,10 +16,7 @@ public class FotoPerfil extends HttpServlet{
     
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response){
-        
-        String output = request.getParameter("foto");
-        System.out.println("Req : " + output);
-        
+
         try{
             
            ServletFileUpload servletFile = new ServletFileUpload(new DiskFileItemFactory());
