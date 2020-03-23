@@ -1,10 +1,20 @@
 package com.proathome.modelos;
 
+import java.sql.Date;
+
 public class Sesion {
     
     private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion;
-    private String horario, lugar, tiempo, extras, tipoClase, nivel, profesor;
+    private String horario, lugar, tiempo, extras, tipoClase, nivel, profesor, actualizado;
     private double latitud, longitud;
+
+    public String getActualizado() {
+        return actualizado;
+    }
+
+    public void setActualizado(String actualizado) {
+        this.actualizado = actualizado;
+    }
 
     public int getIdsesiones() {
         return idsesiones;

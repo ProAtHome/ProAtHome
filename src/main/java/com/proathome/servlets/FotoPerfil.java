@@ -35,15 +35,15 @@ public class FotoPerfil extends HttpServlet{
             
         }catch(ServletException ex){
             
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
             
         }catch(IOException | FileUploadException ex){
             
-            System.out.println(ex.getMessage());
+           ex.printStackTrace();
             
         }catch(Exception ex){
             
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
             
         }
         

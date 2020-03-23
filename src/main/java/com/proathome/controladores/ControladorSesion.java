@@ -3,9 +3,11 @@ package com.proathome.controladores;
 import com.proathome.modelos.Sesion;
 import com.proathome.mysql.ConexionMySQL;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.json.simple.JSONObject;
 
 public class ControladorSesion {
 
@@ -44,11 +46,10 @@ public class ControladorSesion {
                     Sesion obtenida = new Sesion();
                     obtenida.setIdsesiones(resultado.getInt("idsesiones"));
                     String idProfesor = resultado.getString("profesores_idprofesores");
-                    System.out.println(idProfesor);
                     
                     if(idProfesor == null){
                         
-                        obtenida.setProfesor("Sin profesor asignado");
+                        obtenida.setProfesor("null");
  
                     }else{
                         
@@ -65,6 +66,7 @@ public class ControladorSesion {
                     obtenida.setTipoClase(resultado.getString("tipoClase"));
                     obtenida.setLatitud(resultado.getDouble("latitud"));
                     obtenida.setLongitud(resultado.getDouble("longitud"));
+                    obtenida.setActualizado(resultado.getString("actualizado"));
                     sesiones[aux] = obtenida;
                     aux++;
                     
@@ -74,7 +76,7 @@ public class ControladorSesion {
                 
             } catch (SQLException ex) {
 
-                System.out.println(ex.getMessage());
+                ex.printStackTrace();
 
             }
 
@@ -85,5 +87,73 @@ public class ControladorSesion {
         }
 
     }//Fin método obtenerSesiones.
+    
+    public void eliminarSesion(int idSesion){
+        
+        ConexionMySQL mysql = new ConexionMySQL();
+        Connection conectar;
+        
+        conectar = mysql.conectar();
+        
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM sesiones WHERE idsesiones = ?");
+                eliminar.setInt(1 , idSesion);
+                eliminar.execute();
+                conectar.close();
+                
+            }catch(SQLException ex){
+                
+                ex.printStackTrace();
+                
+            }
+            
+        }else{
+            
+            System.out.println("Error en eliminarSesion.");
+            
+        }
+        
+    }//Fin método eliminarSesion.
+    
+    public void actualizarSesion(JSONObject jsonDatos){
+        
+        ConexionMySQL mysql = new ConexionMySQL();
+        Connection conectar;
+        conectar = mysql.conectar();
+        
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement actualizar = conectar.prepareStatement("UPDATE sesiones SET horario = ?, lugar = ?, tiempo = ?, nivel = ?, tipoClase = ?, extras = ?, latitud = ?, longitud = ?, actualizado = ? WHERE idsesiones = ?");
+                actualizar.setString(1 , jsonDatos.get("horario").toString());
+                actualizar.setString(2 , jsonDatos.get("lugar").toString());
+                actualizar.setString(3 , jsonDatos.get("tiempo").toString());
+                actualizar.setString(4 , jsonDatos.get("nivel").toString());
+                actualizar.setString(5 , jsonDatos.get("tipoClase").toString());
+                actualizar.setString(6 , jsonDatos.get("observaciones").toString());
+                actualizar.setDouble(7 , Double.parseDouble(jsonDatos.get("latitud").toString()));
+                actualizar.setDouble(8 , Double.parseDouble(jsonDatos.get("longitud").toString()));
+                actualizar.setString(9 , jsonDatos.get("actualizado").toString());
+                actualizar.setInt(10 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                actualizar.execute();
+                conectar.close();
+                
+            }catch(SQLException ex){
+                
+                ex.printStackTrace();
+                
+            }
+            
+        }else{
+            
+            System.out.println("Error en actualizarSesion.");
+            
+        }   
+        
+    }//Fin método actualizarSesion.
 
 }

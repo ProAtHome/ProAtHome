@@ -37,6 +37,7 @@ public class ControladorCliente {
         sesion.setTipoClase(String.valueOf(datos.get("tipoClase")));
         sesion.setLatitud(Double.valueOf(String.valueOf(datos.get("latitud"))));
         sesion.setLongitud(Double.valueOf(String.valueOf(datos.get("longitud"))));
+        sesion.setActualizado(datos.get("actualizado").toString());
         
     }//Fin método nuevaSesion.
     
@@ -48,8 +49,8 @@ public class ControladorCliente {
             
             try{
                 
-                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, nivel, extras, tipoClase, latitud, longitud) "
-                        + "VALUES (?,?,?,?,?,?,?,?,?)";
+                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, nivel, extras, tipoClase, latitud, longitud, actualizado) "
+                        + "VALUES (?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setInt(1, sesion.getClientes_idclientes());
                 agregarDatos.setString(2, sesion.getHorario());
@@ -60,6 +61,7 @@ public class ControladorCliente {
                 agregarDatos.setString(7, sesion.getTipoClase());
                 agregarDatos.setDouble(8, sesion.getLatitud());
                 agregarDatos.setDouble(9, sesion.getLongitud());
+                agregarDatos.setString(10, sesion.getActualizado());
                 agregarDatos.execute();
                 
                 conectar.close();

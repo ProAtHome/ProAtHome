@@ -48,7 +48,6 @@ public class RESTCliente {
 
         cliente.perfilCliente(idCliente);
         String perfil = gson.toJson(cliente.datosSesion());
-        System.out.println(perfil);
 
         return perfil;
 
@@ -137,6 +136,26 @@ public class RESTCliente {
     }//Fin método obtenerSesiones.
     
     @POST
+    @Path("eliminarSesion")
+    public Response eliminarSesion(JSONObject jsonDatos){
+        
+        sesiones.eliminarSesion(Integer.parseInt(jsonDatos.get("idSesion").toString()));
+        
+        return Response.ok("Sesión eliminada exitosamente.", MediaType.APPLICATION_JSON).build();
+    
+    }
+    
+    @PUT
+    @Path("/actualizarSesion")
+    public Response actualizarSesion(JSONObject jsonDatos){
+        
+        sesiones.actualizarSesion(jsonDatos);
+        
+        return Response.ok("Sesión actualizada correctamente", MediaType.APPLICATION_JSON).build();
+        
+    }
+    
+    @POST
     @Path("/agregarCuentaBancaria")
     public void agregarCuentaBancaria(String datos) {
 
@@ -154,9 +173,9 @@ public class RESTCliente {
 
     }//Fin método agregarCuentaBancaria.
 
-    @PUT
-    @Path("/actualizarCuentaCliente")
-    public void actualizarCuentaCliente(String datos) {
+     @PUT
+    @Path("/actualizarCuentaClienteWeb")
+    public void actualizarCuentaClienteWeb(String datos) {
 
         try {
 
@@ -169,6 +188,26 @@ public class RESTCliente {
             System.out.println(ex.getMessage());
 
         }
+
+    }//Fin método agregarCuentaBancariaWeb.
+    
+    @PUT
+    @Path("/actualizarCuentaCliente")
+    public Response actualizarCuentaCliente(String datos) {
+
+        try {
+
+            JSONObject jsonCuentaBancaria = (JSONObject) parser.parse(datos);
+            cliente.nuevaCuentaBancaria(jsonCuentaBancaria);
+            cliente.actualizarCuentaBancaria(Integer.parseInt(String.valueOf(jsonCuentaBancaria.get("idCliente"))));
+
+        } catch (ParseException ex) {
+
+            ex.printStackTrace();
+
+        }
+        
+        return Response.ok("Actualización exitosa.", MediaType.APPLICATION_JSON).build();
 
     }//Fin método agregarCuentaBancaria.
 
@@ -207,6 +246,8 @@ public class RESTCliente {
         }
 
     }//Fin método agregarSesion.
+    
+    
     
     @PUT
     @Path("/informacionPerfilWeb")
