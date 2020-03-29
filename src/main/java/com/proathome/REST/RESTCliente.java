@@ -36,9 +36,9 @@ public class RESTCliente {
     public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena) {
 
         cliente.iniciarSesion(correo, contrasena);
-        String sesion = gson.toJson(cliente.datosSesion());
+        gson.toJson(cliente.datosSesion());
         
-        return sesion;
+        return gson.toJson(cliente.datosSesion());
 
     }//Fin método sesionCliente.
 
@@ -52,64 +52,7 @@ public class RESTCliente {
         return perfil;
 
     }//Fin método perfilCliente.
-
-    @POST
-    @Path("/actualizarFoto")
-    public void actualizarFoto(String datos) {
-
-        try {
-
-            JSONObject jsonFoto = (JSONObject) parser.parse(datos);
-            cliente.actualizarFoto(jsonFoto);
-
-        } catch (ParseException ex) {
-
-            System.out.println(ex.getMessage());
-
-        }
-
-    }//Fin método actializarFoto.
     
-    @POST
-    @Path("/agregarClienteWeb")
-    public void agregarClienteWeb(String datos) {
-
-        System.out.println(datos);
-        try {
-
-            JSONObject jsonCliente = (JSONObject) parser.parse(datos);
-            cliente.nuevoCliente(jsonCliente);
-            cliente.guardarCliente();
-
-        } catch (ParseException ex) {
-
-            System.out.println(ex.getMessage());
-
-        }
-
-    }//Fin método agregarCliente.
-
-    @POST
-    @Path("/agregarCliente")
-    public Response agregarCliente(String datos) {
-
-        System.out.println(datos);
-        try {
-
-            JSONObject jsonCliente = (JSONObject) parser.parse(datos);
-            cliente.nuevoCliente(jsonCliente);
-            cliente.guardarCliente();
-
-        } catch (ParseException ex) {
-
-            System.out.println(ex.getMessage());
-
-        }
-        
-         return Response.ok("Registro Exitoso.",MediaType.APPLICATION_JSON).build();
-
-    }//Fin método agregarCliente.
-
     @GET
     @Path("/obtenerDatosBancarios/{idCliente}")
     public String obtenerDatosBancarios(@PathParam("idCliente") int idCliente) {
@@ -134,6 +77,63 @@ public class RESTCliente {
         return jsonArray;
         
     }//Fin método obtenerSesiones.
+
+    @POST
+    @Path("/actualizarFoto")
+    public void actualizarFoto(String datos) {
+
+        try {
+
+            JSONObject jsonFoto = (JSONObject) parser.parse(datos);
+            cliente.actualizarFoto(jsonFoto);
+
+        } catch (ParseException ex) {
+
+            ex.printStackTrace();
+
+        }
+
+    }//Fin método actializarFoto.
+    
+    @POST
+    @Path("/agregarClienteWeb")
+    public void agregarClienteWeb(String datos) {
+
+        System.out.println(datos);
+        try {
+
+            JSONObject jsonCliente = (JSONObject) parser.parse(datos);
+            cliente.nuevoCliente(jsonCliente);
+            cliente.guardarCliente();
+
+        } catch (ParseException ex) {
+
+            ex.printStackTrace();
+
+        }
+
+    }//Fin método agregarCliente.
+
+    @POST
+    @Path("/agregarCliente")
+    public Response agregarCliente(String datos) {
+
+        System.out.println(datos);
+        try {
+
+            JSONObject jsonCliente = (JSONObject) parser.parse(datos);
+            cliente.nuevoCliente(jsonCliente);
+            cliente.guardarCliente();
+
+        } catch (ParseException ex) {
+
+            ex.printStackTrace();
+
+        }
+        
+         return Response.ok("Registro Exitoso.",MediaType.APPLICATION_JSON).build();
+
+    }//Fin método agregarCliente.
     
     @POST
     @Path("eliminarSesion")
@@ -143,16 +143,6 @@ public class RESTCliente {
         
         return Response.ok("Sesión eliminada exitosamente.", MediaType.APPLICATION_JSON).build();
     
-    }
-    
-    @PUT
-    @Path("/actualizarSesion")
-    public Response actualizarSesion(JSONObject jsonDatos){
-        
-        sesiones.actualizarSesion(jsonDatos);
-        
-        return Response.ok("Sesión actualizada correctamente", MediaType.APPLICATION_JSON).build();
-        
     }
     
     @POST
@@ -167,50 +157,12 @@ public class RESTCliente {
 
         } catch (ParseException ex) {
 
-            System.out.println(ex.getMessage());
-
-        }
-
-    }//Fin método agregarCuentaBancaria.
-
-     @PUT
-    @Path("/actualizarCuentaClienteWeb")
-    public void actualizarCuentaClienteWeb(String datos) {
-
-        try {
-
-            JSONObject jsonCuentaBancaria = (JSONObject) parser.parse(datos);
-            cliente.nuevaCuentaBancaria(jsonCuentaBancaria);
-            cliente.actualizarCuentaBancaria(Integer.parseInt(String.valueOf(jsonCuentaBancaria.get("idCliente"))));
-
-        } catch (ParseException ex) {
-
-            System.out.println(ex.getMessage());
-
-        }
-
-    }//Fin método agregarCuentaBancariaWeb.
-    
-    @PUT
-    @Path("/actualizarCuentaCliente")
-    public Response actualizarCuentaCliente(String datos) {
-
-        try {
-
-            JSONObject jsonCuentaBancaria = (JSONObject) parser.parse(datos);
-            cliente.nuevaCuentaBancaria(jsonCuentaBancaria);
-            cliente.actualizarCuentaBancaria(Integer.parseInt(String.valueOf(jsonCuentaBancaria.get("idCliente"))));
-
-        } catch (ParseException ex) {
-
             ex.printStackTrace();
 
         }
-        
-        return Response.ok("Actualización exitosa.", MediaType.APPLICATION_JSON).build();
 
     }//Fin método agregarCuentaBancaria.
-
+    
     @POST
     @Path("/agregarEvaluacion")
     public void agregarEvaluacion(String datos) {
@@ -223,7 +175,7 @@ public class RESTCliente {
 
         } catch (ParseException ex) {
 
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
 
         }
 
@@ -241,13 +193,50 @@ public class RESTCliente {
             
         }catch(ParseException ex){
             
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
             
         }
 
     }//Fin método agregarSesion.
     
+    @PUT
+    @Path("/actualizarSesion")
+    public Response actualizarSesion(JSONObject jsonDatos){
+        
+        sesiones.actualizarSesion(jsonDatos);
+        
+        return Response.ok("Sesión actualizada correctamente", MediaType.APPLICATION_JSON).build();
+        
+    }
+
+     @PUT
+    @Path("/actualizarCuentaClienteWeb")
+    public void actualizarCuentaClienteWeb(String datos) {
+
+        try {
+
+            JSONObject jsonCuentaBancaria = (JSONObject) parser.parse(datos);
+            cliente.nuevaCuentaBancaria(jsonCuentaBancaria);
+            cliente.actualizarCuentaBancaria(Integer.parseInt(String.valueOf(jsonCuentaBancaria.get("idCliente"))));
+
+        } catch (ParseException ex) {
+
+            ex.printStackTrace();
+
+        }
+
+    }//Fin método agregarCuentaBancariaWeb.
     
+    @PUT
+    @Path("/actualizarCuentaCliente")
+    public Response actualizarCuentaCliente(JSONObject jsonDatos) {
+
+        cliente.nuevaCuentaBancaria(jsonDatos);
+        cliente.actualizarCuentaBancaria(Integer.parseInt(jsonDatos.get("idCliente").toString()));
+
+        return Response.ok("Actualización exitosa.", MediaType.APPLICATION_JSON).build();
+
+    }//Fin método agregarCuentaBancaria.
     
     @PUT
     @Path("/informacionPerfilWeb")
@@ -261,7 +250,7 @@ public class RESTCliente {
 
         } catch (ParseException ex) {
 
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
 
         }
 
@@ -279,7 +268,7 @@ public class RESTCliente {
 
         } catch (ParseException ex) {
 
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
 
         }
         

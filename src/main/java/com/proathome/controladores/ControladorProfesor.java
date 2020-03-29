@@ -391,15 +391,33 @@ public class ControladorProfesor {
         if (conectar != null) {
 
             try {
+                
+                PreparedStatement consultaRegistro = conectar.prepareStatement("SELECT * FROM datosbancariosprofesores WHERE profesores_idprofesores = ?");
+                consultaRegistro.setInt(1 , idProfesor);
+                ResultSet resultado = consultaRegistro.executeQuery();
+                
+                if(resultado.next()){
+                    
+                    String query = "UPDATE datosbancariosprofesores SET tipoDePago = ?, banco = ?, numeroCuenta = ?, direccionFacturacion = ? WHERE profesores_idprofesores = ?";
+                    PreparedStatement agregarDatos = conectar.prepareStatement(query);
+                    agregarDatos.setString(1, profesor.cuenta.getTipoPago());
+                    agregarDatos.setString(2, profesor.cuenta.getBanco());
+                    agregarDatos.setString(3, profesor.cuenta.getNumeroCuenta());
+                    agregarDatos.setString(4, profesor.cuenta.getDireccionFacturacion());
+                    agregarDatos.setInt(5, idProfesor);
+                    agregarDatos.executeUpdate();
 
-                String query = "UPDATE datosbancariosprofesores SET tipoDePago = ?, banco = ?, numeroCuenta = ?, direccionFacturacion = ? WHERE profesores_idprofesores = ?";
-                PreparedStatement agregarDatos = conectar.prepareStatement(query);
-                agregarDatos.setString(1, profesor.cuenta.getTipoPago());
-                agregarDatos.setString(2, profesor.cuenta.getBanco());
-                agregarDatos.setString(3, profesor.cuenta.getNumeroCuenta());
-                agregarDatos.setString(4, profesor.cuenta.getDireccionFacturacion());
-                agregarDatos.setInt(5, idProfesor);
-                agregarDatos.executeUpdate();
+                }else{
+                    
+                    PreparedStatement insert = conectar.prepareStatement("INSERT INTO datosbancariosprofesores (profesores_idprofesores, tipoDePago, banco, numeroCuenta, direccionFacturacion) VALUES (?,?,?,?,?)");
+                    insert.setInt(1 , idProfesor);
+                    insert.setString(2, profesor.cuenta.getTipoPago());
+                    insert.setString(3, profesor.cuenta.getBanco());
+                    insert.setString(4, profesor.cuenta.getNumeroCuenta());
+                    insert.setString(5, profesor.cuenta.getDireccionFacturacion());
+                    insert.execute();
+                    
+                }
 
                 conectar.close();
 

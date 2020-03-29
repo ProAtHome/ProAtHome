@@ -1,16 +1,19 @@
 package com.proathome.REST;
 
+import com.proathome.controladores.ControladorAdmin;
 import com.proathome.controladores.ControladorNivelIdioma;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-@Path("/apiProAtHome")
+@Path("/apiProAtHome/admin")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class RESTProAtHome {
@@ -22,7 +25,16 @@ public class RESTProAtHome {
     */
     
     private ControladorNivelIdioma nivel = new ControladorNivelIdioma();
+    private ControladorAdmin admin = new ControladorAdmin();
     private JSONParser parser = new JSONParser();
+    
+    @GET
+    @Path("/sesionAdmin/{usuario}/{contrasena}")
+    public String sesionAdmin(@PathParam("usuario") String usuario, @PathParam("contrasena") String contrasena){
+        
+        return admin.iniciarSesion(usuario, contrasena);
+        
+    }//Fin método iniciarSesion.
 
     @POST
     @Path("/agregarNivelIdioma")
@@ -36,7 +48,7 @@ public class RESTProAtHome {
             
         }catch(ParseException ex){
             
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
             
         }
 

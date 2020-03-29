@@ -34,7 +34,7 @@ public class RESTProfesor {
     
     @GET
     @Path("/obtenerSesiones")
-    public String obtenerSesiones2(){
+    public String obtenerSesiones(){
         
         objetoUbicaciones.obtenerSesionesEstudiantes();
         String jsonUbicaciones = gson.toJson(objetoUbicaciones);
@@ -53,6 +53,16 @@ public class RESTProfesor {
         return sesion;
         
     }//Fin método sesionCliente.
+    
+    @GET
+    @Path("obtenerDatosBancarios/{idProfesor}")
+    public String obtenerDatosBancarios(@PathParam("idProfesor") int idProfesor){
+        
+        String jsonDatos = gson.toJson(profesor.obtenerCuentaBancaria(idProfesor));
+        
+        return jsonDatos;
+        
+    }//Fin método obtenerDatosBancarios.
    
     @GET
     @Path("perfilProfesor/{idProfesor}")
@@ -77,7 +87,7 @@ public class RESTProfesor {
             
         }catch(ParseException ex){
             
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
             
         }
         
@@ -95,7 +105,7 @@ public class RESTProfesor {
 
         } catch (ParseException ex) {
 
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
 
         }
 
@@ -113,23 +123,13 @@ public class RESTProfesor {
 
         } catch (ParseException ex) {
 
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
 
         }
         
         return Response.ok("Registro Exitoso.",MediaType.APPLICATION_JSON).build();
 
     }//Fin método agregarProfesor.
-    
-    @GET
-    @Path("obtenerDatosBancarios/{idProfesor}")
-    public String obtenerDatosBancarios(@PathParam("idProfesor") int idProfesor){
-        
-        String jsonDatos = gson.toJson(profesor.obtenerCuentaBancaria(idProfesor));
-        
-        return jsonDatos;
-        
-    }//Fin método obtenerDatosBancarios.
     
     @POST
     @Path("/agregarCuentaBancaria")
@@ -143,15 +143,15 @@ public class RESTProfesor {
             
         }catch(ParseException ex){
             
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
             
         }
         
     }//Fin método agregarCuentaBancaria.
     
     @PUT
-    @Path("/informacionPerfil")
-    public void actualizaDatosPerfil(String datos){
+    @Path("/informacionPerfilWeb")
+    public void actualizaDatosPerfilWeb(String datos){
         
         try{
             
@@ -161,46 +161,41 @@ public class RESTProfesor {
             
         }catch(ParseException ex){
             
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
             
         }
         
     }//Fin método actualizarInfoPerfil.
-
-    @GET
-    @Path("/obtenerProfesores/{clv}")
-    public String obtenerProfesores(@PathParam("clv") String clv) {
-
-        if (clv.equals("all")) {
-
-            String jsonProfesores = "{";
-
-            for (int i = 0; i < profesor.obtenerTodos().size(); i++) {
-                if (i < profesor.obtenerTodos().size() - 1) {
-                    jsonProfesores += profesor.obtenerTodos().get(i) + ",";
-                } else {
-                    jsonProfesores += profesor.obtenerTodos().get(i) + "}";
-                }
-            }
-
-            System.out.println(jsonProfesores);
-            try {
-
-                JSONObject jsonProfesor = (JSONObject) parser.parse(jsonProfesores);
-
-            } catch (ParseException ex) {
-
-                System.out.println(ex.getMessage());
-
-            }
+    
+    @PUT
+    @Path("/informacionPerfil")
+    public Response actualizaDatosPerfil(String datos){
+        
+        try{
             
-            return jsonProfesores;
-
-        }else{
+            JSONObject datosJSON = (JSONObject)parser.parse(datos);
+            profesor.datosActualizarPerfil(datosJSON);
+            profesor.actualizarDatosPerfil();
             
-            return "{\"mensaje\" : \"Clave incorrecta\"}";
+        }catch(ParseException ex){
+            
+            ex.printStackTrace();
+            
         }
         
-    }//Fin método obtenerProfesores.
+        return Response.ok("Actualización exitosa", MediaType.APPLICATION_JSON).build();
+        
+    }//Fin método actualizarInfoPerfil.
+    
+    @PUT
+    @Path("/actualizarCuentaProfesor")
+    public Response actualizarCuentaProfesor(JSONObject jsonDatos){
+        
+        profesor.nuevaCuentaBancaria(jsonDatos);
+        profesor.actualizarCuentaBancaria(Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+        
+        return Response.ok("Actualización exitosa", MediaType.APPLICATION_JSON).build();
+        
+    }//Fin método actualizarCuentaProfesor.
 
 }
