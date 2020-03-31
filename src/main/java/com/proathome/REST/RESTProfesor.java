@@ -48,9 +48,7 @@ public class RESTProfesor {
     public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena){
         
         profesor.iniciarSesion(correo, contrasena);
-        String sesion = gson.toJson(profesor.datosSesion());
-        System.out.println(sesion);
-        return sesion;
+        return gson.toJson(profesor.datosSesion());
         
     }//Fin método sesionCliente.
     

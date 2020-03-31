@@ -5,6 +5,7 @@ import com.proathome.controladores.ControladorNivelIdioma;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -27,6 +28,14 @@ public class RESTProAtHome {
     private ControladorNivelIdioma nivel = new ControladorNivelIdioma();
     private ControladorAdmin admin = new ControladorAdmin();
     private JSONParser parser = new JSONParser();
+    
+    @GET
+    @Path("/obtenerSolicitudes")
+    public String obtenerSolicitudes(){
+        
+        return admin.obtenerSolicitudes();
+        
+    }//Fin método obtenerSolicitudes.
     
     @GET
     @Path("/sesionAdmin/{usuario}/{contrasena}")
@@ -53,5 +62,13 @@ public class RESTProAtHome {
         }
 
     }//Fin método agregarNivelIdioma.
+    
+    @PUT
+    @Path("/cambiarEstado/{idProfesor}/{estado}")
+    public void cambiarEstado(@PathParam("idProfesor") int idProfesor, @PathParam("estado") boolean estado){
+        
+        admin.cambiarEstado(idProfesor, estado);
+        
+    }//Fin método cambiarEstado.
 
 }

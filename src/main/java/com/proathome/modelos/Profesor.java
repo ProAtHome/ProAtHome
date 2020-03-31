@@ -13,12 +13,21 @@ public class Profesor {
     private String nombre, correo, contrasena, clv, foto, descripcion;
     private java.sql.Date fechaNacimiento, fechaRegistro;
     private int edad, idProfesor;
+    private boolean estado;
     public static CuentaBancaria cuenta;
     public static EvaluacionProfesor evaluacion;
     public static Ubicacion ubicacion;
 
     public Profesor() {
         
+    }
+    
+    public boolean isEstado() {
+        return estado;
+    }
+
+    public void setEstado(boolean estado) {
+        this.estado = estado;
     }
 
     public String getDescripcion() {

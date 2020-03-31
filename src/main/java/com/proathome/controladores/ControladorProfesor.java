@@ -44,6 +44,7 @@ public class ControladorProfesor {
                     profesor.setIdProfesor(resultado.getInt("idprofesores"));
                     profesor.setNombre(resultado.getString("nombre"));
                     profesor.setFoto(resultado.getString("foto"));
+                    profesor.setEstado(resultado.getBoolean("estado"));
 
                     conectar.close();
                     profesorRegistrado = true;
