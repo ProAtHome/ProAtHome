@@ -63,6 +63,17 @@ public class RESTCliente {
         return jsonDatos;
 
     }//Fin método obtenerDatosBancarios.
+    
+    @GET
+    @Path("/obtenerDatosBancariosWeb/{idCliente}")
+    public String obtenerDatosBancariosWeb(@PathParam("idCliente") int idCliente) {
+
+        Gson gson = new Gson();
+        String jsonDatos = gson.toJson(cliente.obtenerCuentaBancaria(idCliente));
+
+        return jsonDatos;
+
+    }//Fin método obtenerDatosBancarios.
 
     @GET
     @Path("/obtenerSesiones/{idCliente}")
@@ -209,7 +220,7 @@ public class RESTCliente {
         
     }
 
-     @PUT
+    @PUT
     @Path("/actualizarCuentaClienteWeb")
     public void actualizarCuentaClienteWeb(String datos) {
 

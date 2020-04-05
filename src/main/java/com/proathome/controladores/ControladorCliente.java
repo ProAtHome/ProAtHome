@@ -120,6 +120,7 @@ public class ControladorCliente {
         }
         
         return cliente.cuenta;
+        
     }//Fin método obtenerCuentaBancaria.
     
     public void datosActualizarPerfil(JSONObject datos){

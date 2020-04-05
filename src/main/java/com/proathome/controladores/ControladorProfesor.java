@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import com.proathome.mysql.ConexionMySQL;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class ControladorProfesor {
@@ -78,6 +79,46 @@ public class ControladorProfesor {
         profesor.setDescripcion(String.valueOf(datos.get("descripcion")));
 
     }//Fin método datosActualizarPerfil.
+    
+    public JSONArray obtenerSesionesMovil(){
+        
+        conectar = mysql.conectar();
+        JSONArray arrayJson = new JSONArray();
+        
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes");
+                ResultSet resultado = sesiones.executeQuery();
+                
+                while(resultado.next()){
+                    
+                    JSONObject json = new JSONObject();
+                    json.put("idSesion", resultado.getInt("idsesiones"));
+                    json.put("latitud", resultado.getDouble("latitud"));
+                    json.put("longitud", resultado.getDouble("longitud"));
+                    json.put("nombre", resultado.getString("nombre"));
+                    json.put("nivel", resultado.getString("nivel"));
+                    arrayJson.add(json);
+                    
+                }
+                
+                conectar.close();
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            
+            System.out.println("Error en obtenerSesionesMovil.");
+            
+        }
+        
+        return arrayJson;
+        
+    }
 
     public void actualizarDatosPerfil() {
 
