@@ -83,6 +83,14 @@ public class RESTProfesor {
         
     }//Fin método perfilCliente.
     
+    @GET
+    @Path("informacionSesionMatch/{idSesion}")
+    public JSONObject informacionSesionMatch(@PathParam("idSesion") int idSesion){
+        
+        return profesor.informacionSesionMatch(idSesion);
+        
+    }
+    
     @POST
     @Path("/actualizarFoto")
     public void actualizarFoto(String datos){

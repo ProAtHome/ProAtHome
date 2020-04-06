@@ -23,7 +23,7 @@ public class ControladorProfesor {
     private Profesor profesor = new Profesor();
     private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
-    private JSONObject jsonTodos;
+    private JSONObject jsonMatch = new JSONObject();
     private boolean profesorRegistrado = false;
 
     public void iniciarSesion(String correo, String contrasena) {
@@ -79,6 +79,51 @@ public class ControladorProfesor {
         profesor.setDescripcion(String.valueOf(datos.get("descripcion")));
 
     }//Fin método datosActualizarPerfil.
+    
+    public JSONObject informacionSesionMatch(int idSesion){
+        
+        conectar = mysql.conectar();
+        
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement sesion = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes AND idsesiones = ?");
+                sesion.setInt(1 , idSesion);
+                ResultSet resultado = sesion.executeQuery();
+                
+                if(resultado.next()){
+                    
+                    jsonMatch.put("nombre", resultado.getString("nombre"));
+                    jsonMatch.put("descripcion", resultado.getString("descripcion"));
+                    jsonMatch.put("correo", resultado.getString("correo"));
+                    jsonMatch.put("latitud", resultado.getDouble("latitud"));
+                    jsonMatch.put("longitud", resultado.getDouble("longitud"));
+                    jsonMatch.put("foto", resultado.getString("foto"));
+                    jsonMatch.put("lugar", resultado.getString("lugar"));
+                    jsonMatch.put("tiempo", resultado.getString("tiempo"));
+                    jsonMatch.put("nivel", resultado.getString("nivel"));
+                    jsonMatch.put("tipoClase", resultado.getString("tipoClase"));
+                    jsonMatch.put("extras", resultado.getString("extras"));
+                    jsonMatch.put("horario", resultado.getString("horario"));     
+                    
+                }
+                
+                conectar.close();
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            
+            System.out.println("Error en informacionSesionMatch.");
+            
+        }
+        
+        return jsonMatch;
+        
+    }//Fin método informacionSesionMatch.
     
     public JSONArray obtenerSesionesMovil(){
         
