@@ -41,6 +41,53 @@ public class ControladorCliente {
         
     }//Fin método nuevaSesion.
     
+    public JSONObject detallesSesion(int idSesion){
+      
+        conectar = mysql.conectar();
+        JSONObject jsonDetalles = new JSONObject();
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement detalles = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes AND idsesiones = ?");
+                detalles.setInt(1 , idSesion);
+                ResultSet resultado = detalles.executeQuery();
+                
+                if(resultado.next()){
+                    
+                    jsonDetalles.put("idSesion", resultado.getString("clientes_idclientes"));
+                    jsonDetalles.put("horario", resultado.getString("horario"));
+                    jsonDetalles.put("lugar", resultado.getString("lugar"));
+                    jsonDetalles.put("tiempo", resultado.getString("tiempo"));
+                    jsonDetalles.put("nivel", resultado.getString("nivel"));
+                    jsonDetalles.put("extras", resultado.getString("extras"));
+                    jsonDetalles.put("tipoClase", resultado.getString("tipoClase"));
+                    jsonDetalles.put("latitud", resultado.getDouble("latitud"));
+                    jsonDetalles.put("longitud", resultado.getDouble("longitud"));
+                    jsonDetalles.put("actualizado", resultado.getDate("actualizado"));
+                    jsonDetalles.put("nombre", resultado.getString("nombre"));
+                    jsonDetalles.put("correo", resultado.getString("correo"));
+                    jsonDetalles.put("foto", resultado.getString("foto"));
+                    jsonDetalles.put("descripcion", resultado.getString("descripcion"));
+                    
+                }
+                
+                conectar.close();
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+        
+            System.out.println("Error en detallesSesion.");
+            
+        }
+        
+        return jsonDetalles;
+        
+    }//Fin métod detallesSesion.
+    
     public void guardarSesion(){
         
         conectar = mysql.conectar();
@@ -172,7 +219,7 @@ public class ControladorCliente {
 
             try {
 
-                String query = "SELECT * FROM clientes WHERE correo = ? AND contrasena = ?";
+                String query = "SELECT * FROM clientes WHERE BINARY correo = ? AND BINARY contrasena = ?";
                 PreparedStatement obtenerDatos = conectar.prepareStatement(query);
                 obtenerDatos.setString(1, correo);
                 obtenerDatos.setString(2, contrasena);

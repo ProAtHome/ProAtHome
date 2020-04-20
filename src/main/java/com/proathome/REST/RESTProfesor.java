@@ -1,6 +1,7 @@
 package com.proathome.REST;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import com.proathome.controladores.ControladorProfesor;
 import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;
@@ -34,8 +35,16 @@ public class RESTProfesor {
     private Gson gson = new Gson();
     
     @GET
-    @Path("/obtenerSesiones")
-    public String obtenerSesiones(){
+    @Path("/obtenerSesionesProfesorMatch/{idProfesor}")
+    public JSONArray obtenerSesionesProfesorMatch(@PathParam("idProfesor") int idProfesor){
+        
+        return profesor.sesionesMatchProfesor(idProfesor);
+        
+    }//Fin método obtenerSesionesProfesorMatch.
+    
+    @GET
+    @Path("/obtenerSesionesMaps")
+    public String obtenerSesionesMaps(){
         
         objetoUbicaciones.obtenerSesionesEstudiantes();
         String jsonUbicaciones = gson.toJson(objetoUbicaciones);
@@ -77,7 +86,6 @@ public class RESTProfesor {
         
        profesor.perfilProfesor(idProfesor);
        String perfil = gson.toJson(profesor.datosSesion());
-       System.out.println(perfil);
        
        return perfil;
         
@@ -181,6 +189,24 @@ public class RESTProfesor {
         }
         
     }//Fin método actualizarInfoPerfil.
+     
+    @PUT
+    @Path("/matchSesion/{idProfesor}/{idSesion}")
+    public void matchSesionWeb(@PathParam("idProfesor") int idProfesor, @PathParam("idSesion") int idSesion){
+
+        profesor.matchSesionWeb(idProfesor, idSesion);
+        
+    }//Fin método matchSesion.
+    
+    @PUT
+    @Path("/matchSesion")
+    public Response matchSesion(JSONObject jsonDatos){
+ 
+        profesor.matchSesion(jsonDatos);
+        
+        return Response.ok("Solicitud enviada.", MediaType.APPLICATION_JSON).build();
+        
+    }//Fin método matchSesion.
     
     @PUT
     @Path("/informacionPerfil")

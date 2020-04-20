@@ -25,7 +25,7 @@ public class FotoPerfil extends HttpServlet{
             
             for (FileItem item: multifiles) {
                 
-                item.write(new File("C:/xampp/htdocs/ProAtHome/assets/img/fotoPerfil/" + item.getName()));
+                item.write(new File("C:/xampp/htdocs/ProAtHome/assets/img/fotoPerfil/es_" + item.getName()));
                 
             }
             

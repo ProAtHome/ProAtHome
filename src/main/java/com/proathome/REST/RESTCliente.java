@@ -3,6 +3,7 @@ package com.proathome.REST;
 import com.google.gson.Gson;
 import com.proathome.controladores.ControladorCliente;
 import com.proathome.controladores.ControladorSesion;
+import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -18,7 +19,7 @@ import org.json.simple.parser.ParseException;
 
 @Path("/apiProAtHome/cliente")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON) 
 public class RESTCliente {
 
     /*
@@ -28,8 +29,21 @@ public class RESTCliente {
      */
     private ControladorCliente cliente = new ControladorCliente();
     private ControladorSesion sesiones = new ControladorSesion();
+    private ObjetoUbicacion objetoUbicaciones= new ObjetoUbicacion();
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
+    
+    @GET
+    @Path("/obtenerSesionesMaps/{idSesion}")
+    public String obtenerSesionesMaps(@PathParam("idSesion") int idSesion){
+        
+        objetoUbicaciones.obtenerSesionesMaps(idSesion);
+        String jsonUbicaciones = gson.toJson(objetoUbicaciones);
+        
+        return jsonUbicaciones;
+   
+        
+    }//Fin método obtenerSesionesMaps.
 
     @GET
     @Path("/sesionCliente/{correo}/{contrasena}")
@@ -75,6 +89,14 @@ public class RESTCliente {
 
     }//Fin método obtenerDatosBancarios.
 
+    @GET
+    @Path("/detallesSesion/{idSesion}")
+    public JSONObject detallesSesion(@PathParam("idSesion") int idSesion){
+        
+        return cliente.detallesSesion(idSesion);
+        
+    }//Fin método detallesSesion.
+    
     @GET
     @Path("/obtenerSesiones/{idCliente}")
     public String obtenerSesiones(@PathParam("idCliente") int idCliente){
@@ -147,6 +169,21 @@ public class RESTCliente {
     }//Fin método agregarCliente.
     
     @POST
+    @Path("eliminarSesionWeb")
+    public void eliminarSesionWeb(String datos){
+
+        try{
+            
+            JSONObject eliminar = (JSONObject) parser.parse(datos);
+            sesiones.eliminarSesion(Integer.parseInt(eliminar.get("idClase").toString()));
+            
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    
+    }
+    
+    @POST
     @Path("eliminarSesion")
     public Response eliminarSesion(JSONObject jsonDatos){
         
@@ -209,6 +246,21 @@ public class RESTCliente {
         }
 
     }//Fin método agregarSesion.
+    
+    @PUT
+    @Path("/actualizarSesionWeb")
+    public void actualizarSesionWeb(String datos){
+        
+        try{
+            
+            JSONObject actualizar = (JSONObject) parser.parse(datos);
+            sesiones.actualizarSesion(actualizar);
+            
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+    }
     
     @PUT
     @Path("/actualizarSesion")

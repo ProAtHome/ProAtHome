@@ -24,6 +24,8 @@ public class ControladorProfesor {
     private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
     private JSONObject jsonMatch = new JSONObject();
+    private JSONObject jsonSesionesMatchProfesor = new JSONObject();
+    private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
 
     public void iniciarSesion(String correo, String contrasena) {
@@ -34,7 +36,7 @@ public class ControladorProfesor {
 
             try {
 
-                String query = "SELECT * FROM profesores WHERE correo = ? AND contrasena = ?";
+                String query = "SELECT * FROM profesores WHERE BINARY correo = ? AND BINARY contrasena = ?";
                 PreparedStatement obtenerDatos = conectar.prepareStatement(query);
                 obtenerDatos.setString(1, correo);
                 obtenerDatos.setString(2, contrasena);
@@ -80,6 +82,107 @@ public class ControladorProfesor {
 
     }//Fin método datosActualizarPerfil.
     
+    public void matchSesionWeb(int idProfesor, int idSesion){
+        
+        conectar = mysql.conectar();
+        
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement match = conectar.prepareStatement("UPDATE sesiones SET profesores_idprofesores = ? WHERE idsesiones = ?");
+                match.setInt(1 , idProfesor);
+                match.setInt(2 , idSesion);
+                match.execute();
+                conectar.close();
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            
+            System.out.println("Error en matchSesion.");
+            
+        }
+        
+    }//Fin método matchSesion.
+    
+    public void matchSesion(JSONObject jsonDatos){
+        
+        conectar = mysql.conectar();
+        
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement match = conectar.prepareStatement("UPDATE sesiones SET profesores_idprofesores = ? WHERE idsesiones = ?");
+                match.setInt(1 , Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                match.setInt(2 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                match.execute();
+                conectar.close();
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            
+            System.out.println("Error en matchSesion.");
+            
+        }
+        
+    }//Fin método matchSesion.
+    
+    public JSONArray sesionesMatchProfesor(int idProfesor){
+        
+        conectar = mysql.conectar();
+        JSONArray jsonArrayMatch = new JSONArray();
+        
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement sesionesMatch = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes AND profesores_idprofesores = ?");
+                sesionesMatch.setInt(1 , idProfesor);
+                ResultSet resultado = sesionesMatch.executeQuery();
+                
+                while(resultado.next()){
+                    
+                    JSONObject jsonSesionesMatchProfesor = new JSONObject();
+                    jsonSesionesMatchProfesor.put("idsesiones", resultado.getInt("idsesiones"));
+                    jsonSesionesMatchProfesor.put("nombreEstudiante", resultado.getString("nombre"));
+                    jsonSesionesMatchProfesor.put("descripcion", resultado.getString("descripcion"));
+                    jsonSesionesMatchProfesor.put("correo", resultado.getString("correo"));
+                    jsonSesionesMatchProfesor.put("latitud", resultado.getDouble("latitud"));
+                    jsonSesionesMatchProfesor.put("longitud", resultado.getDouble("longitud"));
+                    jsonSesionesMatchProfesor.put("foto", resultado.getString("foto"));
+                    jsonSesionesMatchProfesor.put("lugar", resultado.getString("lugar"));
+                    jsonSesionesMatchProfesor.put("tiempo", resultado.getString("tiempo"));
+                    jsonSesionesMatchProfesor.put("nivel", resultado.getString("nivel"));
+                    jsonSesionesMatchProfesor.put("tipoClase", resultado.getString("tipoClase"));
+                    jsonSesionesMatchProfesor.put("extras", resultado.getString("extras"));
+                    jsonSesionesMatchProfesor.put("horario", resultado.getString("horario")); 
+                    jsonArrayMatch.add(jsonSesionesMatchProfesor);
+                    
+                }
+                
+                conectar.close();
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            
+            System.out.println("Error en sesionesMatchProfesor.");
+            
+        }
+        
+        return jsonArrayMatch;
+        
+    }//Fin método sesionesMatchProfesor.
+    
     public JSONObject informacionSesionMatch(int idSesion){
         
         conectar = mysql.conectar();
@@ -94,7 +197,10 @@ public class ControladorProfesor {
                 
                 if(resultado.next()){
                     
+                    jsonMatch.put("idSesion", resultado.getInt("idsesiones"));
                     jsonMatch.put("nombre", resultado.getString("nombre"));
+                    jsonMatch.put("idProfesor", resultado.getInt("profesores_idprofesores"));
+                    System.out.println("idP" + resultado.getInt("profesores_idprofesores"));
                     jsonMatch.put("descripcion", resultado.getString("descripcion"));
                     jsonMatch.put("correo", resultado.getString("correo"));
                     jsonMatch.put("latitud", resultado.getDouble("latitud"));
@@ -128,7 +234,6 @@ public class ControladorProfesor {
     public JSONArray obtenerSesionesMovil(){
         
         conectar = mysql.conectar();
-        JSONArray arrayJson = new JSONArray();
         
         if(conectar != null){
             
@@ -144,8 +249,10 @@ public class ControladorProfesor {
                     json.put("latitud", resultado.getDouble("latitud"));
                     json.put("longitud", resultado.getDouble("longitud"));
                     json.put("nombre", resultado.getString("nombre"));
+                    json.put("lugar", resultado.getString("lugar"));
                     json.put("nivel", resultado.getString("nivel"));
                     arrayJson.add(json);
+                    json = null;
                     
                 }
                 

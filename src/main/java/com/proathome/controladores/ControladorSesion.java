@@ -119,7 +119,7 @@ public class ControladorSesion {
     }//Fin método eliminarSesion.
     
     public void actualizarSesion(JSONObject jsonDatos){
-        
+        System.out.println(jsonDatos);
         ConexionMySQL mysql = new ConexionMySQL();
         Connection conectar;
         conectar = mysql.conectar();
