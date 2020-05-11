@@ -89,7 +89,7 @@ public class ControladorProfesor {
         if(conectar != null){
             
             try{
-                
+                System.out.println("UPDATE sesiones SET profesores_idprofesores =" + idProfesor +" WHERE idsesiones = " + idSesion);
                 PreparedStatement match = conectar.prepareStatement("UPDATE sesiones SET profesores_idprofesores = ? WHERE idsesiones = ?");
                 match.setInt(1 , idProfesor);
                 match.setInt(2 , idSesion);

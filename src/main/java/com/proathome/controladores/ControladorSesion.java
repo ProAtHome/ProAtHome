@@ -49,11 +49,23 @@ public class ControladorSesion {
                     
                     if(idProfesor == null){
                         
-                        obtenida.setProfesor("null");
+                        obtenida.setProfesor("Sin profesor asignado.");
  
                     }else{
                         
-                        obtenida.setProfesor("Con profesor pero todavía no hay función para ver el nombre");
+                        PreparedStatement profesor = conectar.prepareStatement("SELECT nombre FROM profesores WHERE idprofesores = ?");
+                        profesor.setInt(1 , resultado.getInt("profesores_idprofesores"));
+                        ResultSet nombreProfesor = profesor.executeQuery();
+                        
+                        if(nombreProfesor.next()){
+                            
+                            obtenida.setProfesor(nombreProfesor.getString("nombre"));
+                            
+                        }else{
+                            
+                            obtenida.setProfesor("Error al obtener profesor.");
+                            
+                        }
   
                     }
                     

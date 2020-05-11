@@ -98,11 +98,12 @@ public class ControladorAdmin {
         
     }
     
-    public Admin datosAdmin(String usuario, String contrasena){
+    public Admin datosAdmin(String usuario, String contrasena, int idAdmin){
         
         Admin admin = new Admin();
         admin.setUsuario(usuario);
         admin.setContrasena(contrasena);
+        admin.setIdAdmin(idAdmin);
         
         return admin;
         
@@ -113,6 +114,7 @@ public class ControladorAdmin {
         boolean usuarioEncontrado = false;
         gson = new Gson();
         conectar = mysql.conectar();
+        int idAdmin = 0;
         
         if(conectar != null){
             
@@ -125,6 +127,7 @@ public class ControladorAdmin {
                 if(resultado.next()){
                     
                     usuarioEncontrado = true;
+                    idAdmin = resultado.getInt("idadmins");
                     
                 }else{
                 
@@ -147,7 +150,7 @@ public class ControladorAdmin {
         }
         
         if(usuarioEncontrado)
-            return "{\"result\":true, \"sesion\":" + gson.toJson(datosAdmin(usuario, contrasena)) + "}";
+            return "{\"result\":true, \"sesion\":" + gson.toJson(datosAdmin(usuario, contrasena, idAdmin)) + "}";
         else
             return "{\"result\":false, \"sesion\":\"Usuario no encontrado.\"}";
         

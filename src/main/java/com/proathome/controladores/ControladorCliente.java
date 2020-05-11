@@ -454,20 +454,39 @@ public class ControladorCliente {
 
             try {
 
-                String query = "UPDATE datosbancariosclientes SET tipoDePago = ?, banco = ?, numeroCuenta = ?, direccionFacturacion = ? WHERE clientes_idclientes = ?";
-                PreparedStatement agregarDatos = conectar.prepareStatement(query);
-                agregarDatos.setString(1, cliente.cuenta.getTipoPago());
-                agregarDatos.setString(2, cliente.cuenta.getBanco());
-                agregarDatos.setString(3, cliente.cuenta.getNumeroCuenta());
-                agregarDatos.setString(4, cliente.cuenta.getDireccionFacturacion());
-                agregarDatos.setInt(5, idCliente);
-                agregarDatos.executeUpdate();
+                PreparedStatement consultaRegistro = conectar.prepareStatement("SELECT * FROM datosbancariosclientes WHERE clientes_idclientes = ?");
+                consultaRegistro.setInt(1 , idCliente);
+                ResultSet resultado = consultaRegistro.executeQuery();
+                
+                if(resultado.next()){
+                    
+                    String query = "UPDATE datosbancariosclientes SET tipoDePago = ?, banco = ?, numeroCuenta = ?, direccionFacturacion = ? WHERE clientes_idclientes = ?";
+                    PreparedStatement agregarDatos = conectar.prepareStatement(query);
+                    agregarDatos.setString(1, cliente.cuenta.getTipoPago());
+                    agregarDatos.setString(2, cliente.cuenta.getBanco());
+                    agregarDatos.setString(3, cliente.cuenta.getNumeroCuenta());
+                    agregarDatos.setString(4, cliente.cuenta.getDireccionFacturacion());
+                    agregarDatos.setInt(5, idCliente);
+                    agregarDatos.executeUpdate();
+                    
+                }else{
+                    
+                    String query = "INSERT INTO datosbancariosclientes (clientes_idclientes, tipoDePago, banco, numeroCuenta, direccionFacturacion) VALUES (?,?,?,?,?)";
+                    PreparedStatement agregarDatos = conectar.prepareStatement(query);
+                    agregarDatos.setInt(1, idCliente);
+                    agregarDatos.setString(2, cliente.cuenta.getTipoPago());
+                    agregarDatos.setString(3, cliente.cuenta.getBanco());
+                    agregarDatos.setString(4, cliente.cuenta.getNumeroCuenta());
+                    agregarDatos.setString(5, cliente.cuenta.getDireccionFacturacion());
+                    agregarDatos.execute();
+
+                }
 
                 conectar.close();
 
             } catch (SQLException ex) {
 
-                System.out.println(ex.getMessage());
+                ex.printStackTrace();
 
             }
 

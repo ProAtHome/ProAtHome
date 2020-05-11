@@ -1,7 +1,6 @@
 package com.proathome.REST;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonParseException;
 import com.proathome.controladores.ControladorProfesor;
 import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;

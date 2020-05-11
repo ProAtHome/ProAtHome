@@ -294,6 +294,7 @@ public class RESTCliente {
     @Path("/actualizarCuentaCliente")
     public Response actualizarCuentaCliente(JSONObject jsonDatos) {
 
+        System.out.println(jsonDatos);
         cliente.nuevaCuentaBancaria(jsonDatos);
         cliente.actualizarCuentaBancaria(Integer.parseInt(jsonDatos.get("idCliente").toString()));
 
