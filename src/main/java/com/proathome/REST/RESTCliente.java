@@ -106,6 +106,7 @@ public class RESTCliente {
         
         sesiones.obtenerSesiones(idCliente);
         jsonArray = gson.toJson(sesiones);
+        System.out.println("Sesiones");
         
         return jsonArray;
         
