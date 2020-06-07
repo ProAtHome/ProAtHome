@@ -2,6 +2,7 @@ package com.proathome.REST;
 
 import com.google.gson.Gson;
 import com.proathome.controladores.ControladorCliente;
+import com.proathome.controladores.ControladorExamenDiagnostico;
 import com.proathome.controladores.ControladorSesion;
 import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;
@@ -29,9 +30,19 @@ public class RESTCliente {
      */
     private ControladorCliente cliente = new ControladorCliente();
     private ControladorSesion sesiones = new ControladorSesion();
-    private ObjetoUbicacion objetoUbicaciones= new ObjetoUbicacion();
+    private ObjetoUbicacion objetoUbicaciones = new ObjetoUbicacion();
+    private ControladorExamenDiagnostico examen = new ControladorExamenDiagnostico();
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
+    
+    @GET
+    @Path("/estatusExamenDiagnostico/{idCliente}")
+    public JSONObject estatusExamenDiagnostico(@PathParam("idCliente") int idCliente){
+        
+        System.out.println(idCliente);
+        return examen.estatusExamenDiagnostico(idCliente);
+        
+    }//Fin método enCursoExamenDiagnostico.
     
     @GET
     @Path("/obtenerSesionesMaps/{idSesion}")
@@ -247,6 +258,42 @@ public class RESTCliente {
         }
 
     }//Fin método agregarSesion.
+    
+    @POST
+    @Path("/examenDiagnostico")
+    public JSONObject examenDiagnostico(String datos){
+        
+        JSONObject estatus = new JSONObject();
+        estatus.clear();
+        
+        try{
+            JSONObject examenJSON = (JSONObject) parser.parse(datos);
+            if(Integer.parseInt(examenJSON.get("estatus").toString()) == ControladorExamenDiagnostico.INICIO)
+                examen.inicioExamenDiagnostico(examenJSON);
+            else if(Integer.parseInt(examenJSON.get("estatus").toString()) == ControladorExamenDiagnostico.CANCELADO){
+                examen.cancelarExamenDiagnostico(examenJSON);
+                estatus.put("estatus", 3);
+            }
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return estatus;
+        
+    }//Fin método examenDiagnostico.
+    
+    @PUT
+    @Path("/enCursoExamenDiagnostico")
+    public void enCursoExamenDiagnostico(String datos){
+        
+        try{
+            JSONObject examenJSON = (JSONObject) parser.parse(datos);
+            examen.enCursoExamenDiagnostico(examenJSON);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+    }//Fin método enCursoExamenDiagnostico.
     
     @PUT
     @Path("/actualizarSesionWeb")
