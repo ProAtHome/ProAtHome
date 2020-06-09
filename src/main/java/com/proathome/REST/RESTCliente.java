@@ -39,10 +39,17 @@ public class RESTCliente {
     @Path("/estatusExamenDiagnostico/{idCliente}")
     public JSONObject estatusExamenDiagnostico(@PathParam("idCliente") int idCliente){
         
-        System.out.println(idCliente);
         return examen.estatusExamenDiagnostico(idCliente);
         
     }//Fin método enCursoExamenDiagnostico.
+    
+    @GET
+    @Path("infoExamenDiagnosticoFinal/{idCliente}")
+    public JSONObject infoExamenDiagnosticoFinal(@PathParam("idCliente") int idCliente){
+        
+        return examen.infoExamenDiagnosticoFinal(idCliente);
+        
+    }//Fin método infoExamenDiagnostico.
     
     @GET
     @Path("/obtenerSesionesMaps/{idSesion}")
@@ -268,11 +275,13 @@ public class RESTCliente {
         
         try{
             JSONObject examenJSON = (JSONObject) parser.parse(datos);
-            if(Integer.parseInt(examenJSON.get("estatus").toString()) == ControladorExamenDiagnostico.INICIO)
+            if(Integer.parseInt(examenJSON.get("estatus").toString()) == ControladorExamenDiagnostico.INICIO){
                 examen.inicioExamenDiagnostico(examenJSON);
+                estatus.put("estatus", ControladorExamenDiagnostico.EXAMEN_GUARDADO);
+            }
             else if(Integer.parseInt(examenJSON.get("estatus").toString()) == ControladorExamenDiagnostico.CANCELADO){
                 examen.cancelarExamenDiagnostico(examenJSON);
-                estatus.put("estatus", 3);
+                estatus.put("estatus", ControladorExamenDiagnostico.CANCELADO);
             }
         }catch(ParseException ex){
             ex.printStackTrace();

@@ -15,6 +15,40 @@ public class ControladorExamenDiagnostico {
     public static final int INICIO = 1;
     public static final int ENCURSO = 2;
     public static final int CANCELADO = 3;
+    public static final int EXAMEN_GUARDADO = 7;
+    public static final int INFO_EXAMEN = 5;
+    public static final int INFO_EXAMEN_FINAL = 6;
+    
+    public JSONObject infoExamenDiagnosticoFinal(int idCliente){
+        
+        examen.clear();
+        conectar = mysql.conectar();
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement info = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
+                info.setInt(1, idCliente);
+                ResultSet resultado = info.executeQuery();
+                
+                if(resultado.next()){
+                    examen.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                    examen.put("aciertos", resultado.getInt("aciertos"));
+                    examen.put("preguntaActual", resultado.getInt("preguntaActual"));
+                    examen.put("estatus", ControladorExamenDiagnostico.INFO_EXAMEN_FINAL);
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            System.out.println("Error en infoExamenDiagnostico.");
+        }
+        
+        return examen;
+        
+    }
     
     public void inicioExamenDiagnostico(JSONObject examen){
 
@@ -116,7 +150,7 @@ public class ControladorExamenDiagnostico {
         }else{
             System.out.println("Error en statusExamenDiagnostico.");
         }
-        System.out.println(examen);
+
         return examen;
        
     }
