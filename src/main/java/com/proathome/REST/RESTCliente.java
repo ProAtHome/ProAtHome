@@ -44,6 +44,14 @@ public class RESTCliente {
     }//Fin método enCursoExamenDiagnostico.
     
     @GET
+    @Path("infoExamenDiagnostico/{idCliente}")
+    public JSONObject infoExamenDiagnostico(@PathParam("idCliente") int idCliente){
+        
+        return examen.infoExamenDiagnostico(idCliente);
+        
+    }//Fin método infoExamenDiagnostico.
+    
+    @GET
     @Path("infoExamenDiagnosticoFinal/{idCliente}")
     public JSONObject infoExamenDiagnosticoFinal(@PathParam("idCliente") int idCliente){
         
@@ -293,14 +301,20 @@ public class RESTCliente {
     
     @PUT
     @Path("/enCursoExamenDiagnostico")
-    public void enCursoExamenDiagnostico(String datos){
+    public JSONObject enCursoExamenDiagnostico(String datos){
         
+        JSONObject estatus = new JSONObject();
+        estatus.clear();
         try{
             JSONObject examenJSON = (JSONObject) parser.parse(datos);
             examen.enCursoExamenDiagnostico(examenJSON);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
+        
+        estatus.put("estatus", ControladorExamenDiagnostico.EXAMEN_GUARDADO);
+        
+        return estatus;
         
     }//Fin método enCursoExamenDiagnostico.
     

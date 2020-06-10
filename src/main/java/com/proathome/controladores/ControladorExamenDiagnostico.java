@@ -18,6 +18,38 @@ public class ControladorExamenDiagnostico {
     public static final int EXAMEN_GUARDADO = 7;
     public static final int INFO_EXAMEN = 5;
     public static final int INFO_EXAMEN_FINAL = 6;
+    public static final int CONTINUAR_EXAMEN = 8;
+    
+    public JSONObject infoExamenDiagnostico(int idCliente){
+        
+        examen.clear();
+        conectar = mysql.conectar();
+        if(conectar != null){
+            
+            try{
+                
+                PreparedStatement info = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
+                info.setInt(1, idCliente);
+                ResultSet resultado = info.executeQuery();
+                
+                if(resultado.next()){
+                    examen.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                    examen.put("aciertos", resultado.getInt("aciertos"));
+                    examen.put("preguntaActual", resultado.getInt("preguntaActual"));
+                    examen.put("estatus", ControladorExamenDiagnostico.CONTINUAR_EXAMEN);
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            System.out.println("Error en infoExamenDiagnostico.");
+        }
+        
+        return examen;
+        
+    }
     
     public JSONObject infoExamenDiagnosticoFinal(int idCliente){
         
@@ -109,12 +141,20 @@ public class ControladorExamenDiagnostico {
         conectar = mysql.conectar();
         if(conectar != null){
             try{
-                PreparedStatement encurso = conectar.prepareStatement("UPDATE diagnostico SET aciertos = ?, preguntaActual = ?, estatus = ? WHERE clientes_idclientes = ?");
-                encurso.setInt(1, Integer.parseInt(examen.get("aciertos").toString()));
-                encurso.setInt(2, Integer.parseInt(examen.get("preguntaActual").toString()));
-                encurso.setInt(3, ControladorExamenDiagnostico.ENCURSO);
-                encurso.setInt(4, Integer.parseInt(examen.get("idEstudiante").toString()));
-                encurso.execute();
+                PreparedStatement aciertos = conectar.prepareStatement("SELECT aciertos FROM diagnostico WHERE clientes_idclientes = ?");
+                aciertos.setInt(1, Integer.parseInt(examen.get("idEstudiante").toString()));
+                ResultSet resultadoAciertos = aciertos.executeQuery();
+                
+                if(resultadoAciertos.next()){
+                    int aciertosAnterior = resultadoAciertos.getInt("aciertos");
+                    int aciertosNuevos = aciertosAnterior + Integer.parseInt(examen.get("aciertos").toString());
+                    PreparedStatement encurso = conectar.prepareStatement("UPDATE diagnostico SET aciertos = ?, preguntaActual = ?, estatus = ? WHERE clientes_idclientes = ?");
+                    encurso.setInt(1, aciertosNuevos);
+                    encurso.setInt(2, Integer.parseInt(examen.get("preguntaActual").toString()));
+                    encurso.setInt(3, ControladorExamenDiagnostico.ENCURSO);
+                    encurso.setInt(4, Integer.parseInt(examen.get("idEstudiante").toString()));
+                    encurso.execute();
+                }
             }catch(SQLException ex){
                 ex.printStackTrace();
             }
