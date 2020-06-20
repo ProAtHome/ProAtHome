@@ -19,6 +19,30 @@ public class ControladorExamenDiagnostico {
     public static final int INFO_EXAMEN = 5;
     public static final int INFO_EXAMEN_FINAL = 6;
     public static final int CONTINUAR_EXAMEN = 8;
+    public static final int EXAMEN_FINALIZADO = 10;
+    public static final int REINICIAR_EXAMEN = 11;
+    
+    public JSONObject reiniciarExamenDiagnostico(JSONObject examen){
+        
+        JSONObject estatus = new JSONObject();
+        estatus.clear();
+        conectar = mysql.conectar();
+        
+        if(conectar != null){
+            try{            
+                PreparedStatement reiniciar = conectar.prepareStatement("DELETE FROM diagnostico WHERE clientes_idclientes = ?");
+                reiniciar.setInt(1, Integer.parseInt(examen.get("idEstudiante").toString()));
+                reiniciar.execute();
+                estatus.put("estatus", ControladorExamenDiagnostico.REINICIAR_EXAMEN);
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en reiniciarExamenDiagnostico.");
+        }
+        
+        return estatus;
+    }
     
     public JSONObject infoExamenDiagnostico(int idCliente){
         
@@ -151,7 +175,7 @@ public class ControladorExamenDiagnostico {
                     PreparedStatement encurso = conectar.prepareStatement("UPDATE diagnostico SET aciertos = ?, preguntaActual = ?, estatus = ? WHERE clientes_idclientes = ?");
                     encurso.setInt(1, aciertosNuevos);
                     encurso.setInt(2, Integer.parseInt(examen.get("preguntaActual").toString()));
-                    encurso.setInt(3, ControladorExamenDiagnostico.ENCURSO);
+                    encurso.setInt(3, Integer.parseInt(examen.get("estatus").toString()));
                     encurso.setInt(4, Integer.parseInt(examen.get("idEstudiante").toString()));
                     encurso.execute();
                 }
@@ -180,6 +204,8 @@ public class ControladorExamenDiagnostico {
                         examen.put("estatus", ControladorExamenDiagnostico.CANCELADO);
                     else if(resultado.getInt("estatus") == ControladorExamenDiagnostico.ENCURSO)
                         examen.put("estatus", ControladorExamenDiagnostico.ENCURSO);
+                    else if(resultado.getInt("estatus") == ControladorExamenDiagnostico.EXAMEN_FINALIZADO)
+                        examen.put("estatus", ControladorExamenDiagnostico.EXAMEN_FINALIZADO);
                 }else{
                      examen.put("estatus", ControladorExamenDiagnostico.INICIO);
                 }

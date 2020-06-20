@@ -132,7 +132,6 @@ public class RESTCliente {
         
         sesiones.obtenerSesiones(idCliente);
         jsonArray = gson.toJson(sesiones);
-        System.out.println("Sesiones");
         
         return jsonArray;
         
@@ -298,6 +297,22 @@ public class RESTCliente {
         return estatus;
         
     }//Fin método examenDiagnostico.
+    
+    @PUT
+    @Path("/reiniciarExamenDiagnostico")
+    public JSONObject reiniciarExamenDiagnostico(String datos){
+        
+        JSONObject estatus = null;
+        try{
+            JSONObject examenJSON = (JSONObject) parser.parse(datos);
+            estatus = examen.reiniciarExamenDiagnostico(examenJSON);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return estatus;
+        
+    }
     
     @PUT
     @Path("/enCursoExamenDiagnostico")
