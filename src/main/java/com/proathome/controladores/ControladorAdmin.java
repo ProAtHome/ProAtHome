@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -19,6 +21,69 @@ public class ControladorAdmin {
     private ConexionMySQL mysql = new ConexionMySQL();
     private Profesor profesores[];
     private Connection conectar;
+    public static final int ESTUDIANTE = 1;
+    public static final int PROFESOR = 2;
+    
+    public JSONArray obtenerMensajes(int tipoCliente){
+        
+        conectar = mysql.conectar();
+        JSONArray arrayMensajes = new JSONArray();
+        
+        if(conectar != null){
+            try{
+                if(tipoCliente == ControladorAdmin.ESTUDIANTE){
+                    PreparedStatement mensajesConsulta = conectar.prepareStatement("SELECT * FROM ayuda INNER JOIN clientes WHERE clientes.idclientes = ayuda.idCliente AND ayuda.tipoCliente = ?");
+                    mensajesConsulta.setInt(1, tipoCliente);
+                    ResultSet resultado = mensajesConsulta.executeQuery();
+                    while(resultado.next()){
+                        JSONObject mensajes = new JSONObject();
+                        mensajes.put("nombre", resultado.getString("nombre"));
+                        mensajes.put("correo", resultado.getString("correo"));
+                        mensajes.put("mensaje", resultado.getString("mensaje"));
+                        arrayMensajes.add(mensajes);
+                    }
+                }else if(tipoCliente == ControladorAdmin.PROFESOR){
+                    PreparedStatement mensajesConsulta = conectar.prepareStatement("SELECT * FROM ayuda INNER JOIN profesores WHERE profesores.idprofesores = ayuda.idCliente AND ayuda.tipoCliente = ?");
+                    mensajesConsulta.setInt(1, tipoCliente);
+                    ResultSet resultado = mensajesConsulta.executeQuery();
+                    while(resultado.next()){
+                        JSONObject mensajes = new JSONObject();
+                        mensajes.put("nombre", resultado.getString("nombre"));
+                        mensajes.put("correo", resultado.getString("correo"));
+                        mensajes.put("mensaje", resultado.getString("mensaje"));
+                        arrayMensajes.add(mensajes);
+                    }
+                }
+          
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en obtenerMensajes");
+        }
+        
+        return arrayMensajes;
+        
+    }
+    
+    public void enviarMensaje(JSONObject mensaje){
+        
+        conectar = mysql.conectar();
+        if(conectar != null){
+            try{
+                PreparedStatement enviar = conectar.prepareStatement("INSERT INTO ayuda (mensaje, idCliente, tipoCliente) VALUES (?,?,?)");
+                enviar.setString(1, mensaje.get("mensaje").toString());
+                enviar.setInt(2, Integer.parseInt(mensaje.get("idCliente").toString()));
+                enviar.setInt(3, Integer.parseInt(mensaje.get("tipoCliente").toString()));
+                enviar.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en enviarMensaje");
+        }
+        
+    }//Fin método enviarMensaje.
     
     public void cambiarEstado(int idProfesor, boolean estado){
         

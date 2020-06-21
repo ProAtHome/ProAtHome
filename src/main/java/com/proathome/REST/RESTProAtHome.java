@@ -10,6 +10,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -30,6 +31,14 @@ public class RESTProAtHome {
     private JSONParser parser = new JSONParser();
     
     @GET
+    @Path("/obtenerMensajes/{tipoCliente}")
+    public JSONArray obtenerMensajes(@PathParam("tipoCliente") int tipoCliente){
+        
+        return admin.obtenerMensajes(tipoCliente);
+        
+    }
+    
+    @GET
     @Path("/obtenerSolicitudes")
     public String obtenerSolicitudes(){
         
@@ -44,24 +53,19 @@ public class RESTProAtHome {
         return admin.iniciarSesion(usuario, contrasena);
         
     }//Fin método iniciarSesion.
-
+    
     @POST
-    @Path("/agregarNivelIdioma")
-    public void agregarNivelIdioma(String datos) {
+    @Path("/enviarMensaje")
+    public void enviarMensaje(String datos){
         
         try{
-            
-            JSONObject jsonNivel = (JSONObject)parser.parse(datos);
-            nivel.nuevoNivel(jsonNivel);
-            nivel.agregarNivel();
-            
+            JSONObject mensaje = (JSONObject) parser.parse(datos);
+            admin.enviarMensaje(mensaje);
         }catch(ParseException ex){
-            
             ex.printStackTrace();
-            
         }
-
-    }//Fin método agregarNivelIdioma.
+        
+    }
     
     @PUT
     @Path("/cambiarEstado/{idProfesor}/{estado}")
