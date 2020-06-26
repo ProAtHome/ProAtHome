@@ -3,6 +3,7 @@ package com.proathome.REST;
 import com.google.gson.Gson;
 import com.proathome.controladores.ControladorCliente;
 import com.proathome.controladores.ControladorExamenDiagnostico;
+import com.proathome.controladores.ControladorRutaAprendizaje;
 import com.proathome.controladores.ControladorSesion;
 import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;
@@ -32,8 +33,17 @@ public class RESTCliente {
     private ControladorSesion sesiones = new ControladorSesion();
     private ObjetoUbicacion objetoUbicaciones = new ObjetoUbicacion();
     private ControladorExamenDiagnostico examen = new ControladorExamenDiagnostico();
+    private ControladorRutaAprendizaje ruta = new ControladorRutaAprendizaje();
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
+    
+    @GET
+    @Path("estadoRutaAprendizaje/{idCliente}")
+    public JSONObject estadoRutaAprendizaje(@PathParam("idCliente") int idCliente){
+        
+        return ruta.estadoRutaAprendizaje(idCliente);
+        
+    }
     
     @GET
     @Path("/estatusExamenDiagnostico/{idCliente}")
@@ -136,6 +146,24 @@ public class RESTCliente {
         return jsonArray;
         
     }//Fin método obtenerSesiones.
+    
+    @POST
+    @Path("/rutaEnCurso")
+    public JSONObject rutaEnCurso(String datos){
+        
+        JSONObject estado = new JSONObject();
+        estado.put("estado", ControladorRutaAprendizaje.RUTA_ACTUALIZADA);
+        
+        try{
+            JSONObject rutaJSON = (JSONObject)parser.parse(datos);
+            ruta.rutaEnCurso(rutaJSON);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return estado;
+        
+    }
 
     @POST
     @Path("/actualizarFoto")

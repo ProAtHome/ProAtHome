@@ -1,0 +1,77 @@
+package com.proathome.controladores;
+
+import com.proathome.mysql.ConexionMySQL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import org.json.simple.JSONObject;
+
+/**
+ *
+ * @author Marvin
+ */
+public class ControladorRutaAprendizaje {
+    
+    private JSONObject ruta = new JSONObject();
+    private ConexionMySQL mysql = new ConexionMySQL();
+    private Connection conectar;
+    public static final int INICIO_RUTA = 1;
+    public static final int RUTA_ENCURSO = 2;
+    public static final int RUTA_ACTUALIZADA = 3;
+    
+    public void rutaEnCurso(JSONObject datos){
+        
+        conectar = mysql.conectar();
+        if(conectar != null){
+            try{
+                PreparedStatement enCurso = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro) VALUES (?,?,?,?,?,?)");
+                enCurso.setInt(1, Integer.parseInt(datos.get("idEstudiante").toString()));
+                enCurso.setInt(2, Integer.parseInt(datos.get("idBloque").toString()));
+                enCurso.setInt(3, Integer.parseInt(datos.get("idNivel").toString()));
+                enCurso.setInt(4, Integer.parseInt(datos.get("idSeccion").toString()));
+                enCurso.setDouble(5, Double.parseDouble(datos.get("horas").toString()));
+                enCurso.setString(6, datos.get("fecha_registro").toString());
+                enCurso.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en rutaEnCurso");
+        }
+        
+    }
+    
+    public JSONObject estadoRutaAprendizaje(int idEstudiante){
+        
+        ruta.clear();
+        conectar = mysql.conectar();
+        
+        if(conectar != null){
+            try{
+               PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ?)");
+               estado.setInt(1, idEstudiante);
+                ResultSet resultado = estado.executeQuery();
+                if(resultado.next()){
+                    ruta.put("estado", ControladorRutaAprendizaje.RUTA_ENCURSO);
+                    ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                    ruta.put("idBloque", resultado.getInt("idBloque"));
+                    ruta.put("idNivel", resultado.getInt("idNivel"));
+                    ruta.put("idSeccion", resultado.getInt("idSeccion"));
+                    ruta.put("horas", resultado.getDouble("horas"));
+                    ruta.put("fecha_registro", resultado.getString("fecha_registro"));
+                }else{
+                    ruta.put("estado", ControladorRutaAprendizaje.INICIO_RUTA);
+                }
+            }catch(SQLException ex){
+               ex.printStackTrace();
+            }          
+        }else{
+            System.out.println("Error en estadoRutaAprendizaje.");
+        }
+        
+        return ruta;
+        
+    }
+    
+}
