@@ -19,6 +19,10 @@ public class ControladorRutaAprendizaje {
     public static final int INICIO_RUTA = 1;
     public static final int RUTA_ENCURSO = 2;
     public static final int RUTA_ACTUALIZADA = 3;
+    public static final int SECCIONES = 1;
+    public static final int BASICO = 2;
+    public static final int INTERMEDIO = 3;
+    
     
     public void rutaEnCurso(JSONObject datos){
         
@@ -42,27 +46,29 @@ public class ControladorRutaAprendizaje {
         
     }
     
-    public JSONObject estadoRutaAprendizaje(int idEstudiante){
+    public JSONObject estadoRutaAprendizaje(int idEstudiante, int tipo){
         
         ruta.clear();
         conectar = mysql.conectar();
         
         if(conectar != null){
             try{
-               PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ?)");
-               estado.setInt(1, idEstudiante);
-                ResultSet resultado = estado.executeQuery();
-                if(resultado.next()){
-                    ruta.put("estado", ControladorRutaAprendizaje.RUTA_ENCURSO);
-                    ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
-                    ruta.put("idBloque", resultado.getInt("idBloque"));
-                    ruta.put("idNivel", resultado.getInt("idNivel"));
-                    ruta.put("idSeccion", resultado.getInt("idSeccion"));
-                    ruta.put("horas", resultado.getDouble("horas"));
-                    ruta.put("fecha_registro", resultado.getString("fecha_registro"));
-                }else{
-                    ruta.put("estado", ControladorRutaAprendizaje.INICIO_RUTA);
-                }
+             
+                   PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ?)");
+                    estado.setInt(1, idEstudiante);
+                     ResultSet resultado = estado.executeQuery();
+                     if(resultado.next()){
+                         ruta.put("estado", ControladorRutaAprendizaje.RUTA_ENCURSO);
+                         ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                         ruta.put("idBloque", resultado.getInt("idBloque"));
+                         ruta.put("idNivel", resultado.getInt("idNivel"));
+                         ruta.put("idSeccion", resultado.getInt("idSeccion"));
+                         ruta.put("horas", resultado.getDouble("horas"));
+                         ruta.put("fecha_registro", resultado.getString("fecha_registro"));
+                     }else{
+                         ruta.put("estado", ControladorRutaAprendizaje.INICIO_RUTA);
+                     }
+               
             }catch(SQLException ex){
                ex.printStackTrace();
             }          
