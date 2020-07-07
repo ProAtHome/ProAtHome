@@ -23,6 +23,87 @@ public class ControladorRutaAprendizaje {
     public static final int BASICO = 2;
     public static final int INTERMEDIO = 3;
     
+    public JSONObject obtenerSesionActual(int idEstudiante){
+        conectar = mysql.conectar();
+        ruta.clear();
+        
+        if(conectar != null){
+            
+            try{
+                //CHECAREMOS PRIMERO EL NIVEL 3
+                PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ?)");
+                estado.setInt(1, idEstudiante);
+                estado.setInt(2, 3);
+                ResultSet resultado = estado.executeQuery();
+                
+                if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 3 ENTONCES...
+                    ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                    ruta.put("idBloque", resultado.getInt("idBloque"));
+                    ruta.put("idNivel", resultado.getInt("idNivel"));
+                    ruta.put("idSeccion", resultado.getInt("idSeccion"));
+                    ruta.put("horas", resultado.getDouble("horas"));
+                }else{// SI NO, ENTONCES CHECAREMOS EL NIVEL 2
+                    estado = null;
+                    resultado = null;
+                    estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ?)");
+                    estado.setInt(1, idEstudiante);
+                    estado.setInt(2, 2);
+                    resultado = estado.executeQuery();
+                    
+                    if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 2 ENTONCES...
+                        ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                        ruta.put("idBloque", resultado.getInt("idBloque"));
+                        ruta.put("idNivel", resultado.getInt("idNivel"));
+                        ruta.put("idSeccion", resultado.getInt("idSeccion"));
+                        ruta.put("horas", resultado.getDouble("horas"));
+                    }else{//SI NO, ENTONCES CHECAREMOS EL NIVEL 1
+                        estado = null;
+                        resultado = null;
+                        estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ?)");
+                        estado.setInt(1, idEstudiante);
+                        estado.setInt(2, 1);
+                        resultado = estado.executeQuery();
+                        
+                        if(resultado.next()){//SI TENEMOS ALGÚN REGISTRO ENTONCES...
+                            ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                            ruta.put("idBloque", resultado.getInt("idBloque"));
+                            ruta.put("idNivel", resultado.getInt("idNivel"));
+                            ruta.put("idSeccion", resultado.getInt("idSeccion"));
+                            ruta.put("horas", resultado.getDouble("horas"));
+                        }else{//SI NO, ES DESDE 0 ESTE PEDO.
+                            ruta.put("idEstudiante", idEstudiante);
+                            ruta.put("idBloque", 1);
+                            ruta.put("idNivel", 1);
+                            ruta.put("idSeccion", 1);
+                            ruta.put("horas", 0);
+                        }
+                    }
+                }
+                     /*
+                     if(resultado.next()){
+                         
+                         ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                         ruta.put("idBloque", resultado.getInt("idBloque"));
+                         ruta.put("idNivel", resultado.getInt("idNivel"));
+                         ruta.put("idSeccion", resultado.getInt("idSeccion"));
+                         ruta.put("horas", resultado.getDouble("horas"));
+                     }else{
+                         ruta.put("idEstudiante", idEstudiante);
+                         ruta.put("idBloque", 1);
+                         ruta.put("idNivel", 1);
+                         ruta.put("idSeccion", 1);
+                         ruta.put("horas", 0);
+                     }*/
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            System.out.println("Error en obtenerSesionActual.");
+        }
+        
+        return ruta;
+    }
     
     public void rutaEnCurso(JSONObject datos){
         
