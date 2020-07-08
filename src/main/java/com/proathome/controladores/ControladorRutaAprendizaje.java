@@ -41,7 +41,7 @@ public class ControladorRutaAprendizaje {
                     ruta.put("idBloque", resultado.getInt("idBloque"));
                     ruta.put("idNivel", resultado.getInt("idNivel"));
                     ruta.put("idSeccion", resultado.getInt("idSeccion"));
-                    ruta.put("horas", resultado.getDouble("horas"));
+                    ruta.put("horas", resultado.getInt("horas"));
                 }else{// SI NO, ENTONCES CHECAREMOS EL NIVEL 2
                     estado = null;
                     resultado = null;
@@ -55,7 +55,7 @@ public class ControladorRutaAprendizaje {
                         ruta.put("idBloque", resultado.getInt("idBloque"));
                         ruta.put("idNivel", resultado.getInt("idNivel"));
                         ruta.put("idSeccion", resultado.getInt("idSeccion"));
-                        ruta.put("horas", resultado.getDouble("horas"));
+                        ruta.put("horas", resultado.getInt("horas"));
                     }else{//SI NO, ENTONCES CHECAREMOS EL NIVEL 1
                         estado = null;
                         resultado = null;
@@ -69,7 +69,7 @@ public class ControladorRutaAprendizaje {
                             ruta.put("idBloque", resultado.getInt("idBloque"));
                             ruta.put("idNivel", resultado.getInt("idNivel"));
                             ruta.put("idSeccion", resultado.getInt("idSeccion"));
-                            ruta.put("horas", resultado.getDouble("horas"));
+                            ruta.put("horas", resultado.getInt("horas"));
                         }else{//SI NO, ES DESDE 0 ESTE PEDO.
                             ruta.put("idEstudiante", idEstudiante);
                             ruta.put("idBloque", 1);
@@ -115,7 +115,7 @@ public class ControladorRutaAprendizaje {
                 enCurso.setInt(2, Integer.parseInt(datos.get("idBloque").toString()));
                 enCurso.setInt(3, Integer.parseInt(datos.get("idNivel").toString()));
                 enCurso.setInt(4, Integer.parseInt(datos.get("idSeccion").toString()));
-                enCurso.setDouble(5, Double.parseDouble(datos.get("horas").toString()));
+                enCurso.setInt(5, Integer.parseInt(datos.get("horas").toString()));
                 enCurso.setString(6, datos.get("fecha_registro").toString());
                 enCurso.execute();
             }catch(SQLException ex){
@@ -144,7 +144,7 @@ public class ControladorRutaAprendizaje {
                          ruta.put("idBloque", resultado.getInt("idBloque"));
                          ruta.put("idNivel", resultado.getInt("idNivel"));
                          ruta.put("idSeccion", resultado.getInt("idSeccion"));
-                         ruta.put("horas", resultado.getDouble("horas"));
+                         ruta.put("horas", resultado.getInt("horas"));
                          ruta.put("fecha_registro", resultado.getString("fecha_registro"));
                      }else{
                          ruta.put("estado", ControladorRutaAprendizaje.INICIO_RUTA);
