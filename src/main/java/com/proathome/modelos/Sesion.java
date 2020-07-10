@@ -4,9 +4,10 @@ import java.sql.Date;
 
 public class Sesion {
     
-    private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion;
-    private String horario, lugar, tiempo, extras, tipoClase, nivel, profesor, actualizado;
+    private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion, tiempo, idSeccion, idNivel, idBloque;
+    private String horario, lugar, extras, tipoClase, profesor, actualizado;
     private double latitud, longitud;
+    private java.sql.Date fecha;
 
     public String getActualizado() {
         return actualizado;
@@ -52,14 +53,6 @@ public class Sesion {
         this.longitud = longitud;
     }
 
-    public String getNivel() {
-        return nivel;
-    }
-
-    public void setNivel(String nivel) {
-        this.nivel = nivel;
-    }
-
     public void setIdsesiones(int idsesiones) {
         this.idsesiones = idsesiones;
     }
@@ -96,12 +89,36 @@ public class Sesion {
         this.lugar = lugar;
     }
 
-    public String getTiempo() {
+    public int getTiempo() {
         return tiempo;
     }
 
-    public void setTiempo(String tiempo) {
+    public void setTiempo(int tiempo) {
         this.tiempo = tiempo;
+    }
+
+    public int getIdSeccion() {
+        return idSeccion;
+    }
+
+    public void setIdSeccion(int idSeccion) {
+        this.idSeccion = idSeccion;
+    }
+
+    public int getIdNivel() {
+        return idNivel;
+    }
+
+    public void setIdNivel(int idNivel) {
+        this.idNivel = idNivel;
+    }
+
+    public int getIdBloque() {
+        return idBloque;
+    }
+
+    public void setIdBloque(int idBloque) {
+        this.idBloque = idBloque;
     }
 
     public String getExtras() {
@@ -118,6 +135,14 @@ public class Sesion {
 
     public void setTipoClase(String tipoClase) {
         this.tipoClase = tipoClase;
+    }
+
+    public Date getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(Date fecha) {
+        this.fecha = fecha;
     }
       
 }

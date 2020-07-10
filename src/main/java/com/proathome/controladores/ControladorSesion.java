@@ -72,13 +72,16 @@ public class ControladorSesion {
                     obtenida.setClientes_idclientes(resultado.getInt("clientes_idclientes"));
                     obtenida.setHorario(resultado.getString("horario"));
                     obtenida.setLugar(resultado.getString("lugar"));
-                    obtenida.setTiempo(resultado.getString("tiempo"));
-                    obtenida.setNivel(resultado.getString("nivel"));
+                    obtenida.setTiempo(resultado.getInt("tiempo"));
                     obtenida.setExtras(resultado.getString("extras"));
                     obtenida.setTipoClase(resultado.getString("tipoClase"));
                     obtenida.setLatitud(resultado.getDouble("latitud"));
                     obtenida.setLongitud(resultado.getDouble("longitud"));
                     obtenida.setActualizado(resultado.getString("actualizado"));
+                    obtenida.setIdSeccion(resultado.getInt("idSeccion"));
+                    obtenida.setIdNivel(resultado.getInt("idNivel"));
+                    obtenida.setIdBloque(resultado.getInt("idBloque"));
+                    obtenida.setFecha(resultado.getDate("fecha"));
                     sesiones[aux] = obtenida;
                     aux++;
                     
@@ -139,18 +142,31 @@ public class ControladorSesion {
         if(conectar != null){
             
             try{
+                PreparedStatement actualizar;
                 
-                PreparedStatement actualizar = conectar.prepareStatement("UPDATE sesiones SET horario = ?, lugar = ?, tiempo = ?, nivel = ?, tipoClase = ?, extras = ?, latitud = ?, longitud = ?, actualizado = ? WHERE idsesiones = ?");
+                if(Boolean.valueOf(jsonDatos.get("cambioFecha").toString()))
+                    actualizar = conectar.prepareStatement("UPDATE sesiones SET horario = ?, lugar = ?, tiempo = ?, tipoClase = ?, extras = ?, latitud = ?, longitud = ?, actualizado = ?, idSeccion = ?, idNivel = ?, idBloque = ?, fecha = ? WHERE idsesiones = ?");
+                else
+                    actualizar = conectar.prepareStatement("UPDATE sesiones SET horario = ?, lugar = ?, tiempo = ?, tipoClase = ?, extras = ?, latitud = ?, longitud = ?, actualizado = ?, idSeccion = ?, idNivel = ?, idBloque = ? WHERE idsesiones = ?");
+               
                 actualizar.setString(1 , jsonDatos.get("horario").toString());
                 actualizar.setString(2 , jsonDatos.get("lugar").toString());
                 actualizar.setString(3 , jsonDatos.get("tiempo").toString());
-                actualizar.setString(4 , jsonDatos.get("nivel").toString());
-                actualizar.setString(5 , jsonDatos.get("tipoClase").toString());
-                actualizar.setString(6 , jsonDatos.get("observaciones").toString());
-                actualizar.setDouble(7 , Double.parseDouble(jsonDatos.get("latitud").toString()));
-                actualizar.setDouble(8 , Double.parseDouble(jsonDatos.get("longitud").toString()));
-                actualizar.setString(9 , jsonDatos.get("actualizado").toString());
-                actualizar.setInt(10 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                actualizar.setString(4 , jsonDatos.get("tipoClase").toString());
+                actualizar.setString(5 , jsonDatos.get("observaciones").toString());
+                actualizar.setDouble(6 , Double.parseDouble(jsonDatos.get("latitud").toString()));
+                actualizar.setDouble(7 , Double.parseDouble(jsonDatos.get("longitud").toString()));
+                actualizar.setString(8 , jsonDatos.get("actualizado").toString());
+                actualizar.setInt(9, Integer.valueOf(jsonDatos.get("idSeccion").toString()));
+                actualizar.setInt(10, Integer.valueOf(jsonDatos.get("idNivel").toString()));
+                actualizar.setInt(11, Integer.valueOf(jsonDatos.get("idBloque").toString()));
+                if(Boolean.valueOf(jsonDatos.get("cambioFecha").toString())){
+                    actualizar.setDate(12, java.sql.Date.valueOf(jsonDatos.get("fecha").toString()));
+                    actualizar.setInt(13, Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                }else{
+                     actualizar.setInt(12, Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                }
+
                 actualizar.execute();
                 conectar.close();
                 
