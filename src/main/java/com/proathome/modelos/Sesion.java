@@ -5,9 +5,33 @@ import java.sql.Date;
 public class Sesion {
     
     private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion, tiempo, idSeccion, idNivel, idBloque;
-    private String horario, lugar, extras, tipoClase, profesor, actualizado;
+    private String horario, lugar, extras, tipoClase, profesor, actualizado, fotoProfesor, correoProfesor, descripcionProfesor;
     private double latitud, longitud;
     private java.sql.Date fecha;
+
+    public String getFotoProfesor() {
+        return fotoProfesor;
+    }
+
+    public void setFotoProfesor(String fotoProfesor) {
+        this.fotoProfesor = fotoProfesor;
+    }
+
+    public String getCorreoProfesor() {
+        return correoProfesor;
+    }
+
+    public void setCorreoProfesor(String correoProfesor) {
+        this.correoProfesor = correoProfesor;
+    }
+
+    public String getDescripcionProfesor() {
+        return descripcionProfesor;
+    }
+
+    public void setDescripcionProfesor(String descripcionProfesor) {
+        this.descripcionProfesor = descripcionProfesor;
+    }
 
     public String getActualizado() {
         return actualizado;

@@ -12,6 +12,111 @@ import org.json.simple.JSONObject;
 public class ControladorSesion {
 
     private Sesion sesiones[];
+    
+    
+        public void claseDisponibleProfesor(int idSesion, int idProfesor, boolean disponible){
+        
+        ConexionMySQL mysql = new ConexionMySQL();
+        Connection conectar = mysql.conectar();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET profDisponible = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                consulta.setBoolean(1, disponible);
+                consulta.setInt(2, idSesion);
+                consulta.setInt(3, idProfesor);
+                consulta.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en claseDsiponible");
+        }
+        
+    }
+    
+    public JSONObject sincronizarClaseProfesor(int idSesion, int idPrfoesor){
+    
+        ConexionMySQL mysql = new ConexionMySQL();
+        Connection conectar = mysql.conectar();
+        JSONObject jsonResultado = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                consulta.setInt(1, idSesion);
+                consulta.setInt(2, idPrfoesor);
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    jsonResultado.put("dispEstudiante", resultado.getBoolean("estDisponible"));
+                }else{
+                    jsonResultado.put("error", "Error en la consulta.");
+                }
+                consulta.close();
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en sincronixarClase.");
+        }
+        
+        return jsonResultado;
+        
+    }
+    
+    public void claseDisponible(int idSesion, int idEstudiante, boolean disponible){
+        
+        ConexionMySQL mysql = new ConexionMySQL();
+        Connection conectar = mysql.conectar();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estDisponible = ? WHERE idsesiones = ? AND clientes_idclientes = ?");
+                consulta.setBoolean(1, disponible);
+                consulta.setInt(2, idSesion);
+                consulta.setInt(3, idEstudiante);
+                consulta.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en claseDsiponible");
+        }
+        
+    }
+    
+    public JSONObject sincronizarClase(int idSesion, int idEstudiante){
+    
+        ConexionMySQL mysql = new ConexionMySQL();
+        Connection conectar = mysql.conectar();
+        JSONObject jsonResultado = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ? AND clientes_idclientes = ?");
+                consulta.setInt(1, idSesion);
+                consulta.setInt(2, idEstudiante);
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    jsonResultado.put("dispProfesor", resultado.getBoolean("profDisponible"));
+                }else{
+                    jsonResultado.put("error", "Error en la consulta.");
+                }
+                consulta.close();
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en sincronixarClase.");
+        }
+        
+        return jsonResultado;
+        
+    }
 
     public void obtenerSesiones(int idCliente) {
 
@@ -50,21 +155,23 @@ public class ControladorSesion {
                     if(idProfesor == null){
                         
                         obtenida.setProfesor("Sin profesor asignado.");
+                        obtenida.setFotoProfesor("Sin foto");
+                        obtenida.setDescripcionProfesor("Sin descripcion");
+                        obtenida.setCorreoProfesor("Sin correo");
  
                     }else{
                         
-                        PreparedStatement profesor = conectar.prepareStatement("SELECT nombre FROM profesores WHERE idprofesores = ?");
+                        PreparedStatement profesor = conectar.prepareStatement("SELECT * FROM profesores WHERE idprofesores = ?");
                         profesor.setInt(1 , resultado.getInt("profesores_idprofesores"));
                         ResultSet nombreProfesor = profesor.executeQuery();
                         
-                        if(nombreProfesor.next()){
-                            
-                            obtenida.setProfesor(nombreProfesor.getString("nombre"));
-                            
-                        }else{
-                            
-                            obtenida.setProfesor("Error al obtener profesor.");
-                            
+                        if(nombreProfesor.next()){ 
+                            obtenida.setProfesor(nombreProfesor.getString("nombre"));  
+                            obtenida.setCorreoProfesor(nombreProfesor.getString("correo"));
+                            obtenida.setDescripcionProfesor(nombreProfesor.getString("descripcion"));
+                            obtenida.setFotoProfesor(nombreProfesor.getString("foto"));
+                        }else{                  
+                            obtenida.setProfesor("Error al obtener profesor.");                    
                         }
   
                     }

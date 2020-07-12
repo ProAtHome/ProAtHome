@@ -2,6 +2,7 @@ package com.proathome.REST;
 
 import com.google.gson.Gson;
 import com.proathome.controladores.ControladorProfesor;
+import com.proathome.controladores.ControladorSesion;
 import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -28,10 +29,19 @@ public class RESTProfesor {
     *
     */
     
+    private ControladorSesion sesiones = new ControladorSesion();
     private ControladorProfesor profesor = new ControladorProfesor();
-    private ObjetoUbicacion objetoUbicaciones= new ObjetoUbicacion();
+    private ObjetoUbicacion objetoUbicaciones = new ObjetoUbicacion();
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
+    
+    @GET
+    @Path("/sincronizarClase/{idSesion}/{idProfesor}")
+    public JSONObject sincronizarClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
+        
+       return sesiones.sincronizarClaseProfesor(idSesion, idProfesor);
+        
+    }
     
     @GET
     @Path("/obtenerSesionesProfesorMatch/{idProfesor}")
@@ -170,6 +180,14 @@ public class RESTProfesor {
         }
         
     }//Fin método agregarCuentaBancaria.
+    
+    @PUT
+    @Path("/claseDisponible/{idSesion}/{idProfesor}/{disponible}")
+    public void claseDsiponible(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("disponible") boolean dsiponible){
+        
+        sesiones.claseDisponibleProfesor(idSesion, idProfesor, dsiponible);
+        
+    }
     
     @PUT
     @Path("/informacionPerfilWeb")

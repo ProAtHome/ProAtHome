@@ -159,7 +159,7 @@ public class ControladorProfesor {
                     jsonSesionesMatchProfesor.put("foto", resultado.getString("foto"));
                     jsonSesionesMatchProfesor.put("lugar", resultado.getString("lugar"));
                     jsonSesionesMatchProfesor.put("tiempo", resultado.getString("tiempo"));
-                    jsonSesionesMatchProfesor.put("nivel", resultado.getString("nivel"));
+                    jsonSesionesMatchProfesor.put("nivel", "Nivel sin programar en profesor.");
                     jsonSesionesMatchProfesor.put("tipoClase", resultado.getString("tipoClase"));
                     jsonSesionesMatchProfesor.put("extras", resultado.getString("extras"));
                     jsonSesionesMatchProfesor.put("horario", resultado.getString("horario")); 
@@ -208,7 +208,7 @@ public class ControladorProfesor {
                     jsonMatch.put("foto", resultado.getString("foto"));
                     jsonMatch.put("lugar", resultado.getString("lugar"));
                     jsonMatch.put("tiempo", resultado.getString("tiempo"));
-                    jsonMatch.put("nivel", resultado.getString("nivel"));
+                    jsonMatch.put("nivel", "Nivel sin programar en profesor.");
                     jsonMatch.put("tipoClase", resultado.getString("tipoClase"));
                     jsonMatch.put("extras", resultado.getString("extras"));
                     jsonMatch.put("horario", resultado.getString("horario"));     
@@ -250,7 +250,7 @@ public class ControladorProfesor {
                     json.put("longitud", resultado.getDouble("longitud"));
                     json.put("nombre", resultado.getString("nombre"));
                     json.put("lugar", resultado.getString("lugar"));
-                    json.put("nivel", resultado.getString("nivel"));
+                    json.put("nivel", "Nivel sin programar en profesor.");
                     arrayJson.add(json);
                     json = null;
                     
