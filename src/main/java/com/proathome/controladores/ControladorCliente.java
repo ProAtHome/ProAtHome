@@ -22,8 +22,6 @@ public class ControladorCliente {
      */
     private Cliente cliente = new Cliente();
     private Sesion sesion = new Sesion();
-    private ConexionMySQL mysql = new ConexionMySQL();
-    private Connection conectar;
     private boolean clienteRegistrado = false;
     
     public void nuevaSesion(JSONObject datos){
@@ -46,7 +44,7 @@ public class ControladorCliente {
     
     public JSONObject detallesSesion(int idSesion){
       
-        conectar = mysql.conectar();
+        Connection conectar = ConexionMySQL.connection();
         JSONObject jsonDetalles = new JSONObject();
         if(conectar != null){
             
@@ -74,8 +72,7 @@ public class ControladorCliente {
                     jsonDetalles.put("descripcion", resultado.getString("descripcion"));
                     
                 }
-                
-                conectar.close();
+               
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -93,7 +90,7 @@ public class ControladorCliente {
     
     public void guardarSesion(){
         
-        conectar = mysql.conectar();
+         Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -116,8 +113,7 @@ public class ControladorCliente {
                 agregarDatos.setInt(12, sesion.getIdBloque());
                 agregarDatos.setDate(13, sesion.getFecha());
                 agregarDatos.execute();
-                
-                conectar.close();
+            
                 
             }catch(SQLException ex){
                 
@@ -136,7 +132,7 @@ public class ControladorCliente {
     public CuentaBancaria obtenerCuentaBancaria(int idCliente){
                 
         cliente.cuenta = new CuentaBancaria();
-        conectar = mysql.conectar();
+         Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -158,7 +154,6 @@ public class ControladorCliente {
                     
                 }  
                 
-                conectar.close();
                 
             }catch(SQLException ex){
                 
@@ -187,7 +182,7 @@ public class ControladorCliente {
     
     public void actualizarDatosPerfil(){
         
-        conectar = mysql.conectar();
+         Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -200,8 +195,7 @@ public class ControladorCliente {
                 actualizar.setString(3, cliente.getDescripcion());
                 actualizar.setInt(4, cliente.getIdCliente());
                 actualizar.executeUpdate();
-                
-                conectar.close();
+            
                 
             }catch(SQLException ex){
                 
@@ -219,7 +213,7 @@ public class ControladorCliente {
 
     public void iniciarSesion(String correo, String contrasena) {
 
-        conectar = mysql.conectar();
+         Connection conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -237,13 +231,11 @@ public class ControladorCliente {
                     cliente.setNombre(resultado.getString("nombre"));
                     cliente.setFoto(resultado.getString("foto"));
                     
-                    conectar.close();
                     clienteRegistrado = true;
 
                 } else {
 
                     clienteRegistrado = false;
-                    conectar.close();
 
                 }
 
@@ -267,7 +259,7 @@ public class ControladorCliente {
         cliente.setFoto(String.valueOf(foto.get("nombre")));
         cliente.setIdCliente(Integer.parseInt(String.valueOf(foto.get("idCliente"))));
         
-        conectar = mysql.conectar();
+         Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -278,8 +270,7 @@ public class ControladorCliente {
                 actualizar.setString(1, cliente.getFoto());
                 actualizar.setInt(2, cliente.getIdCliente());
                 actualizar.executeUpdate();
-                
-                conectar.close();
+            
                 
             }catch(SQLException ex){
                 
@@ -297,7 +288,7 @@ public class ControladorCliente {
 
     public void perfilCliente(int idCliente) {
 
-        conectar = mysql.conectar();
+         Connection conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -319,14 +310,13 @@ public class ControladorCliente {
                     cliente.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
                     cliente.setFoto(resultado.getString("foto"));
                     cliente.setDescripcion(resultado.getString("descripcion"));
-                    
-                    conectar.close();
+
                     clienteRegistrado = true;
 
                 } else {
 
                     clienteRegistrado = false;
-                    conectar.close();
+          
 
                 }
 
@@ -377,7 +367,7 @@ public class ControladorCliente {
 
     public void guardarCliente() {
 
-        conectar = mysql.conectar();
+         Connection conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -392,8 +382,6 @@ public class ControladorCliente {
                 agregarDatos.setDate(5, cliente.getFechaNacimiento());
                 agregarDatos.setDate(6, cliente.getFechaRegistro());
                 agregarDatos.execute();
-                
-                conectar.close();
 
             } catch (SQLException ex) {
 
@@ -421,7 +409,7 @@ public class ControladorCliente {
     
     public void guardarCuentaBancaria(int idCliente) {
 
-        conectar = mysql.conectar();
+        Connection conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -435,8 +423,6 @@ public class ControladorCliente {
                 agregarDatos.setString(4, cliente.cuenta.getNumeroCuenta());
                 agregarDatos.setString(5, cliente.cuenta.getDireccionFacturacion());
                 agregarDatos.execute();
-
-                conectar.close();
 
             } catch (SQLException ex) {
 
@@ -454,7 +440,7 @@ public class ControladorCliente {
 
     public void actualizarCuentaBancaria(int idCliente) {
 
-        conectar = mysql.conectar();
+         Connection conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -488,8 +474,6 @@ public class ControladorCliente {
 
                 }
 
-                conectar.close();
-
             } catch (SQLException ex) {
 
                 ex.printStackTrace();
@@ -517,7 +501,7 @@ public class ControladorCliente {
 
     public void guardarEvaluacion(int idCliente) {
 
-        conectar = mysql.conectar();
+         Connection conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -532,8 +516,6 @@ public class ControladorCliente {
                 agregarDatos.setString(5, cliente.evaluacion.getLugar());
                 agregarDatos.setInt(6, cliente.evaluacion.getNivelIdioma());
                 agregarDatos.execute();
-
-                conectar.close();
 
             } catch (SQLException ex) {
 

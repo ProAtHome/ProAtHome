@@ -7,17 +7,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 
 public class ControladorSesion {
 
     private Sesion sesiones[];
     
-    
-        public void claseDisponibleProfesor(int idSesion, int idProfesor, boolean disponible){
+    public void claseDisponibleProfesor(int idSesion, int idProfesor, boolean disponible){
         
-        ConexionMySQL mysql = new ConexionMySQL();
-        Connection conectar = mysql.conectar();
+        Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             try{
@@ -37,13 +37,13 @@ public class ControladorSesion {
     
     public JSONObject sincronizarClaseProfesor(int idSesion, int idPrfoesor){
     
-        ConexionMySQL mysql = new ConexionMySQL();
-        Connection conectar = mysql.conectar();
         JSONObject jsonResultado = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        PreparedStatement consulta;
         
         if(conectar != null){
             try{
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ? AND profesores_idprofesores = ?");
                 consulta.setInt(1, idSesion);
                 consulta.setInt(2, idPrfoesor);
                 ResultSet resultado = consulta.executeQuery();
@@ -53,7 +53,6 @@ public class ControladorSesion {
                 }else{
                     jsonResultado.put("error", "Error en la consulta.");
                 }
-                consulta.close();
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -68,8 +67,7 @@ public class ControladorSesion {
     
     public void claseDisponible(int idSesion, int idEstudiante, boolean disponible){
         
-        ConexionMySQL mysql = new ConexionMySQL();
-        Connection conectar = mysql.conectar();
+        Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             try{
@@ -89,8 +87,7 @@ public class ControladorSesion {
     
     public JSONObject sincronizarClase(int idSesion, int idEstudiante){
     
-        ConexionMySQL mysql = new ConexionMySQL();
-        Connection conectar = mysql.conectar();
+        Connection conectar = ConexionMySQL.connection();
         JSONObject jsonResultado = new JSONObject();
         
         if(conectar != null){
@@ -105,7 +102,7 @@ public class ControladorSesion {
                 }else{
                     jsonResultado.put("error", "Error en la consulta.");
                 }
-                consulta.close();
+             
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -120,10 +117,7 @@ public class ControladorSesion {
 
     public void obtenerSesiones(int idCliente) {
 
-        ConexionMySQL mysql = new ConexionMySQL();
-        Connection conectar;
-
-        conectar = mysql.conectar();
+        Connection conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -194,7 +188,7 @@ public class ControladorSesion {
                     
                 }
                 
-                conectar.close();
+
                 
             } catch (SQLException ex) {
 
@@ -212,10 +206,9 @@ public class ControladorSesion {
     
     public void eliminarSesion(int idSesion){
         
-        ConexionMySQL mysql = new ConexionMySQL();
         Connection conectar;
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -224,7 +217,7 @@ public class ControladorSesion {
                 PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM sesiones WHERE idsesiones = ?");
                 eliminar.setInt(1 , idSesion);
                 eliminar.execute();
-                conectar.close();
+               
                 
             }catch(SQLException ex){
                 
@@ -242,9 +235,8 @@ public class ControladorSesion {
     
     public void actualizarSesion(JSONObject jsonDatos){
         System.out.println(jsonDatos);
-        ConexionMySQL mysql = new ConexionMySQL();
         Connection conectar;
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -275,7 +267,6 @@ public class ControladorSesion {
                 }
 
                 actualizar.execute();
-                conectar.close();
                 
             }catch(SQLException ex){
                 

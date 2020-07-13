@@ -6,6 +6,7 @@ import com.proathome.controladores.ControladorExamenDiagnostico;
 import com.proathome.controladores.ControladorRutaAprendizaje;
 import com.proathome.controladores.ControladorSesion;
 import com.proathome.modelos.ObjetoUbicacion;
+import com.proathome.mysql.ConexionMySQL;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;

@@ -18,7 +18,6 @@ import org.json.simple.JSONObject;
 public class ControladorAdmin {
     
     private Gson gson;
-    private ConexionMySQL mysql = new ConexionMySQL();
     private Profesor profesores[];
     private Connection conectar;
     public static final int ESTUDIANTE = 1;
@@ -26,7 +25,7 @@ public class ControladorAdmin {
     
     public JSONArray obtenerMensajes(int tipoCliente){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         JSONArray arrayMensajes = new JSONArray();
         
         if(conectar != null){
@@ -68,7 +67,7 @@ public class ControladorAdmin {
     
     public void enviarMensaje(JSONObject mensaje){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
                 PreparedStatement enviar = conectar.prepareStatement("INSERT INTO ayuda (mensaje, idCliente, tipoCliente) VALUES (?,?,?)");
@@ -87,7 +86,7 @@ public class ControladorAdmin {
     
     public void cambiarEstado(int idProfesor, boolean estado){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -97,7 +96,6 @@ public class ControladorAdmin {
                 cambiarEstado.setBoolean(1 , estado);
                 cambiarEstado.setInt(2 , idProfesor);
                 cambiarEstado.execute();
-                conectar.close();
                 
             }catch(SQLException ex){
                 
@@ -116,7 +114,7 @@ public class ControladorAdmin {
     public String obtenerSolicitudes(){
         
         gson = new Gson();
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -147,7 +145,6 @@ public class ControladorAdmin {
                         
                     }
                 }
-                conectar.close();
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -178,7 +175,7 @@ public class ControladorAdmin {
         
         boolean usuarioEncontrado = false;
         gson = new Gson();
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         int idAdmin = 0;
         
         if(conectar != null){
@@ -200,7 +197,6 @@ public class ControladorAdmin {
                     
                 }
                 
-                conectar.close();
                 
             }catch(SQLException ex){
                 

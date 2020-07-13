@@ -3,6 +3,8 @@ package com.proathome.mysql;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
 *
@@ -13,6 +15,8 @@ import java.sql.SQLException;
 public class ConexionMySQL {
     
     public String db, url, user, pass;
+    static Connection link = null;
+    static ConexionMySQL mysql = new ConexionMySQL();
     
     public ConexionMySQL(){  
         
@@ -20,17 +24,11 @@ public class ConexionMySQL {
          this.url = "jdbc:mysql://localhost:3306/" +db;
          this.user = "root";
          this.pass = "";
-         
-    }
-    
-    public Connection conectar(){
-        
-        Connection link = null;
-        
+        System.out.println("Conexion 1");
         try{
             
             String a = db + url + user + pass;
-   
+           
             Class.forName("com.mysql.jdbc.Driver");
             link = DriverManager.getConnection(this.url, this.user, this.pass);
             
@@ -39,31 +37,22 @@ public class ConexionMySQL {
             System.out.println(ex);
             
         }
-        
+         
+    }
+   
+    
+    public Connection conectar(){
+ 
         return link;
         
     }//Fin método conectar.
     
-    public void probarConexion(){
+    public static Connection connection(){
         
-        ConexionMySQL mysql = new ConexionMySQL();
-        java.sql.Connection conectar = mysql.conectar();
+        link = mysql.conectar();
         
-        if(conectar != null){
-            
-            System.out.println("Estás conectado.");
-            
-            try{
-                
-                conectar.close();
-                
-            }catch(SQLException ex){
-                
-                System.out.println(ex.getMessage());
-                
-            }
-        }
+        return link;
         
-    }//Fin método probarConexión.
+    }
     
 }

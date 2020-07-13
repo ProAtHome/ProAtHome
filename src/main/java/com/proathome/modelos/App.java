@@ -1,5 +1,6 @@
 package com.proathome.modelos;
 
+import com.proathome.mysql.ConexionMySQL;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
@@ -11,5 +12,5 @@ import javax.ws.rs.core.Application;
 
 @ApplicationPath("/")
 public class App extends Application{
-    
+
 }

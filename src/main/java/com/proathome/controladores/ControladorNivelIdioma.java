@@ -16,7 +16,6 @@ public class ControladorNivelIdioma {
     */
     
     private NivelIdioma nivel = new NivelIdioma();
-    private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
     
     public void nuevoNivel(JSONObject jsonNivel){
@@ -27,7 +26,7 @@ public class ControladorNivelIdioma {
     
     public void agregarNivel(){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             

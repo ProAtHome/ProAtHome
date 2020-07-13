@@ -21,7 +21,6 @@ public class ControladorProfesor {
     *
      */
     private Profesor profesor = new Profesor();
-    private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
     private JSONObject jsonMatch = new JSONObject();
     private JSONObject jsonSesionesMatchProfesor = new JSONObject();
@@ -30,7 +29,7 @@ public class ControladorProfesor {
 
     public void iniciarSesion(String correo, String contrasena) {
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -49,13 +48,13 @@ public class ControladorProfesor {
                     profesor.setFoto(resultado.getString("foto"));
                     profesor.setEstado(resultado.getBoolean("estado"));
 
-                    conectar.close();
+                    
                     profesorRegistrado = true;
 
                 } else {
 
                     profesorRegistrado = false;
-                    conectar.close();
+                    
 
                 }
 
@@ -84,7 +83,7 @@ public class ControladorProfesor {
     
     public void matchSesionWeb(int idProfesor, int idSesion){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -94,7 +93,7 @@ public class ControladorProfesor {
                 match.setInt(1 , idProfesor);
                 match.setInt(2 , idSesion);
                 match.execute();
-                conectar.close();
+                
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -110,7 +109,7 @@ public class ControladorProfesor {
     
     public void matchSesion(JSONObject jsonDatos){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -120,7 +119,7 @@ public class ControladorProfesor {
                 match.setInt(1 , Integer.parseInt(jsonDatos.get("idProfesor").toString()));
                 match.setInt(2 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
                 match.execute();
-                conectar.close();
+                
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -136,7 +135,7 @@ public class ControladorProfesor {
     
     public JSONArray sesionesMatchProfesor(int idProfesor){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         JSONArray jsonArrayMatch = new JSONArray();
         
         if(conectar != null){
@@ -167,7 +166,7 @@ public class ControladorProfesor {
                     
                 }
                 
-                conectar.close();
+                
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -185,7 +184,7 @@ public class ControladorProfesor {
     
     public JSONObject informacionSesionMatch(int idSesion){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -215,7 +214,7 @@ public class ControladorProfesor {
                     
                 }
                 
-                conectar.close();
+                
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -233,7 +232,7 @@ public class ControladorProfesor {
     
     public JSONArray obtenerSesionesMovil(){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             
@@ -256,7 +255,7 @@ public class ControladorProfesor {
                     
                 }
                 
-                conectar.close();
+                
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -274,7 +273,7 @@ public class ControladorProfesor {
 
     public void actualizarDatosPerfil() {
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -288,7 +287,7 @@ public class ControladorProfesor {
                 actualizar.setInt(4, profesor.getIdProfesor());
                 actualizar.executeUpdate();
 
-                conectar.close();
+                
 
             } catch (SQLException ex) {
 
@@ -309,7 +308,7 @@ public class ControladorProfesor {
         profesor.setFoto(String.valueOf(foto.get("nombre")));
         profesor.setIdProfesor(Integer.parseInt(String.valueOf(foto.get("idProfesor"))));
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -321,7 +320,7 @@ public class ControladorProfesor {
                 actualizar.setInt(2, profesor.getIdProfesor());
                 actualizar.executeUpdate();
 
-                conectar.close();
+                
 
             } catch (SQLException ex) {
 
@@ -339,7 +338,7 @@ public class ControladorProfesor {
 
     public void perfilProfesor(int idProfesor) {
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -362,13 +361,13 @@ public class ControladorProfesor {
                     profesor.setFoto(resultado.getString("foto"));
                     profesor.setDescripcion(resultado.getString("descripcion"));
 
-                    conectar.close();
+                    
                     profesorRegistrado = true;
 
                 } else {
 
                     profesorRegistrado = false;
-                    conectar.close();
+                    
 
                 }
 
@@ -421,7 +420,7 @@ public class ControladorProfesor {
 
         ArrayList<String> list = new ArrayList<>();
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -440,7 +439,7 @@ public class ControladorProfesor {
 
                 }
 
-                conectar.close();
+                
 
             } catch (SQLException ex) {
 
@@ -460,7 +459,7 @@ public class ControladorProfesor {
 
     public void guardarProfesor() {
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -476,7 +475,7 @@ public class ControladorProfesor {
                 agregarDatos.setDate(6, profesor.getFechaRegistro());
                 agregarDatos.execute();
 
-                conectar.close();
+                
 
             } catch (SQLException ex) {
 
@@ -495,7 +494,7 @@ public class ControladorProfesor {
     public CuentaBancaria obtenerCuentaBancaria(int idProfesor) {
 
         profesor.cuenta = new CuentaBancaria();
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -517,7 +516,7 @@ public class ControladorProfesor {
 
                 }
 
-                conectar.close();
+                
 
             } catch (SQLException ex) {
 
@@ -547,7 +546,7 @@ public class ControladorProfesor {
 
     public void guardarCuentaBancaria(int idProfesor) {
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -562,7 +561,7 @@ public class ControladorProfesor {
                 agregarDatos.setString(5, profesor.cuenta.getDireccionFacturacion());
                 agregarDatos.execute();
 
-                conectar.close();
+                
 
             } catch (SQLException ex) {
 
@@ -580,7 +579,7 @@ public class ControladorProfesor {
 
     public void actualizarCuentaBancaria(int idProfesor) {
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
 
@@ -613,7 +612,7 @@ public class ControladorProfesor {
                     
                 }
 
-                conectar.close();
+                
 
             } catch (SQLException ex) {
 

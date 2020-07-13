@@ -9,7 +9,6 @@ import org.json.simple.JSONObject;
 
 public class ControladorExamenDiagnostico {
     
-    private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
     private JSONObject examen = new JSONObject();
     public static final int INICIO = 1;
@@ -26,7 +25,7 @@ public class ControladorExamenDiagnostico {
         
         JSONObject estatus = new JSONObject();
         estatus.clear();
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             try{            
@@ -47,7 +46,7 @@ public class ControladorExamenDiagnostico {
     public JSONObject infoExamenDiagnostico(int idCliente){
         
         examen.clear();
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         if(conectar != null){
             
             try{
@@ -78,7 +77,7 @@ public class ControladorExamenDiagnostico {
     public JSONObject infoExamenDiagnosticoFinal(int idCliente){
         
         examen.clear();
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         if(conectar != null){
             
             try{
@@ -108,7 +107,7 @@ public class ControladorExamenDiagnostico {
     
     public void inicioExamenDiagnostico(JSONObject examen){
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
                 PreparedStatement validar = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
@@ -135,7 +134,7 @@ public class ControladorExamenDiagnostico {
         
     public void cancelarExamenDiagnostico(JSONObject examen){
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
                 PreparedStatement validar = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
@@ -162,7 +161,7 @@ public class ControladorExamenDiagnostico {
         
     public void enCursoExamenDiagnostico(JSONObject examen){
 
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
                 PreparedStatement aciertos = conectar.prepareStatement("SELECT aciertos FROM diagnostico WHERE clientes_idclientes = ?");
@@ -191,7 +190,7 @@ public class ControladorExamenDiagnostico {
     public JSONObject estatusExamenDiagnostico(int idCliente){
 
         examen.clear();
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         System.out.println("Entro");
         if(conectar != null){
             try{

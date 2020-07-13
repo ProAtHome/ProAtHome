@@ -14,7 +14,6 @@ import org.json.simple.JSONObject;
 public class ControladorRutaAprendizaje {
     
     private JSONObject ruta = new JSONObject();
-    private ConexionMySQL mysql = new ConexionMySQL();
     private Connection conectar;
     public static final int INICIO_RUTA = 1;
     public static final int RUTA_ENCURSO = 2;
@@ -24,7 +23,7 @@ public class ControladorRutaAprendizaje {
     public static final int INTERMEDIO = 3;
     
     public JSONObject obtenerSesionActual(int idEstudiante){
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         ruta.clear();
         
         if(conectar != null){
@@ -79,21 +78,7 @@ public class ControladorRutaAprendizaje {
                         }
                     }
                 }
-                     /*
-                     if(resultado.next()){
-                         
-                         ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
-                         ruta.put("idBloque", resultado.getInt("idBloque"));
-                         ruta.put("idNivel", resultado.getInt("idNivel"));
-                         ruta.put("idSeccion", resultado.getInt("idSeccion"));
-                         ruta.put("horas", resultado.getDouble("horas"));
-                     }else{
-                         ruta.put("idEstudiante", idEstudiante);
-                         ruta.put("idBloque", 1);
-                         ruta.put("idNivel", 1);
-                         ruta.put("idSeccion", 1);
-                         ruta.put("horas", 0);
-                     }*/
+        
             }catch(SQLException ex){
                 ex.printStackTrace();
             }
@@ -107,7 +92,7 @@ public class ControladorRutaAprendizaje {
     
     public void rutaEnCurso(JSONObject datos){
         
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
                 PreparedStatement enCurso = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro) VALUES (?,?,?,?,?,?)");
@@ -130,7 +115,7 @@ public class ControladorRutaAprendizaje {
     public JSONObject estadoRutaAprendizaje(int idEstudiante, int tipo){
         
         ruta.clear();
-        conectar = mysql.conectar();
+        conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             try{
