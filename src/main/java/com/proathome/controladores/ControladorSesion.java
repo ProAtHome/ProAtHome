@@ -15,6 +15,114 @@ public class ControladorSesion {
 
     private Sesion sesiones[];
     
+    public void cambiarEstatusClaseEstudiante(int idSesion, int idEstudiante, int estatus){
+        
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND clientes_idclientes = ?");
+                consulta.setInt(1, estatus);
+                consulta.setInt(2, idSesion);
+                consulta.setInt(3, idEstudiante);
+                consulta.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en cambiarEstatusClaseEstudiante.");
+        }
+        
+    }
+    
+    public void cambiarEstatusClaseProfesor(int idSesion, int idProfesor, int estatus){
+        
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                consulta.setInt(1, estatus);
+                consulta.setInt(2, idSesion);
+                consulta.setInt(3, idProfesor);
+                consulta.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en cambiarEstatusClaseEstudiante.");
+        }
+        
+    }
+    
+       public JSONObject validarEstatusClaseProfesor(int idSesion, int idProfesor){
+        
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject datosSesion = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                consulta.setInt(1, idSesion);
+                consulta.setInt(2, idProfesor);
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    datosSesion.put("idSeccion", resultado.getInt("idSeccion"));
+                    datosSesion.put("idNivel", resultado.getInt("idNivel"));
+                    datosSesion.put("idBloque", resultado.getInt("idBloque"));
+                    datosSesion.put("profDsiponible", resultado.getBoolean("profDisponible"));
+                    datosSesion.put("estaus", resultado.getInt("estatus"));
+                    datosSesion.put("progreso", resultado.getInt("progreso"));
+                }else{
+                    datosSesion.put("error", "Error en la consulta.");
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+         
+        }else{
+            System.out.println("Error en validarEstatusClase.");
+        }
+        
+        return datosSesion;
+        
+    }
+    
+    public JSONObject validarEstatusClaseEstudiante(int idSesion, int idEstudiante){
+        
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject datosSesion = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ? AND clientes_idclientes = ?");
+                consulta.setInt(1, idSesion);
+                consulta.setInt(2, idEstudiante);
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    datosSesion.put("idSeccion", resultado.getInt("idSeccion"));
+                    datosSesion.put("idNivel", resultado.getInt("idNivel"));
+                    datosSesion.put("idBloque", resultado.getInt("idBloque"));
+                    datosSesion.put("profDsiponible", resultado.getBoolean("profDisponible"));
+                    datosSesion.put("estaus", resultado.getInt("estatus"));
+                    datosSesion.put("progreso", resultado.getInt("progreso"));
+                }else{
+                    datosSesion.put("error", "Error en la consulta.");
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+         
+        }else{
+            System.out.println("Error en validarEstatusClase.");
+        }
+        
+        return datosSesion;
+        
+    }
+    
     public void claseDisponibleProfesor(int idSesion, int idProfesor, boolean disponible){
         
         Connection conectar = ConexionMySQL.connection();

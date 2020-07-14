@@ -39,6 +39,14 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/validarEstatusClase/{idSesion}/{idEstudiante}")
+    public JSONObject validarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
+        
+        return sesiones.validarEstatusClaseEstudiante(idSesion, idEstudiante);
+        
+    }
+    
+    @GET
     @Path("/sincronizarClase/{idSesion}/{idEstudiante}")
     public JSONObject sincronizarClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
         
@@ -342,6 +350,14 @@ public class RESTCliente {
         return estatus;
         
     }//Fin método examenDiagnostico.
+    
+    @PUT
+    @Path("/cambiarEstatusClase/{idSesion}/{idEstudiante}/{estatus}")
+    public void cambiarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante, @PathParam("estatus") int estatus){
+        
+        sesiones.cambiarEstatusClaseEstudiante(idSesion, idEstudiante, estatus);
+        
+    }
     
     @PUT
     @Path("/claseDisponible/{idSesion}/{idEstudiante}/{disponible}")

@@ -96,8 +96,8 @@ public class ControladorCliente {
             
             try{
                 
-                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase, latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha) "
-                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase, latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso) "
+                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setInt(1, sesion.getClientes_idclientes());
                 agregarDatos.setString(2, sesion.getHorario());
@@ -112,6 +112,7 @@ public class ControladorCliente {
                 agregarDatos.setInt(11, sesion.getIdNivel());
                 agregarDatos.setInt(12, sesion.getIdBloque());
                 agregarDatos.setDate(13, sesion.getFecha());
+                agregarDatos.setInt(14, sesion.getTiempo());
                 agregarDatos.execute();
             
                 
