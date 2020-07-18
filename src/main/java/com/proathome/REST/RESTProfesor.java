@@ -36,6 +36,17 @@ public class RESTProfesor {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/validarEstatusClase/{idSesion}/{idProfesor}")
+    public JSONObject validarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
+        
+        JSONObject json = sesiones.validarEstatusClaseProfesor(idSesion, idProfesor);
+        System.out.println(json);
+        
+        return json;
+        
+    }
+    
+    @GET
     @Path("/sincronizarClase/{idSesion}/{idProfesor}")
     public JSONObject sincronizarClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
         
@@ -180,6 +191,27 @@ public class RESTProfesor {
         }
         
     }//Fin método agregarCuentaBancaria.
+    
+    @PUT
+    @Path("/cambiarEstatusClase/{idSesion}/{idProfesor}/{estatus}")
+    public void cambiarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("estatus") int estatus){
+        
+        System.out.println("PROFESOOOOO");
+        sesiones.cambiarEstatusClaseProfesor(idSesion, idProfesor, estatus);
+        
+    }
+    
+    @PUT
+    @Path("/actualizarProgresoClase/{idSesion}/{idProfesor}/{progreso}/{progresoSegundos}")
+    public JSONObject actualizarProgresoClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("progreso") int progreso, @PathParam("progresoSegundos") int progresoSegundos){
+        
+        sesiones.actualizarProgresoClase(idSesion, idProfesor, progreso, progresoSegundos);
+        JSONObject json= new JSONObject();
+        json.put("estado", "Progreso guardado.");
+        
+        return json;
+        
+    }
     
     @PUT
     @Path("/claseDisponible/{idSesion}/{idProfesor}/{disponible}")

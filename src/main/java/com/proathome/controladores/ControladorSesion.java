@@ -15,6 +15,25 @@ public class ControladorSesion {
 
     private Sesion sesiones[];
     
+    public void actualizarProgresoClase(int idSesion, int idProfesor, int progreso, int progresoSegundos){
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                System.out.println("Progreso actualizado: " + progreso);
+                PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET progreso = ?, progresoSegundos = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                consulta.setInt(1, progreso);
+                consulta.setInt(2, progresoSegundos);
+                consulta.setInt(3, idSesion);
+                consulta.setInt(4, idProfesor);
+                consulta.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en actualizarProgresoClase.");
+        }
+    }
+    
     public void cambiarEstatusClaseEstudiante(int idSesion, int idEstudiante, int estatus){
         
         Connection conectar = ConexionMySQL.connection();
@@ -69,9 +88,10 @@ public class ControladorSesion {
                     datosSesion.put("idSeccion", resultado.getInt("idSeccion"));
                     datosSesion.put("idNivel", resultado.getInt("idNivel"));
                     datosSesion.put("idBloque", resultado.getInt("idBloque"));
-                    datosSesion.put("profDsiponible", resultado.getBoolean("profDisponible"));
-                    datosSesion.put("estaus", resultado.getInt("estatus"));
+                    datosSesion.put("estDisponible", resultado.getBoolean("estDisponible"));
+                    datosSesion.put("estatus", resultado.getInt("estatus"));
                     datosSesion.put("progreso", resultado.getInt("progreso"));
+                    datosSesion.put("progresoSegundos", resultado.getInt("progresoSegundos"));
                 }else{
                     datosSesion.put("error", "Error en la consulta.");
                 }
@@ -101,12 +121,13 @@ public class ControladorSesion {
                 ResultSet resultado = consulta.executeQuery();
                 
                 if(resultado.next()){
+                    datosSesion.put("profDisponible", resultado.getBoolean("profDisponible"));
                     datosSesion.put("idSeccion", resultado.getInt("idSeccion"));
                     datosSesion.put("idNivel", resultado.getInt("idNivel"));
                     datosSesion.put("idBloque", resultado.getInt("idBloque"));
-                    datosSesion.put("profDsiponible", resultado.getBoolean("profDisponible"));
-                    datosSesion.put("estaus", resultado.getInt("estatus"));
+                    datosSesion.put("estatus", resultado.getInt("estatus"));
                     datosSesion.put("progreso", resultado.getInt("progreso"));
+                    datosSesion.put("progresoSegundos", resultado.getInt("progresoSegundos"));
                 }else{
                     datosSesion.put("error", "Error en la consulta.");
                 }
