@@ -1,5 +1,6 @@
 package com.proathome.controladores;
 
+import com.proathome.modelos.Constantes;
 import com.proathome.modelos.Sesion;
 import com.proathome.mysql.ConexionMySQL;
 import java.sql.Connection;
@@ -15,17 +16,127 @@ public class ControladorSesion {
 
     private Sesion sesiones[];
     
-    public void actualizarProgresoClase(int idSesion, int idProfesor, int progreso, int progresoSegundos){
+    public void activarTE(int idSesion, int idEstudiante, int progresoTotal){
+        
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
-                System.out.println("Progreso actualizado: " + progreso);
-                PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET progreso = ?, progresoSegundos = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
-                consulta.setInt(1, progreso);
-                consulta.setInt(2, progresoSegundos);
-                consulta.setInt(3, idSesion);
-                consulta.setInt(4, idProfesor);
-                consulta.execute();
+                PreparedStatement activar = conectar.prepareStatement("UPDATE sesiones SET estatus = ?, TE = ?, progresoTE = ?, progresoSegundosTE = ? WHERE idsesiones = ? AND clientes_idclientes = ?");
+                activar.setInt(1,14);
+                activar.setBoolean(2, true);
+                activar.setInt(3, progresoTotal);
+                activar.setInt(4, 0);
+                activar.setInt(5, idSesion);
+                activar.setInt(6, idEstudiante);
+                activar.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en activarTE.");
+        }
+        
+    }
+    
+    public JSONObject validarClaseFinalizadaEstudiante(int idSesion, int idEstudiante){
+        
+        JSONObject validar = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consultar = conectar.prepareStatement("SELECT finalizado FROM sesiones WHERE idsesiones = ? AND clientes_idclientes = ?");
+                consultar.setInt(1, idSesion);
+                consultar.setInt(2, idEstudiante);
+                ResultSet resultado = consultar.executeQuery();
+                
+                if(resultado.next()){
+                    validar.put("finalizado", resultado.getBoolean("finalizado"));
+                }else{
+                    validar.put("error", "Error al consultar finalizado.");
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en validarClaseFinalizada.");
+        }
+        
+        return validar;
+        
+    }
+    
+    public JSONObject validarClaseFinalizada(int idSesion, int idProfesor){
+        
+        JSONObject validar = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consultar = conectar.prepareStatement("SELECT finalizado FROM sesiones WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                consultar.setInt(1, idSesion);
+                consultar.setInt(2, idProfesor);
+                ResultSet resultado = consultar.executeQuery();
+                
+                if(resultado.next()){
+                    validar.put("finalizado", resultado.getBoolean("finalizado"));
+                }else{
+                    validar.put("error", "Error al consultar finalizado.");
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en validarClaseFinalizada.");
+        }
+        
+        return validar;
+        
+    }
+    
+    public void finalizarClase(int idSesion, int idEstudiante){
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                PreparedStatement finalizar = conectar.prepareStatement("UPDATE sesiones SET finalizado = ? WHERE idsesiones = ? AND clientes_idclientes = ?");
+                finalizar.setBoolean(1, true);
+                finalizar.setInt(2, idSesion);
+                finalizar.setInt(3, idEstudiante);
+                finalizar.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en finalizarClase.");
+        }
+    }
+    
+    public void actualizarProgresoClase(int idSesion, int idProfesor, int progreso, int progresoSegundos, int tipoDeTiempo){
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                
+                
+                if(tipoDeTiempo == Constantes.TIPO_DE_TIEMPO_TE){
+                    System.out.println("Progreso actualizado TE: " + progreso);
+                    PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET progresoTE = ?, progresoSegundosTE = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                    consulta.setInt(1, progreso);
+                    consulta.setInt(2, progresoSegundos);
+                    consulta.setInt(3, idSesion);
+                    consulta.setInt(4, idProfesor);
+                    consulta.execute();
+                }else if(tipoDeTiempo == Constantes.TIPO_DE_TIEMPO_NORMAL){
+                    System.out.println("Progreso actualizado: " + progreso);
+                    PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET progreso = ?, progresoSegundos = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                    consulta.setInt(1, progreso);
+                    consulta.setInt(2, progresoSegundos);
+                    consulta.setInt(3, idSesion);
+                    consulta.setInt(4, idProfesor);
+                    consulta.execute();
+                }
+                
             }catch(SQLException ex){
                 ex.printStackTrace();
             }
@@ -58,11 +169,50 @@ public class ControladorSesion {
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
-                PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
-                consulta.setInt(1, estatus);
-                consulta.setInt(2, idSesion);
-                consulta.setInt(3, idProfesor);
-                consulta.execute();
+                
+                PreparedStatement estatusTE = conectar.prepareStatement("SELECT TE FROM sesiones WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                estatusTE.setInt(1, idSesion);
+                estatusTE.setInt(2, idProfesor);
+                ResultSet resultadoTE = estatusTE.executeQuery();
+                
+                if(resultadoTE.next()){
+                    if(resultadoTE.getBoolean("TE")){
+                        if(estatus == Constantes.ESTATUS_ENCURSO){
+                            PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                            consulta.setInt(1, Constantes.ESTATUS_ENCURSO_TE);
+                            consulta.setInt(2, idSesion);
+                            consulta.setInt(3, idProfesor);
+                            consulta.execute();
+                        }else if(estatus == Constantes.ESTATUS_ENPAUSA){
+                            PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                            consulta.setInt(1, Constantes.ESTATUS_ENPAUSA_TE);
+                            consulta.setInt(2, idSesion);
+                            consulta.setInt(3, idProfesor);
+                            consulta.execute();
+                        }else if(estatus == Constantes.ESTATUS_TERMINADO){
+                            PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                            consulta.setInt(1, Constantes.ESTATUS_TERMINADO_TE);
+                            consulta.setInt(2, idSesion);
+                            consulta.setInt(3, idProfesor);
+                            consulta.execute();
+                        }else{
+                            System.out.println("Estatus: " + estatus);
+                            PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                            consulta.setInt(1, estatus);
+                            consulta.setInt(2, idSesion);
+                            consulta.setInt(3, idProfesor);
+                            consulta.execute();
+                        }
+                    }else{
+                        System.out.println("Estatus: " + estatus);
+                        PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                        consulta.setInt(1, estatus);
+                        consulta.setInt(2, idSesion);
+                        consulta.setInt(3, idProfesor);
+                        consulta.execute();
+                    }
+                }
+                
             }catch(SQLException ex){
                 ex.printStackTrace();
             }
@@ -79,6 +229,7 @@ public class ControladorSesion {
         
         if(conectar != null){
             try{
+                
                 PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ? AND profesores_idprofesores = ?");
                 consulta.setInt(1, idSesion);
                 consulta.setInt(2, idProfesor);
@@ -92,6 +243,9 @@ public class ControladorSesion {
                     datosSesion.put("estatus", resultado.getInt("estatus"));
                     datosSesion.put("progreso", resultado.getInt("progreso"));
                     datosSesion.put("progresoSegundos", resultado.getInt("progresoSegundos"));
+                    datosSesion.put("TE", resultado.getBoolean("TE"));
+                    datosSesion.put("progresoTE", resultado.getInt("progresoTE"));
+                    datosSesion.put("progresoSegundosTE", resultado.getInt("progresoSegundosTE"));
                 }else{
                     datosSesion.put("error", "Error en la consulta.");
                 }
@@ -128,6 +282,9 @@ public class ControladorSesion {
                     datosSesion.put("estatus", resultado.getInt("estatus"));
                     datosSesion.put("progreso", resultado.getInt("progreso"));
                     datosSesion.put("progresoSegundos", resultado.getInt("progresoSegundos"));
+                    datosSesion.put("TE", resultado.getBoolean("TE"));
+                    datosSesion.put("progresoTE", resultado.getInt("progresoTE"));
+                    datosSesion.put("progresoSegundosTE", resultado.getInt("progresoSegundosTE"));
                 }else{
                     datosSesion.put("error", "Error en la consulta.");
                 }

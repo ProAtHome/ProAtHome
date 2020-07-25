@@ -36,6 +36,14 @@ public class RESTProfesor {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/validarClaseFinalizada/{idSesion}/{idProfesor}")
+    public JSONObject validarClaseFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
+        
+        return sesiones.validarClaseFinalizada(idSesion, idProfesor);
+        
+    }
+    
+    @GET
     @Path("/validarEstatusClase/{idSesion}/{idProfesor}")
     public JSONObject validarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
         
@@ -196,16 +204,15 @@ public class RESTProfesor {
     @Path("/cambiarEstatusClase/{idSesion}/{idProfesor}/{estatus}")
     public void cambiarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("estatus") int estatus){
         
-        System.out.println("PROFESOOOOO");
         sesiones.cambiarEstatusClaseProfesor(idSesion, idProfesor, estatus);
         
     }
     
     @PUT
-    @Path("/actualizarProgresoClase/{idSesion}/{idProfesor}/{progreso}/{progresoSegundos}")
-    public JSONObject actualizarProgresoClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("progreso") int progreso, @PathParam("progresoSegundos") int progresoSegundos){
+    @Path("/actualizarProgresoClase/{idSesion}/{idProfesor}/{progreso}/{progresoSegundos}/{tipoDeTiempo}")
+    public JSONObject actualizarProgresoClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("progreso") int progreso, @PathParam("progresoSegundos") int progresoSegundos, @PathParam("tipoDeTiempo") int tipoDeTiempo){
         
-        sesiones.actualizarProgresoClase(idSesion, idProfesor, progreso, progresoSegundos);
+        sesiones.actualizarProgresoClase(idSesion, idProfesor, progreso, progresoSegundos, tipoDeTiempo);
         JSONObject json= new JSONObject();
         json.put("estado", "Progreso guardado.");
         

@@ -38,6 +38,15 @@ public class RESTCliente {
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
     
+        
+    @GET
+    @Path("/validarClaseFinalizada/{idSesion}/{idEstudiante}")
+    public JSONObject validarClaseFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
+        
+        return sesiones.validarClaseFinalizadaEstudiante(idSesion, idEstudiante);
+        
+    }
+    
     @GET
     @Path("/validarEstatusClase/{idSesion}/{idEstudiante}")
     public JSONObject validarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
@@ -350,6 +359,22 @@ public class RESTCliente {
         return estatus;
         
     }//Fin método examenDiagnostico.
+    
+    @PUT
+    @Path("/activarTE/{idSesion}/{idEstudiante}/{progresoTotal}")
+    public void activarTE(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante, @PathParam("progresoTotal") int progresoTotal){
+        
+        sesiones.activarTE(idSesion, idEstudiante, progresoTotal);
+        
+    }
+    
+    @PUT
+    @Path("/finalizarClase/{idSesion}/{idEstudiante}")
+    public void finalizarClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
+        
+        sesiones.finalizarClase(idSesion, idEstudiante);
+        
+    }
     
     @PUT
     @Path("/cambiarEstatusClase/{idSesion}/{idEstudiante}/{estatus}")
