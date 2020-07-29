@@ -8,7 +8,16 @@ public class Sesion {
     private String horario, lugar, extras, tipoClase, profesor, actualizado, fotoProfesor, correoProfesor, descripcionProfesor;
     private double latitud, longitud;
     private java.sql.Date fecha;
+    private boolean sumar;
 
+    public boolean getSumar() {
+        return sumar;
+    }
+
+    public void setSumar(boolean sumar) {
+        this.sumar = sumar;
+    }
+    
     public String getFotoProfesor() {
         return fotoProfesor;
     }

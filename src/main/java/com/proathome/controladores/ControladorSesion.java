@@ -469,6 +469,7 @@ public class ControladorSesion {
                     obtenida.setIdNivel(resultado.getInt("idNivel"));
                     obtenida.setIdBloque(resultado.getInt("idBloque"));
                     obtenida.setFecha(resultado.getDate("fecha"));
+                    obtenida.setSumar(resultado.getBoolean("sumar"));
                     sesiones[aux] = obtenida;
                     aux++;
                     
@@ -520,7 +521,7 @@ public class ControladorSesion {
     }//Fin método eliminarSesion.
     
     public void actualizarSesion(JSONObject jsonDatos){
-        System.out.println(jsonDatos);
+
         Connection conectar;
         conectar = ConexionMySQL.connection();
         

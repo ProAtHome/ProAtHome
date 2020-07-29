@@ -39,6 +39,7 @@ public class ControladorCliente {
         sesion.setLongitud(Double.valueOf(String.valueOf(datos.get("longitud"))));
         sesion.setFecha(java.sql.Date.valueOf(datos.get("fecha").toString()));
         sesion.setActualizado(datos.get("actualizado").toString());
+        sesion.setSumar(Boolean.valueOf(datos.get("sumar").toString()));
         
     }//Fin método nuevaSesion.
     
@@ -96,8 +97,8 @@ public class ControladorCliente {
             
             try{
                 
-                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase, latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso) "
-                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase, latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso, sumar) "
+                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setInt(1, sesion.getClientes_idclientes());
                 agregarDatos.setString(2, sesion.getHorario());
@@ -113,6 +114,7 @@ public class ControladorCliente {
                 agregarDatos.setInt(12, sesion.getIdBloque());
                 agregarDatos.setDate(13, sesion.getFecha());
                 agregarDatos.setInt(14, sesion.getTiempo());
+                agregarDatos.setBoolean(15, sesion.getSumar());
                 agregarDatos.execute();
             
                 

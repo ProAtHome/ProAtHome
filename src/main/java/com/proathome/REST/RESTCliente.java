@@ -182,6 +182,20 @@ public class RESTCliente {
     }//Fin método obtenerSesiones.
     
     @POST
+    @Path("/sumarClaseRuta")
+    public void sumarClaseRuta(String datos){
+        
+        try{
+            JSONObject json = (JSONObject) parser.parse(datos);
+            ruta.sumarClaseRuta(json);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        
+    }
+    
+    @POST
     @Path("/rutaEnCurso")
     public JSONObject rutaEnCurso(String datos){
         
