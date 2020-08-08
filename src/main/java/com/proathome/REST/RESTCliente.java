@@ -7,6 +7,7 @@ import com.proathome.controladores.ControladorRutaAprendizaje;
 import com.proathome.controladores.ControladorSesion;
 import com.proathome.modelos.ObjetoUbicacion;
 import com.proathome.mysql.ConexionMySQL;
+import java.sql.SQLException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -383,10 +384,36 @@ public class RESTCliente {
     }
     
     @PUT
+    @Path("/activarTEWeb")
+    public void activarTEWeb(String datos){
+        
+        try{
+            JSONObject json = (JSONObject) parser.parse(datos);
+            sesiones.activarTE(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idEstudiante").toString()), Integer.parseInt(json.get("progresoTotal").toString()));
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+    }
+    
+    @PUT
     @Path("/finalizarClase/{idSesion}/{idEstudiante}")
     public void finalizarClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
         
         sesiones.finalizarClase(idSesion, idEstudiante);
+        
+    }
+    
+    @PUT
+    @Path("/finalizarClaseWeb")
+    public void finalizarClaseWeb(String datos){
+        
+        try{
+            JSONObject json = (JSONObject)parser.parse(datos);
+            sesiones.finalizarClase(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idEstudiante").toString()));
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
         
     }
     
@@ -403,6 +430,19 @@ public class RESTCliente {
     public void claseDsiponible(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante, @PathParam("disponible") boolean dsiponible){
         
         sesiones.claseDisponible(idSesion, idEstudiante, dsiponible);
+        
+    }
+    
+    @PUT
+    @Path("/claseDisponibleWeb")
+    public void claseDsiponibleWeb(String datos){
+        
+        try{
+            JSONObject json = (JSONObject)parser.parse(datos);
+            sesiones.claseDisponible(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idEstudiante").toString()), Boolean.parseBoolean(json.get("disponible").toString()));
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
         
     }
     

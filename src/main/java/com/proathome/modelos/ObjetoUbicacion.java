@@ -42,7 +42,7 @@ public class ObjetoUbicacion {
                     geometry.coordinates[0][0] = doubleLongitud;
                     geometry.coordinates[0][1] = doubleLatitud;
                     propertie.setIdSesion(resultado.getInt("idsesiones"));
-                    propertie.setDescription(resultado.getString("nivel"));
+                    propertie.setDescription(String.valueOf(resultado.getInt("idSeccion")));
                     propertie.setTitle("Nombre");
                     propertie.setLink("Ver Sesión");
                     propertie.setUrl("url");
@@ -51,8 +51,6 @@ public class ObjetoUbicacion {
                     features[0] = feature;
                     
                 }
-                
-                conectar.close();
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -115,8 +113,6 @@ public class ObjetoUbicacion {
                     aux++;
                     
                 }
-                
-                conectar.close();
                 
             }catch(SQLException ex){
                 ex.printStackTrace();

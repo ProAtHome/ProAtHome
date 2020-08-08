@@ -118,7 +118,6 @@ public class ControladorSesion {
         if(conectar != null){
             try{
                 
-                
                 if(tipoDeTiempo == Constantes.TIPO_DE_TIEMPO_TE){
                     System.out.println("Progreso actualizado TE: " + progreso);
                     PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET progresoTE = ?, progresoSegundosTE = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
@@ -285,6 +284,8 @@ public class ControladorSesion {
                     datosSesion.put("TE", resultado.getBoolean("TE"));
                     datosSesion.put("progresoTE", resultado.getInt("progresoTE"));
                     datosSesion.put("progresoSegundosTE", resultado.getInt("progresoSegundosTE"));
+                    datosSesion.put("tiempo", resultado.getInt("tiempo"));
+                    datosSesion.put("sumar", resultado.getInt("sumar"));
                 }else{
                     datosSesion.put("error", "Error en la consulta.");
                 }

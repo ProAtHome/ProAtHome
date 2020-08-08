@@ -209,6 +209,19 @@ public class RESTProfesor {
     }
     
     @PUT
+    @Path("/cambiarEstatusClaseWeb")
+    public void cambiarEstatusClaseWeb(String datos){
+        
+        try{
+            JSONObject json = (JSONObject)parser.parse(datos);
+            sesiones.cambiarEstatusClaseProfesor(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idProfesor").toString()), Integer.parseInt(json.get("estatus").toString()));
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+    }
+    
+    @PUT
     @Path("/actualizarProgresoClase/{idSesion}/{idProfesor}/{progreso}/{progresoSegundos}/{tipoDeTiempo}")
     public JSONObject actualizarProgresoClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("progreso") int progreso, @PathParam("progresoSegundos") int progresoSegundos, @PathParam("tipoDeTiempo") int tipoDeTiempo){
         
@@ -221,10 +234,40 @@ public class RESTProfesor {
     }
     
     @PUT
+    @Path("/actualizarProgresoClaseWeb")
+    public JSONObject actualizarProgresoClaseWeb(String datos){
+        
+        try{
+            JSONObject json = (JSONObject)parser.parse(datos);
+            sesiones.actualizarProgresoClase(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idProfesor").toString()), Integer.parseInt(json.get("progreso").toString()), Integer.parseInt(json.get("progresoSegundos").toString()), Integer.parseInt(json.get("tipoDeTiempo").toString()));
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        JSONObject json= new JSONObject();
+        json.put("estado", "Progreso guardado.");
+        
+        return json;
+        
+    }
+    
+    @PUT
     @Path("/claseDisponible/{idSesion}/{idProfesor}/{disponible}")
     public void claseDsiponible(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("disponible") boolean dsiponible){
         
         sesiones.claseDisponibleProfesor(idSesion, idProfesor, dsiponible);
+        
+    }
+    
+    @PUT
+    @Path("/claseDisponibleWeb")
+    public void claseDsiponibleWeb(String datos){
+        
+        try{
+            JSONObject json = (JSONObject)parser.parse(datos);
+            sesiones.claseDisponibleProfesor(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idProfesor").toString()), Boolean.parseBoolean(json.get("disponible").toString()));
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
         
     }
     

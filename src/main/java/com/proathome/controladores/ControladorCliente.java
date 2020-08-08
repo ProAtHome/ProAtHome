@@ -60,8 +60,10 @@ public class ControladorCliente {
                     jsonDetalles.put("idSesion", resultado.getString("clientes_idclientes"));
                     jsonDetalles.put("horario", resultado.getString("horario"));
                     jsonDetalles.put("lugar", resultado.getString("lugar"));
-                    jsonDetalles.put("tiempo", resultado.getString("tiempo"));
-                    jsonDetalles.put("nivel", resultado.getString("nivel"));
+                    jsonDetalles.put("tiempo", resultado.getInt("tiempo"));
+                    jsonDetalles.put("idSeccion", resultado.getInt("idSeccion"));
+                    jsonDetalles.put("idNivel", resultado.getInt("idNivel"));
+                    jsonDetalles.put("idBloque", resultado.getInt("idBloque"));
                     jsonDetalles.put("extras", resultado.getString("extras"));
                     jsonDetalles.put("tipoClase", resultado.getString("tipoClase"));
                     jsonDetalles.put("latitud", resultado.getDouble("latitud"));
