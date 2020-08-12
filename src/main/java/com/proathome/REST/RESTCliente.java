@@ -187,6 +187,7 @@ public class RESTCliente {
     public void sumarClaseRuta(String datos){
         
         try{
+            System.out.println(datos);
             JSONObject json = (JSONObject) parser.parse(datos);
             ruta.sumarClaseRuta(json);
         }catch(ParseException ex){
