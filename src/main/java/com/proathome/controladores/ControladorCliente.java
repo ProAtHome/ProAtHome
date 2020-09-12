@@ -24,6 +24,161 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public JSONObject obtenerToken(int idSesion, int idEstudiante){
+    
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+        
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT token FROM pagos WHERE idSesion = ? AND idEstudiante = ?");
+                consulta.setInt(1, idSesion);
+                consulta.setInt(2, idEstudiante);
+                ResultSet resultado = consulta.executeQuery();
+                if(resultado.next()){
+                    respuesta.put("token", resultado.getString("token"));
+                }else{
+                    respuesta.put("error", "Datos no encontrados.");
+                }
+        
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            System.out.println("Error en obtenerToken.");
+        }
+        
+        return respuesta;
+    
+    }
+    
+    public void actualizarToken(JSONObject jsonToken){
+    
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+        
+            try{
+                
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM pagos WHERE idSesion = ? AND idEstudiante = ?");
+                consulta.setInt(1, Integer.parseInt(jsonToken.get("idSesion").toString()));
+                consulta.setInt(2, Integer.parseInt(jsonToken.get("idEstudiante").toString()));
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                
+                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET token = ? WHERE idEstudiante = ? AND  idSesion = ?");
+                    actualizar.setString(1, jsonToken.get("token").toString());
+                    actualizar.setInt(2, Integer.parseInt(jsonToken.get("idEstudiante").toString()));
+                    actualizar.setInt(3, Integer.parseInt(jsonToken.get("idSesion").toString()));
+                    actualizar.execute();
+                    
+                }else{
+                
+                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO pagos (token, idEstudiante, idSesion) VALUES (?,?,?)");
+                    actualizar.setString(1, jsonToken.get("token").toString());
+                    actualizar.setInt(2, Integer.parseInt(jsonToken.get("idEstudiante").toString()));
+                    actualizar.setInt(3, Integer.parseInt(jsonToken.get("idSesion").toString()));
+                    actualizar.execute();
+                
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        
+        }else{
+            System.out.println("Error en actualizarToken.");
+        }
+        
+    }
+    
+    public JSONObject obtenerPreOrden(int idEstudiante, int idSesion){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        if(conectar != null){
+            try{
+                PreparedStatement consultaSesion = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ?");
+                consultaSesion.setInt(1, idSesion);
+                ResultSet resultadoSesiones = consultaSesion.executeQuery();
+                
+                if(resultadoSesiones.next()){
+                    
+                    PreparedStatement consultaDatosBancarios = conectar.prepareStatement("SELECT * FROM datosbancariosclientes WHERE clientes_idclientes = ?");
+                    consultaDatosBancarios.setInt(1, idEstudiante);
+                    ResultSet resultadoDatosBancarios = consultaDatosBancarios.executeQuery();
+                    
+                    if(resultadoDatosBancarios.next()){
+                        respuesta.put("idEstudiante", idEstudiante);
+                        respuesta.put("idSesion", idSesion);
+                        respuesta.put("nombreTitular", resultadoDatosBancarios.getString("nombreTitular"));
+                        respuesta.put("tarjeta", resultadoDatosBancarios.getString("tarjeta"));
+                        respuesta.put("mes", resultadoDatosBancarios.getString("mes"));
+                        respuesta.put("ano", resultadoDatosBancarios.getInt("ano"));
+                        respuesta.put("idSeccion", resultadoSesiones.getInt("idSeccion"));
+                        respuesta.put("idNivel", resultadoSesiones.getInt("idNivel"));
+                        respuesta.put("idBloque", resultadoSesiones.getInt("idBloque"));
+                        respuesta.put("tiempo", resultadoSesiones.getInt("tiempo"));
+                    }else{
+                        respuesta.put("idEstudiante", idEstudiante);
+                        respuesta.put("idSesion", idSesion);
+                        respuesta.put("nombreTitular", "");
+                        respuesta.put("tarjeta", "");
+                        respuesta.put("mes", "");
+                        respuesta.put("ano", "");
+                        respuesta.put("idSeccion", resultadoSesiones.getInt("idSeccion"));
+                        respuesta.put("idNivel", resultadoSesiones.getInt("idNivel"));
+                        respuesta.put("idBloque", resultadoSesiones.getInt("idBloque"));
+                        respuesta.put("tiempo", resultadoSesiones.getInt("tiempo"));
+                    }
+                
+                }else{
+                    respuesta.put("error", "Error en los datos de Sesión.");
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error obtenerPreOrden.");
+        }
+        
+        return respuesta;
+    }
+    
+    public void iniciarProcesoRuta(JSONObject json){
+    
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE clientes_idclientes = ?");
+                consulta.setInt(1, Integer.valueOf(json.get("idEstudiante").toString()));
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    System.out.println("La ruta ya fue iniciada prro.");
+                }else{
+                    PreparedStatement iniciar = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
+                    iniciar.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                    iniciar.setInt(2, 1);
+                    iniciar.setInt(3, 1);
+                    iniciar.setInt(4, 1);
+                    iniciar.setInt(5, 0);
+                    iniciar.setString(6, "Hoy");
+                    iniciar.setBoolean(7, true);
+                    iniciar.execute();
+                }
+               
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en iniciarProcesoRuta.");
+        }
+        
+    }
+    
     public void nuevaSesion(JSONObject datos){
         
         sesion.setClientes_idclientes(Integer.parseInt(String.valueOf(datos.get("idCliente"))));
@@ -70,6 +225,7 @@ public class ControladorCliente {
                     jsonDetalles.put("longitud", resultado.getDouble("longitud"));
                     jsonDetalles.put("actualizado", resultado.getDate("actualizado"));
                     jsonDetalles.put("nombre", resultado.getString("nombre"));
+                    jsonDetalles.put("fecha", resultado.getString("fecha"));
                     jsonDetalles.put("correo", resultado.getString("correo"));
                     jsonDetalles.put("foto", resultado.getString("foto"));
                     jsonDetalles.put("descripcion", resultado.getString("descripcion"));
@@ -148,10 +304,10 @@ public class ControladorCliente {
                 
                 if(resultado.next()){
                 
-                    cliente.cuenta.setBanco(resultado.getString("banco"));
-                    cliente.cuenta.setDireccionFacturacion(resultado.getString("direccionFacturacion"));
-                    cliente.cuenta.setTipoPago(resultado.getString("tipoDePago"));
-                    cliente.cuenta.setNumeroCuenta(resultado.getString("numeroCuenta"));
+                    cliente.cuenta.setNombreTitular(resultado.getString("nombreTitular"));
+                    cliente.cuenta.setTarjeta(resultado.getString("tarjeta"));
+                    cliente.cuenta.setMes(resultado.getString("mes"));
+                    cliente.cuenta.setAno(resultado.getString("ano"));
                     
                 }else{
                     
@@ -405,10 +561,10 @@ public class ControladorCliente {
     public void nuevaCuentaBancaria(JSONObject jsonCuentaBancaria) {
 
         cliente.cuenta = new CuentaBancaria();
-        cliente.cuenta.setBanco(String.valueOf(jsonCuentaBancaria.get("banco")));
-        cliente.cuenta.setDireccionFacturacion(String.valueOf(jsonCuentaBancaria.get("direccionFacturacion")));
-        cliente.cuenta.setTipoPago(String.valueOf(jsonCuentaBancaria.get("tipoDePago")));
-        cliente.cuenta.setNumeroCuenta(String.valueOf(jsonCuentaBancaria.get("numeroCuenta")));
+        cliente.cuenta.setNombreTitular(String.valueOf(jsonCuentaBancaria.get("nombreTitular")));
+        cliente.cuenta.setTarjeta(String.valueOf(jsonCuentaBancaria.get("tarjeta")));
+        cliente.cuenta.setMes(String.valueOf(jsonCuentaBancaria.get("mes")));
+        cliente.cuenta.setAno(String.valueOf(jsonCuentaBancaria.get("ano")));
 
     }//Fin método nuevaCuentaBancaria.
     
@@ -420,13 +576,13 @@ public class ControladorCliente {
 
             try {
 
-                String query = "INSERT INTO datosbancariosclientes (clientes_idclientes, tipoDePago, banco, numeroCuenta, direccionFacturacion) VALUES (?,?,?,?,?)";
+                String query = "INSERT INTO datosbancariosclientes (clientes_idclientes, nombreTitular, tarjeta, mes, ano) VALUES (?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setInt(1, idCliente);
-                agregarDatos.setString(2, cliente.cuenta.getTipoPago());
-                agregarDatos.setString(3, cliente.cuenta.getBanco());
-                agregarDatos.setString(4, cliente.cuenta.getNumeroCuenta());
-                agregarDatos.setString(5, cliente.cuenta.getDireccionFacturacion());
+                agregarDatos.setString(2, cliente.cuenta.getNombreTitular());
+                agregarDatos.setString(3, cliente.cuenta.getTarjeta());
+                agregarDatos.setString(4, cliente.cuenta.getMes());
+                agregarDatos.setString(5, cliente.cuenta.getAno());
                 agregarDatos.execute();
 
             } catch (SQLException ex) {
@@ -457,24 +613,24 @@ public class ControladorCliente {
                 
                 if(resultado.next()){
                     
-                    String query = "UPDATE datosbancariosclientes SET tipoDePago = ?, banco = ?, numeroCuenta = ?, direccionFacturacion = ? WHERE clientes_idclientes = ?";
+                    String query = "UPDATE datosbancariosclientes SET nombreTitular = ?, tarjeta = ?, mes = ?, ano = ? WHERE clientes_idclientes = ?";
                     PreparedStatement agregarDatos = conectar.prepareStatement(query);
-                    agregarDatos.setString(1, cliente.cuenta.getTipoPago());
-                    agregarDatos.setString(2, cliente.cuenta.getBanco());
-                    agregarDatos.setString(3, cliente.cuenta.getNumeroCuenta());
-                    agregarDatos.setString(4, cliente.cuenta.getDireccionFacturacion());
+                    agregarDatos.setString(1, cliente.cuenta.getNombreTitular());
+                    agregarDatos.setString(2, cliente.cuenta.getTarjeta());
+                    agregarDatos.setString(3, cliente.cuenta.getMes());
+                    agregarDatos.setString(4, cliente.cuenta.getAno());
                     agregarDatos.setInt(5, idCliente);
                     agregarDatos.executeUpdate();
                     
                 }else{
                     
-                    String query = "INSERT INTO datosbancariosclientes (clientes_idclientes, tipoDePago, banco, numeroCuenta, direccionFacturacion) VALUES (?,?,?,?,?)";
+                    String query = "INSERT INTO datosbancariosclientes (clientes_idclientes, nombreTitular, tarjeta, mes, ano) VALUES (?,?,?,?,?)";
                     PreparedStatement agregarDatos = conectar.prepareStatement(query);
                     agregarDatos.setInt(1, idCliente);
-                    agregarDatos.setString(2, cliente.cuenta.getTipoPago());
-                    agregarDatos.setString(3, cliente.cuenta.getBanco());
-                    agregarDatos.setString(4, cliente.cuenta.getNumeroCuenta());
-                    agregarDatos.setString(5, cliente.cuenta.getDireccionFacturacion());
+                    agregarDatos.setString(2, cliente.cuenta.getNombreTitular());
+                    agregarDatos.setString(3, cliente.cuenta.getTarjeta());
+                    agregarDatos.setString(4, cliente.cuenta.getMes());
+                    agregarDatos.setString(5, cliente.cuenta.getAno());
                     agregarDatos.execute();
 
                 }

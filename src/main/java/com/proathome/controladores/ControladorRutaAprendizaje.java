@@ -25,6 +25,29 @@ public class ControladorRutaAprendizaje {
     public static final int BASICO = 2;
     public static final int INTERMEDIO = 3;
     
+    public void nuevaRuta(JSONObject json){
+        conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement nueva = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
+                nueva.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                nueva.setInt(2, Integer.parseInt(json.get("idBloque").toString()));
+                nueva.setInt(3, Integer.parseInt(json.get("idNivel").toString()));
+                nueva.setInt(4, Integer.parseInt(json.get("idSeccion").toString()));
+                nueva.setInt(5, Integer.parseInt(json.get("horas").toString()));
+                nueva.setString(6, json.get("fecha_registro").toString());
+                nueva.setBoolean(7, Boolean.parseBoolean(json.get("sumar").toString()));
+                nueva.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en la conexión nuevaRuta");
+        }
+        
+    }
+    
     public void sumarClaseRuta(JSONObject json){
         conectar = ConexionMySQL.connection();
         rutaSumar.clear();
@@ -235,9 +258,10 @@ public class ControladorRutaAprendizaje {
         if(conectar != null){
             try{
                 //CHECAREMOS PRIMERO EL NIVEL 3
-                PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ?)");
+                PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
                 estado.setInt(1, idEstudiante);
                 estado.setInt(2, 3);
+                estado.setBoolean(3, true);
                 ResultSet resultado = estado.executeQuery();
                 
                 if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 3 ENTONCES...
@@ -251,9 +275,10 @@ public class ControladorRutaAprendizaje {
                 }else{// SI NO, ENTONCES CHECAREMOS EL NIVEL 2
                     estado = null;
                     resultado = null;
-                    estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ?)");
+                    estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
                     estado.setInt(1, idEstudiante);
                     estado.setInt(2, 2);
+                    estado.setBoolean(3, true);
                     resultado = estado.executeQuery();
                     
                     if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 2 ENTONCES...
@@ -267,9 +292,10 @@ public class ControladorRutaAprendizaje {
                     }else{//SI NO, ENTONCES CHECAREMOS EL NIVEL 1
                         estado = null;
                         resultado = null;
-                        estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ?)");
+                        estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
                         estado.setInt(1, idEstudiante);
                         estado.setInt(2, 1);
+                        estado.setBoolean(3, true);
                         resultado = estado.executeQuery();
                         
                         if(resultado.next()){//SI TENEMOS ALGÚN REGISTRO ENTONCES...

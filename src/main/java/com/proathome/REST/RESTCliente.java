@@ -6,8 +6,6 @@ import com.proathome.controladores.ControladorExamenDiagnostico;
 import com.proathome.controladores.ControladorRutaAprendizaje;
 import com.proathome.controladores.ControladorSesion;
 import com.proathome.modelos.ObjetoUbicacion;
-import com.proathome.mysql.ConexionMySQL;
-import java.sql.SQLException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -39,7 +37,22 @@ public class RESTCliente {
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
     
+    @GET
+    @Path("/obtenerToken/{idSesion}/{idEstudiante}")
+    public JSONObject obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
+    
+        return cliente.obtenerToken(idSesion, idEstudiante);
         
+    }
+    
+    @GET
+    @Path("/obtenerPreOrden/{idEstudiante}/{idSesion}")
+    public JSONObject obtenerPreOrden(@PathParam("idEstudiante") int idEstudiante, @PathParam("idSesion") int idSesion){
+        
+        return cliente.obtenerPreOrden(idEstudiante, idSesion);
+   
+    }
+    
     @GET
     @Path("/validarClaseFinalizada/{idSesion}/{idEstudiante}")
     public JSONObject validarClaseFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
@@ -182,18 +195,40 @@ public class RESTCliente {
         
     }//Fin método obtenerSesiones.
     
+    @POST()
+    @Path("/iniciarProcesoRuta")
+    public void iniciarProcesoRuta(String datos){
+    
+        try{
+            JSONObject json = (JSONObject)parser.parse(datos);
+            cliente.iniciarProcesoRuta(json);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    
+    }
+    
+    @POST
+    @Path("/nuevaRuta")
+    public void nuevaRuta(String datos){
+        try{
+            JSONObject json = (JSONObject) parser.parse(datos);
+            ruta.nuevaRuta(json);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        } 
+    }
+    
     @POST
     @Path("/sumarClaseRuta")
     public void sumarClaseRuta(String datos){
         
         try{
-            System.out.println(datos);
             JSONObject json = (JSONObject) parser.parse(datos);
             ruta.sumarClaseRuta(json);
         }catch(ParseException ex){
             ex.printStackTrace();
-        }
-        
+        } 
         
     }
     
@@ -375,6 +410,19 @@ public class RESTCliente {
         return estatus;
         
     }//Fin método examenDiagnostico.
+    
+    @PUT
+    @Path("/actualizarToken")
+    public void guardarToken(String datos){
+    
+        try{
+            JSONObject jsonToken = (JSONObject) parser.parse(datos);
+            cliente.actualizarToken(jsonToken);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    
+    }
     
     @PUT
     @Path("/activarTE/{idSesion}/{idEstudiante}/{progresoTotal}")

@@ -8,42 +8,42 @@ public class CuentaBancaria {
     * 
     */
     
-    private String banco, tipoPago, direccionFacturacion, numeroCuenta;
+    private String nombreTitular, tarjeta, mes, ano;
     
     public CuentaBancaria(){
         
     }
 
-    public String getBanco() {
-        return banco;
+    public String getNombreTitular() {
+        return nombreTitular;
     }
 
-    public void setBanco(String banco) {
-        this.banco = banco;
+    public void setNombreTitular(String nombreTitular) {
+        this.nombreTitular = nombreTitular;
     }
 
-    public String getTipoPago() {
-        return tipoPago;
+    public String getTarjeta() {
+        return tarjeta;
     }
 
-    public void setTipoPago(String tipoPago) {
-        this.tipoPago = tipoPago;
+    public void setTarjeta(String tarjeta) {
+        this.tarjeta = tarjeta;
     }
 
-    public String getDireccionFacturacion() {
-        return direccionFacturacion;
+    public String getMes() {
+        return mes;
     }
 
-    public void setDireccionFacturacion(String direccionFacturacion) {
-        this.direccionFacturacion = direccionFacturacion;
+    public void setMes(String mes) {
+        this.mes = mes;
     }
 
-    public String getNumeroCuenta() {
-        return numeroCuenta;
+    public String getAno() {
+        return ano;
     }
 
-    public void setNumeroCuenta(String numeroCuenta) {
-        this.numeroCuenta = numeroCuenta;
+    public void setAno(String ano) {
+        this.ano = ano;
     }
       
 }

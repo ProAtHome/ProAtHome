@@ -191,7 +191,6 @@ public class ControladorExamenDiagnostico {
 
         examen.clear();
         conectar = ConexionMySQL.connection();
-        System.out.println("Entro");
         if(conectar != null){
             try{
                 PreparedStatement estatus = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
