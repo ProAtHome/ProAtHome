@@ -195,6 +195,14 @@ public class RESTCliente {
         
     }//Fin método obtenerSesiones.
     
+    @POST
+    @Path("/cobro")
+    public void cobro(String datos){
+    
+        cliente.cobro();
+        
+    }
+    
     @POST()
     @Path("/iniciarProcesoRuta")
     public void iniciarProcesoRuta(String datos){
@@ -410,6 +418,21 @@ public class RESTCliente {
         return estatus;
         
     }//Fin método examenDiagnostico.
+    
+    @PUT
+    @Path("/actualizarPago")
+    public void actualizarPago(String datos){
+    
+        try{
+        
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            cliente.actualizarPago(jsonDatos);
+        
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    
+    }
     
     @PUT
     @Path("/actualizarToken")

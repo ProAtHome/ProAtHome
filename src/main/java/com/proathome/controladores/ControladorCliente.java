@@ -9,8 +9,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import com.proathome.mysql.ConexionMySQL;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import mx.openpay.client.Charge;
+import mx.openpay.client.Customer;
+import mx.openpay.client.core.OpenpayAPI;
+import mx.openpay.client.core.requests.transactions.CreateCardChargeParams;
+import mx.openpay.client.exceptions.OpenpayServiceException;
+import mx.openpay.client.exceptions.ServiceUnavailableException;
 import org.json.simple.JSONObject;
 
 public class ControladorCliente {
@@ -23,6 +30,57 @@ public class ControladorCliente {
     private Cliente cliente = new Cliente();
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
+    
+    public void cobro(){
+    
+        OpenpayAPI openpayAPI =  new  OpenpayAPI ("https://sandbox-api.openpay.mx", "sk_ff91f7cdbb4149149a70aa5af71176ab","medmbxsomtgpwv744wtf");
+   
+        CreateCardChargeParams request = new CreateCardChargeParams();
+        Customer customer = new Customer();
+        customer.setName("Marvin Roberto");
+        customer.setLastName("Jiménez Gamboa");
+        customer.setPhoneNumber("5545342536");
+        customer.setEmail("marvinjiga@gmail.com");
+
+        request.cardId("k47tpfaouddyhl3y499c"); // =source_id
+        request.amount(new BigDecimal("100"));
+        request.currency("MXN");
+        request.description("Cargo ProAtHome desde net");
+        request.deviceSessionId("e8408fcd0506A00a812ca0d13cd35650");
+        request.isPhoneOrder(true);
+        request.customer(customer);
+
+        try {
+            Charge charge = openpayAPI.charges().create(request);
+        } catch (OpenpayServiceException e) {
+            e.printStackTrace();
+        } catch (ServiceUnavailableException e) {
+            e.printStackTrace();
+        }
+    
+    }
+    
+    public void actualizarPago(JSONObject json){
+    
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+        
+            try{
+                PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET costoClase = ?, costoTE = ? WHERE idEstudiante = ? AND idSesion = ?");
+                actualizar.setDouble(1, Double.parseDouble(json.get("costoClase").toString()));
+                actualizar.setDouble(2, Double.parseDouble(json.get("costoTE").toString()));
+                actualizar.setInt(3, Integer.parseInt(json.get("idEstudiante").toString()));
+                actualizar.setInt(4, Integer.parseInt(json.get("idSesion").toString()));
+                actualizar.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            System.out.println("Error en actualizarPago.");
+        }
+        
+    }
     
     public JSONObject obtenerToken(int idSesion, int idEstudiante){
     
@@ -103,34 +161,50 @@ public class ControladorCliente {
                 consultaSesion.setInt(1, idSesion);
                 ResultSet resultadoSesiones = consultaSesion.executeQuery();
                 
-                if(resultadoSesiones.next()){
+                if(resultadoSesiones.next()){   
                     
-                    PreparedStatement consultaDatosBancarios = conectar.prepareStatement("SELECT * FROM datosbancariosclientes WHERE clientes_idclientes = ?");
-                    consultaDatosBancarios.setInt(1, idEstudiante);
-                    ResultSet resultadoDatosBancarios = consultaDatosBancarios.executeQuery();
-                    
-                    if(resultadoDatosBancarios.next()){
-                        respuesta.put("idEstudiante", idEstudiante);
-                        respuesta.put("idSesion", idSesion);
-                        respuesta.put("nombreTitular", resultadoDatosBancarios.getString("nombreTitular"));
-                        respuesta.put("tarjeta", resultadoDatosBancarios.getString("tarjeta"));
-                        respuesta.put("mes", resultadoDatosBancarios.getString("mes"));
-                        respuesta.put("ano", resultadoDatosBancarios.getInt("ano"));
-                        respuesta.put("idSeccion", resultadoSesiones.getInt("idSeccion"));
-                        respuesta.put("idNivel", resultadoSesiones.getInt("idNivel"));
-                        respuesta.put("idBloque", resultadoSesiones.getInt("idBloque"));
-                        respuesta.put("tiempo", resultadoSesiones.getInt("tiempo"));
-                    }else{
-                        respuesta.put("idEstudiante", idEstudiante);
-                        respuesta.put("idSesion", idSesion);
-                        respuesta.put("nombreTitular", "");
-                        respuesta.put("tarjeta", "");
-                        respuesta.put("mes", "");
-                        respuesta.put("ano", "");
-                        respuesta.put("idSeccion", resultadoSesiones.getInt("idSeccion"));
-                        respuesta.put("idNivel", resultadoSesiones.getInt("idNivel"));
-                        respuesta.put("idBloque", resultadoSesiones.getInt("idBloque"));
-                        respuesta.put("tiempo", resultadoSesiones.getInt("tiempo"));
+                    PreparedStatement consultaEstudiante = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
+                    consultaEstudiante.setInt(1, idEstudiante);
+                    ResultSet resultadoEstudiante = consultaEstudiante.executeQuery();
+                        
+                    if(resultadoEstudiante.next()){
+
+                        PreparedStatement consultaDatosBancarios = conectar.prepareStatement("SELECT * FROM datosbancariosclientes WHERE clientes_idclientes = ?");
+                        consultaDatosBancarios.setInt(1, idEstudiante);
+                        ResultSet resultadoDatosBancarios = consultaDatosBancarios.executeQuery();
+
+                        if(resultadoDatosBancarios.next()){
+                            respuesta.put("idEstudiante", idEstudiante);
+                            respuesta.put("idSesion", idSesion);
+                            respuesta.put("nombreEstudiante", resultadoEstudiante.getString("nombre"));
+                            respuesta.put("correo", resultadoEstudiante.getString("correo"));
+                            respuesta.put("nombreTitular", resultadoDatosBancarios.getString("nombreTitular"));
+                            respuesta.put("tarjeta", resultadoDatosBancarios.getString("tarjeta"));
+                            respuesta.put("mes", resultadoDatosBancarios.getString("mes"));
+                            respuesta.put("ano", resultadoDatosBancarios.getInt("ano"));
+                            respuesta.put("idSeccion", resultadoSesiones.getInt("idSeccion"));
+                            respuesta.put("idNivel", resultadoSesiones.getInt("idNivel"));
+                            respuesta.put("idBloque", resultadoSesiones.getInt("idBloque"));
+                            respuesta.put("tiempo", resultadoSesiones.getInt("tiempo"));
+                        }else{
+                            respuesta.put("idEstudiante", idEstudiante);
+                            respuesta.put("idSesion", idSesion);
+                            respuesta.put("nombreEstudiante", resultadoEstudiante.getString("nombre"));
+                            respuesta.put("correo", resultadoEstudiante.getString("correo"));
+                            respuesta.put("nombreTitular", "");
+                            respuesta.put("tarjeta", "");
+                            respuesta.put("mes", "");
+                            respuesta.put("ano", "");
+                            respuesta.put("idSeccion", resultadoSesiones.getInt("idSeccion"));
+                            respuesta.put("idNivel", resultadoSesiones.getInt("idNivel"));
+                            respuesta.put("idBloque", resultadoSesiones.getInt("idBloque"));
+                            respuesta.put("tiempo", resultadoSesiones.getInt("tiempo"));
+                        }
+
+                    }else{  
+
+                        respuesta.put("error", "Error en los datos de Sesión.");
+
                     }
                 
                 }else{
