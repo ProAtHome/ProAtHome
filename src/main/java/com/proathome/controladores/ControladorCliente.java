@@ -66,11 +66,12 @@ public class ControladorCliente {
         if(conectar != null){
         
             try{
-                PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET costoClase = ?, costoTE = ? WHERE idEstudiante = ? AND idSesion = ?");
+                PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET costoClase = ?, costoTE = ?, estatusPago = ? WHERE idEstudiante = ? AND idSesion = ?");
                 actualizar.setDouble(1, Double.parseDouble(json.get("costoClase").toString()));
                 actualizar.setDouble(2, Double.parseDouble(json.get("costoTE").toString()));
-                actualizar.setInt(3, Integer.parseInt(json.get("idEstudiante").toString()));
-                actualizar.setInt(4, Integer.parseInt(json.get("idSesion").toString()));
+                actualizar.setString(3, json.get("estatusPago").toString());
+                actualizar.setInt(4, Integer.parseInt(json.get("idEstudiante").toString()));
+                actualizar.setInt(5, Integer.parseInt(json.get("idSesion").toString()));
                 actualizar.execute();
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -97,7 +98,7 @@ public class ControladorCliente {
                 if(resultado.next()){
                     respuesta.put("token", resultado.getString("token"));
                 }else{
-                    respuesta.put("error", "Datos no encontrados.");
+                    respuesta.put("token", null);
                 }
         
             }catch(SQLException ex){
