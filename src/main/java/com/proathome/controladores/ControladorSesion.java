@@ -469,6 +469,7 @@ public class ControladorSesion {
                     obtenida.setIdBloque(resultado.getInt("idBloque"));
                     obtenida.setFecha(resultado.getDate("fecha"));
                     obtenida.setSumar(resultado.getBoolean("sumar"));
+                    obtenida.setFinalizado(resultado.getBoolean("finalizado"));
                     sesiones[aux] = obtenida;
                     aux++;
                     

@@ -10,15 +10,31 @@ import java.sql.Date;
 
 public class Cliente {
    
-    private String nombre, correo, contrasena, foto, descripcion;
+    private String nombre, correo, contrasena, foto, descripcion, tipoPlan;
     private java.sql.Date fechaNacimiento, fechaRegistro;
-    private int edad, idCliente;
+    private int edad, idCliente, monedero;
     public static CuentaBancaria cuenta;
     public static EvaluacionCliente evaluacion;
     public static Ubicacion ubicacion;
     
     public Cliente(){
         
+    }
+
+    public String getTipoPlan() {
+        return tipoPlan;
+    }
+
+    public void setTipoPlan(String tipoPlan) {
+        this.tipoPlan = tipoPlan;
+    }
+
+    public int getMonedero() {
+        return monedero;
+    }
+
+    public void setMonedero(int monedero) {
+        this.monedero = monedero;
     }
 
     public String getDescripcion() {

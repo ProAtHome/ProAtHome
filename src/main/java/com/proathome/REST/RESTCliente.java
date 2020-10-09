@@ -38,6 +38,14 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/verificarSesionesPagadas/{idEstudiante}")
+    public JSONObject verificarSesionesPagadas(@PathParam("idEstudiante") int idEstudiante){
+    
+        return cliente.verificarSesionesPagadas(idEstudiante);
+        
+    }
+    
+    @GET
     @Path("/obtenerToken/{idSesion}/{idEstudiante}")
     public JSONObject obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
     
@@ -196,10 +204,15 @@ public class RESTCliente {
     }//Fin método obtenerSesiones.
     
     @POST
-    @Path("/cobro")
-    public void cobro(String datos){
+    @Path("/iniciarPlan")
+    public void iniciarPlan(String datos){
     
-        cliente.cobro();
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            cliente.iniciarPlan(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
         
     }
     

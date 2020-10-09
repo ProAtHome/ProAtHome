@@ -8,7 +8,15 @@ public class Sesion {
     private String horario, lugar, extras, tipoClase, profesor, actualizado, fotoProfesor, correoProfesor, descripcionProfesor;
     private double latitud, longitud;
     private java.sql.Date fecha;
-    private boolean sumar;
+    private boolean sumar, finalizado;
+
+    public boolean getFinalizado() {
+        return finalizado;
+    }
+
+    public void setFinalizado(boolean finalizado) {
+        this.finalizado = finalizado;
+    }
 
     public boolean getSumar() {
         return sumar;

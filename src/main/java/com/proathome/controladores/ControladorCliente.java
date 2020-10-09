@@ -9,15 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import com.proathome.mysql.ConexionMySQL;
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import mx.openpay.client.Charge;
-import mx.openpay.client.Customer;
-import mx.openpay.client.core.OpenpayAPI;
-import mx.openpay.client.core.requests.transactions.CreateCardChargeParams;
-import mx.openpay.client.exceptions.OpenpayServiceException;
-import mx.openpay.client.exceptions.ServiceUnavailableException;
 import org.json.simple.JSONObject;
 
 public class ControladorCliente {
@@ -31,33 +24,95 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
-    public void cobro(){
+    public JSONObject verificarSesionesPagadas(int idEstudiante){
     
-        OpenpayAPI openpayAPI =  new  OpenpayAPI ("https://sandbox-api.openpay.mx", "sk_ff91f7cdbb4149149a70aa5af71176ab","medmbxsomtgpwv744wtf");
-   
-        CreateCardChargeParams request = new CreateCardChargeParams();
-        Customer customer = new Customer();
-        customer.setName("Marvin Roberto");
-        customer.setLastName("Jiménez Gamboa");
-        customer.setPhoneNumber("5545342536");
-        customer.setEmail("marvinjiga@gmail.com");
+        boolean plan_activo = false;
+        boolean sesiones_pagadas_finalizadas = true;
+        JSONObject jsonDatos = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+        
+            try{
+                
+                PreparedStatement contador = conectar.prepareStatement("SELECT COUNT(*) AS numero FROM sesiones INNER JOIN pagos WHERE pagos.idSesion = sesiones.idsesiones AND sesiones.clientes_idclientes = ?");
+                contador.setInt(1, idEstudiante);
+                ResultSet resultadoContador = contador.executeQuery();
+                
+                if(resultadoContador.next()){
+                    if(resultadoContador.getInt("numero") < 3){
+                        plan_activo = false;
+                        sesiones_pagadas_finalizadas = false;
+                    }else{
+                        PreparedStatement consulta = conectar.prepareStatement("SELECT sesiones.finalizado, pagos.estatusPago FROM sesiones INNER JOIN pagos WHERE pagos.idSesion = sesiones.idsesiones AND sesiones.clientes_idclientes = ?");
+                        consulta.setInt(1, idEstudiante);
+                        ResultSet resultado = consulta.executeQuery();
 
-        request.cardId("k47tpfaouddyhl3y499c"); // =source_id
-        request.amount(new BigDecimal("100"));
-        request.currency("MXN");
-        request.description("Cargo ProAtHome desde net");
-        request.deviceSessionId("e8408fcd0506A00a812ca0d13cd35650");
-        request.isPhoneOrder(true);
-        request.customer(customer);
+                        while(resultado.next()){
+                            String estatusPago = resultado.getString("estatusPago");
+                            if(estatusPago == null)
+                                estatusPago = "No pagado";
 
-        try {
-            Charge charge = openpayAPI.charges().create(request);
-        } catch (OpenpayServiceException e) {
-            e.printStackTrace();
-        } catch (ServiceUnavailableException e) {
-            e.printStackTrace();
+                            if((!resultado.getBoolean("finalizado") || !estatusPago.equalsIgnoreCase("Pagado"))){
+                                sesiones_pagadas_finalizadas = false;
+                            }
+                        }
+
+                        PreparedStatement plan = conectar.prepareStatement("SELECT tipoPlan FROM planes WHERE clientes_idclientes = ?");
+                        plan.setInt(1, idEstudiante);
+                        ResultSet resultadoPlan = plan.executeQuery();
+
+                        if(resultadoPlan.next()){
+                            if(!resultadoPlan.getString("tipoPlan").equalsIgnoreCase("PARTICULAR"))
+                                plan_activo = true;
+                        }else{
+                            plan_activo = false;
+                        }
+                    }
+                }else{
+                    plan_activo = false;
+                    sesiones_pagadas_finalizadas = false;
+                }
+                
+                jsonDatos.put("plan_activo", plan_activo);
+                jsonDatos.put("sesiones_pagadas_finalizadas", sesiones_pagadas_finalizadas);
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            System.out.println("Error en verificarSesionesPagadas.");
         }
+        
+        return jsonDatos;
+        
+    }
     
+    public void iniciarPlan(JSONObject json){
+    
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                PreparedStatement consultar = conectar.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
+                consultar.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                ResultSet resultado = consultar.executeQuery();
+                
+                if(resultado.next()){
+                    System.out.println("El plan del perfil ya fue iniciado.");
+                }else{
+                    PreparedStatement plan = conectar.prepareStatement("INSERT INTO planes (clientes_idclientes) VALUES (?)");
+                    plan.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                    plan.execute();
+                
+                }
+            
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en iniciarPlan.");
+        }
+        
     }
     
     public void actualizarPago(JSONObject json){
@@ -530,9 +585,10 @@ public class ControladorCliente {
 
             try {
 
-                String query = "SELECT * FROM clientes WHERE idclientes = ?";
+                String query = "SELECT * FROM clientes INNER JOIN planes WHERE clientes.idclientes = ? AND planes.clientes_idclientes = ?";
                 PreparedStatement obtenerDatos = conectar.prepareStatement(query);
                 obtenerDatos.setInt(1, idCliente);
+                obtenerDatos.setInt(2, idCliente);
                 ResultSet resultado = obtenerDatos.executeQuery();
 
                 if (resultado.next()) {
@@ -546,7 +602,9 @@ public class ControladorCliente {
                     cliente.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
                     cliente.setFoto(resultado.getString("foto"));
                     cliente.setDescripcion(resultado.getString("descripcion"));
-
+                    cliente.setTipoPlan(resultado.getString("tipoPlan"));
+                    cliente.setMonedero(resultado.getInt("monedero"));
+                    System.out.println(cliente);
                     clienteRegistrado = true;
 
                 } else {
