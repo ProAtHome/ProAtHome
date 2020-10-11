@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.json.JSONException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -202,6 +203,17 @@ public class RESTCliente {
         return jsonArray;
         
     }//Fin método obtenerSesiones.
+    
+    @POST
+    @Path("/generarPlan")
+    public void generarPlan(String datos){
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            cliente.generarPlan(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    }
     
     @POST
     @Path("/iniciarPlan")

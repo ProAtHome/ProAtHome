@@ -1,5 +1,6 @@
 package com.proathome.controladores;
 
+import com.mysql.cj.MysqlConnection;
 import com.proathome.modelos.Cliente;
 import com.proathome.modelos.CuentaBancaria;
 import com.proathome.modelos.EvaluacionCliente;
@@ -23,6 +24,35 @@ public class ControladorCliente {
     private Cliente cliente = new Cliente();
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
+    
+    public void generarPlan(JSONObject jsonPlan){
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                //Actualizar plan en el perfil.
+                PreparedStatement actualizarPlan = conectar.prepareStatement("UPDATE planes SET tipoPlan = ?, fechaInicio = ?, fechaFin = ?, monedero = ? WHERE clientes_idclientes = ?");
+                actualizarPlan.setString(1, jsonPlan.get("tipoPlan").toString());
+                actualizarPlan.setDate(2, java.sql.Date.valueOf(jsonPlan.get("fechaInicio").toString()));
+                actualizarPlan.setDate(3, java.sql.Date.valueOf(jsonPlan.get("fechaFin").toString()));
+                actualizarPlan.setInt(4, Integer.parseInt(jsonPlan.get("monedero").toString()));
+                actualizarPlan.setInt(5, Integer.parseInt(jsonPlan.get("idEstudiante").toString()));
+                actualizarPlan.execute();
+                //Guradar historial.
+                PreparedStatement historial = conectar.prepareStatement("INSERT INTO historialPlanes (tipoPlan, fechaInicio, fechaFin, monedero, clientes_idclientes) VALUES (?,?,?,?,?)");
+                historial.setString(1, jsonPlan.get("tipoPlan").toString());
+                historial.setDate(2, java.sql.Date.valueOf(jsonPlan.get("fechaInicio").toString()));
+                historial.setDate(3, java.sql.Date.valueOf(jsonPlan.get("fechaFin").toString()));
+                historial.setInt(4, Integer.parseInt(jsonPlan.get("monedero").toString()));
+                historial.setInt(5, Integer.parseInt(jsonPlan.get("idEstudiante").toString()));
+                historial.execute();
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en generar Plan.");
+        }
+    }
     
     public JSONObject verificarSesionesPagadas(int idEstudiante){
     
