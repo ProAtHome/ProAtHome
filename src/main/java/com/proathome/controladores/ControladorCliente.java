@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import com.proathome.mysql.ConexionMySQL;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Calendar;
 import org.json.simple.JSONObject;
 
 public class ControladorCliente {
@@ -24,6 +25,144 @@ public class ControladorCliente {
     private Cliente cliente = new Cliente();
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
+    
+    public void actualizarMonedero(JSONObject jsonMonedero){
+
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                PreparedStatement actualizar = conectar.prepareStatement("UPDATE planes SET monedero = ? WHERE clientes_idclientes = ?");
+                actualizar.setInt(1, Integer.parseInt(jsonMonedero.get("nuevoMonedero").toString()));
+                actualizar.setInt(2, Integer.parseInt(jsonMonedero.get("idEstudiante").toString()));
+                actualizar.execute();
+                
+                //Validar plan.
+                PreparedStatement planActivo = conectar.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
+                planActivo.setInt(1, Integer.parseInt(jsonMonedero.get("idEstudiante").toString()));
+                ResultSet resultadoPlanActivo = planActivo.executeQuery();
+                
+                if(resultadoPlanActivo.next()){
+                    //¿Hay plan activo?
+                    if(!resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR")){
+                         
+                        //¿Hay horas en el monedero en el PLAN activo?
+                        if(resultadoPlanActivo.getInt("monedero") != 0){
+                            //¿El plan ya expiró?
+                            Calendar calendar = Calendar.getInstance();
+                            String fechaHoy = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
+  
+                            if(resultadoPlanActivo.getDate("fechaFin").toString().equalsIgnoreCase(fechaHoy)){
+                                //Finalizar plan activo y pasarlo a PARTICULAR
+                                System.out.println("Plan finalizado");
+                                PreparedStatement finalizar = conectar.prepareStatement("UPDATE planes SET tipoPlan = ?, fechaInicio = ?, fechaFin = ?, monedero = ? WHERE clientes_idclientes = ?");
+                                finalizar.setString(1, "PARTICULAR");
+                                finalizar.setDate(2, null);
+                                finalizar.setDate(3, null);
+                                finalizar.setInt(4, 0);
+                                finalizar.setInt(5, Integer.parseInt(jsonMonedero.get("idEstudiante").toString()));
+                                finalizar.execute();
+                            }
+                        }else{
+                            System.out.println("Plan finalizado");
+                            //Finalizar plan activo y pasarlo a PARTICULAR
+                            PreparedStatement finalizar2 = conectar.prepareStatement("UPDATE planes SET tipoPlan = ?, fechaInicio = ?, fechaFin = ?, monedero = ? WHERE clientes_idclientes = ?");
+                            finalizar2.setString(1, "PARTICULAR");
+                            finalizar2.setDate(2, null);
+                            finalizar2.setDate(3, null);
+                            finalizar2.setInt(4, 0);
+                            finalizar2.setInt(5, Integer.parseInt(jsonMonedero.get("idEstudiante").toString()));
+                            finalizar2.execute();
+                        }
+                    }
+                    
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en actualizarMonedero.");
+        }
+        
+    }
+    
+    public JSONObject verificarPlan(int idEstudiante){
+    
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject jsonPlan = new JSONObject();
+        if(conectar != null){
+            try{
+                
+                PreparedStatement planActivo = conectar.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
+                planActivo.setInt(1, idEstudiante);
+                ResultSet resultadoPlanActivo = planActivo.executeQuery();
+                
+                if(resultadoPlanActivo.next()){
+                    //¿Hay plan activo?
+                    if(resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR")){
+                         jsonPlan.put("tipoPlan", resultadoPlanActivo.getString("tipoPlan"));
+                         jsonPlan.put("monedero", resultadoPlanActivo.getInt("monedero"));
+                    }else{//Si
+                        //¿Hay horas en el monedero en el PLAN activo?
+                        if(resultadoPlanActivo.getInt("monedero") != 0){
+                            //¿El plan ya expiró?
+                            Calendar calendar = Calendar.getInstance();
+                            String fechaHoy = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
+                            System.out.println(fechaHoy);
+                            if(resultadoPlanActivo.getDate("fechaFin").toString().equalsIgnoreCase(fechaHoy)){
+                                //Finalizar plan activo y pasarlo a PARTICULAR
+                                System.out.println("Plan finalizado");
+                                PreparedStatement finalizar = conectar.prepareStatement("UPDATE planes SET tipoPlan = ?, fechaInicio = ?, fechaFin = ?, monedero = ? WHERE clientes_idclientes = ?");
+                                finalizar.setString(1, "PARTICULAR");
+                                finalizar.setDate(2, null);
+                                finalizar.setDate(3, null);
+                                finalizar.setInt(4, 0);
+                                finalizar.setInt(5, idEstudiante);
+                                finalizar.execute();
+                            }else{
+                                jsonPlan.put("tipoPlan", resultadoPlanActivo.getString("tipoPlan"));
+                                jsonPlan.put("monedero", resultadoPlanActivo.getInt("monedero"));
+                            }
+                        }else{
+                            System.out.println("Plan finalizado");
+                            //Finalizar plan activo y pasarlo a PARTICULAR
+                            PreparedStatement finalizar2 = conectar.prepareStatement("UPDATE planes SET tipoPlan = ?, fechaInicio = ?, fechaFin = ?, monedero = ? WHERE clientes_idclientes = ?");
+                            finalizar2.setString(1, "PARTICULAR");
+                            finalizar2.setDate(2, null);
+                            finalizar2.setDate(3, null);
+                            finalizar2.setInt(4, 0);
+                            finalizar2.setInt(5, idEstudiante);
+                            finalizar2.execute();
+                        }
+                    }
+                    
+                }
+                
+                Connection conectar2 = ConexionMySQL.connection();
+                if(conectar2 != null){
+                    PreparedStatement planActivo2 = conectar2.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
+                    planActivo2.setInt(1, idEstudiante);
+                    ResultSet resultadoPlanActivo2 = planActivo2.executeQuery();
+                    if(resultadoPlanActivo2.next()){
+                        jsonPlan.put("tipoPlan", resultadoPlanActivo2.getString("tipoPlan"));
+                        jsonPlan.put("monedero", resultadoPlanActivo2.getInt("monedero"));
+                    }
+                }else{
+                    jsonPlan.put("tipoPlan", "Error");
+                    jsonPlan.put("monedero", 0);
+                }
+                
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en verificarPlan.");
+        }
+        
+        return jsonPlan;
+    
+    }
     
     public void generarPlan(JSONObject jsonPlan){
         Connection conectar = ConexionMySQL.connection();
@@ -317,7 +456,6 @@ public class ControladorCliente {
                 ResultSet resultado = consulta.executeQuery();
                 
                 if(resultado.next()){
-                    System.out.println("La ruta ya fue iniciada prro.");
                 }else{
                     PreparedStatement iniciar = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
                     iniciar.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
@@ -355,6 +493,8 @@ public class ControladorCliente {
         sesion.setFecha(java.sql.Date.valueOf(datos.get("fecha").toString()));
         sesion.setActualizado(datos.get("actualizado").toString());
         sesion.setSumar(Boolean.valueOf(datos.get("sumar").toString()));
+        sesion.setTipoPlan(datos.get("tipoPlan").toString());
+        
         
     }//Fin método nuevaSesion.
     
@@ -415,8 +555,8 @@ public class ControladorCliente {
             
             try{
                 
-                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase, latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso, sumar) "
-                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase, latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso, sumar, tipoPlan) "
+                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setInt(1, sesion.getClientes_idclientes());
                 agregarDatos.setString(2, sesion.getHorario());
@@ -433,6 +573,7 @@ public class ControladorCliente {
                 agregarDatos.setDate(13, sesion.getFecha());
                 agregarDatos.setInt(14, sesion.getTiempo());
                 agregarDatos.setBoolean(15, sesion.getSumar());
+                agregarDatos.setString(16, sesion.getTipoPlan());
                 agregarDatos.execute();
             
                 
@@ -614,6 +755,18 @@ public class ControladorCliente {
         if (conectar != null) {
 
             try {
+                
+                PreparedStatement consultar = conectar.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
+                consultar.setInt(1, idCliente);
+                ResultSet resultadoPlan = consultar.executeQuery();
+                
+                if(resultadoPlan.next()){
+                    System.out.println("El plan del perfil ya fue iniciado.");
+                }else{
+                    PreparedStatement plan = conectar.prepareStatement("INSERT INTO planes (clientes_idclientes) VALUES (?)");
+                    plan.setInt(1, idCliente);
+                    plan.execute();
+                }
 
                 String query = "SELECT * FROM clientes INNER JOIN planes WHERE clientes.idclientes = ? AND planes.clientes_idclientes = ?";
                 PreparedStatement obtenerDatos = conectar.prepareStatement(query);
@@ -634,7 +787,6 @@ public class ControladorCliente {
                     cliente.setDescripcion(resultado.getString("descripcion"));
                     cliente.setTipoPlan(resultado.getString("tipoPlan"));
                     cliente.setMonedero(resultado.getInt("monedero"));
-                    System.out.println(cliente);
                     clienteRegistrado = true;
 
                 } else {

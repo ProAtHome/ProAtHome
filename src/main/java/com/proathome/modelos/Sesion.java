@@ -5,10 +5,18 @@ import java.sql.Date;
 public class Sesion {
     
     private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion, tiempo, idSeccion, idNivel, idBloque;
-    private String horario, lugar, extras, tipoClase, profesor, actualizado, fotoProfesor, correoProfesor, descripcionProfesor;
+    private String tipoPlan, horario, lugar, extras, tipoClase, profesor, actualizado, fotoProfesor, correoProfesor, descripcionProfesor;
     private double latitud, longitud;
     private java.sql.Date fecha;
     private boolean sumar, finalizado;
+
+    public String getTipoPlan() {
+        return tipoPlan;
+    }
+
+    public void setTipoPlan(String tipoPlan) {
+        this.tipoPlan = tipoPlan;
+    }
 
     public boolean getFinalizado() {
         return finalizado;

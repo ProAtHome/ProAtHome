@@ -39,6 +39,14 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/verificarPlan/{idEstudiante}")
+    public JSONObject verificarPlan(@PathParam("idEstudiante") int idEstudiante){
+        
+        return cliente.verificarPlan(idEstudiante);
+        
+    }
+    
+    @GET
     @Path("/verificarSesionesPagadas/{idEstudiante}")
     public JSONObject verificarSesionesPagadas(@PathParam("idEstudiante") int idEstudiante){
     
@@ -444,15 +452,26 @@ public class RESTCliente {
         
     }//Fin método examenDiagnostico.
     
+    @PUT()
+    @Path("/actualizarMonedero")
+    public void actualizarMonedero(String datos){
+    
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            cliente.actualizarMonedero(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+    }
+    
     @PUT
     @Path("/actualizarPago")
     public void actualizarPago(String datos){
     
         try{
-        
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
             cliente.actualizarPago(jsonDatos);
-        
         }catch(ParseException ex){
             ex.printStackTrace();
         }

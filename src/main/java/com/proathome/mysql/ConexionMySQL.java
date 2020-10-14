@@ -20,11 +20,10 @@ public class ConexionMySQL {
     
     public ConexionMySQL(){  
         
-         this.db = "proathome?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=America/Mexico_City";
-         this.url = "jdbc:mysql://localhost:3306/" +db;
-         this.user = "root";
-         this.pass = "";
-        System.out.println("Conexion 1");
+        this.db = "proathome?autoReconnect=true&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=America/Mexico_City";
+        this.url = "jdbc:mysql://localhost:3306/" +db;
+        this.user = "root";
+        this.pass = "";
         try{
             
             String a = db + url + user + pass;

@@ -2,6 +2,7 @@ package com.proathome.REST;
 
 import com.proathome.controladores.ControladorAdmin;
 import com.proathome.controladores.ControladorNivelIdioma;
+import java.util.Calendar;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -29,6 +30,23 @@ public class RESTProAtHome {
     private ControladorNivelIdioma nivel = new ControladorNivelIdioma();
     private ControladorAdmin admin = new ControladorAdmin();
     private JSONParser parser = new JSONParser();
+    
+    
+    // CREAR UN LATIDO DE CORAZON MYSQL.
+    
+    @GET
+    @Path("/fechaServidor")
+    public JSONObject fechaServidor(){
+    
+        Calendar calendar = Calendar.getInstance();
+        String fecha = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
+        JSONObject fechaServidor = new JSONObject();
+        fechaServidor.put("fechaServidor", fecha);
+        
+        return fechaServidor;
+        
+        
+    }
     
     @GET
     @Path("/obtenerMensajes/{tipoCliente}")
