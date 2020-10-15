@@ -117,7 +117,6 @@ public class ControladorSesion {
             try{
                 
                 if(tipoDeTiempo == Constantes.TIPO_DE_TIEMPO_TE){
-                    System.out.println("Progreso actualizado TE: " + progreso);
                     PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET progresoTE = ?, progresoSegundosTE = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
                     consulta.setInt(1, progreso);
                     consulta.setInt(2, progresoSegundos);
@@ -125,7 +124,6 @@ public class ControladorSesion {
                     consulta.setInt(4, idProfesor);
                     consulta.execute();
                 }else if(tipoDeTiempo == Constantes.TIPO_DE_TIEMPO_NORMAL){
-                    System.out.println("Progreso actualizado: " + progreso);
                     PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET progreso = ?, progresoSegundos = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
                     consulta.setInt(1, progreso);
                     consulta.setInt(2, progresoSegundos);
@@ -193,7 +191,6 @@ public class ControladorSesion {
                             consulta.setInt(3, idProfesor);
                             consulta.execute();
                         }else{
-                            System.out.println("Estatus: " + estatus);
                             PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
                             consulta.setInt(1, estatus);
                             consulta.setInt(2, idSesion);
@@ -201,7 +198,6 @@ public class ControladorSesion {
                             consulta.execute();
                         }
                     }else{
-                        System.out.println("Estatus: " + estatus);
                         PreparedStatement consulta = conectar.prepareStatement("UPDATE sesiones SET estatus = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
                         consulta.setInt(1, estatus);
                         consulta.setInt(2, idSesion);
@@ -470,6 +466,7 @@ public class ControladorSesion {
                     obtenida.setFecha(resultado.getDate("fecha"));
                     obtenida.setSumar(resultado.getBoolean("sumar"));
                     obtenida.setFinalizado(resultado.getBoolean("finalizado"));
+                    obtenida.setTipoPlan(resultado.getString("tipoPlan"));
                     sesiones[aux] = obtenida;
                     aux++;
                     
@@ -491,31 +488,43 @@ public class ControladorSesion {
 
     }//Fin método obtenerSesiones.
     
-    public void eliminarSesion(int idSesion){
+    public void eliminarSesion(JSONObject jsonDatos){
         
-        Connection conectar;
-        
-        conectar = ConexionMySQL.connection();
-        
+        Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
-            
             try{
                 
-                PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM sesiones WHERE idsesiones = ?");
-                eliminar.setInt(1 , idSesion);
-                eliminar.execute();
+                //Verificar el tipo de plan 
+                if(jsonDatos.get("tipoPlan").toString().equalsIgnoreCase("PARTICULAR")){
+                    
+                    PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM sesiones WHERE idsesiones = ?");
+                    eliminar.setInt(1 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                    eliminar.execute();
+                }else{
+                    //Regresamos las horas a su lugar.
+                    PreparedStatement consultarMonedero = conectar.prepareStatement("SELECT monedero FROM planes WHERE clientes_idclientes = ?");
+                    consultarMonedero.setInt(1, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                    ResultSet monedero = consultarMonedero.executeQuery();
+                    if(monedero.next()){
+                        //Actualizar monedero
+                        int monederoAct = monedero.getInt("monedero") + Integer.parseInt(jsonDatos.get("horas").toString());
+                        PreparedStatement actualizar = conectar.prepareStatement("UPDATE planes SET monedero = ? WHERE clientes_idclientes = ?");
+                        actualizar.setInt(1, monederoAct);
+                        actualizar.setInt(2, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                        actualizar.execute();
+                        
+                        PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM sesiones WHERE idsesiones = ?");
+                        eliminar.setInt(1 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                        eliminar.execute();
+                    }
+                }
                
-                
             }catch(SQLException ex){
-                
-                ex.printStackTrace();
-                
+                ex.printStackTrace(); 
             }
             
         }else{
-            
-            System.out.println("Error en eliminarSesion.");
-            
+            System.out.println("Error en eliminarSesion."); 
         }
         
     }//Fin método eliminarSesion.

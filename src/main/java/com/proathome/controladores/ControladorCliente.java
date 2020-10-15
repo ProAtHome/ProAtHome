@@ -290,13 +290,25 @@ public class ControladorCliente {
         if(conectar != null){
         
             try{
-                PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET costoClase = ?, costoTE = ?, estatusPago = ? WHERE idEstudiante = ? AND idSesion = ?");
-                actualizar.setDouble(1, Double.parseDouble(json.get("costoClase").toString()));
-                actualizar.setDouble(2, Double.parseDouble(json.get("costoTE").toString()));
-                actualizar.setString(3, json.get("estatusPago").toString());
-                actualizar.setInt(4, Integer.parseInt(json.get("idEstudiante").toString()));
-                actualizar.setInt(5, Integer.parseInt(json.get("idSesion").toString()));
-                actualizar.execute();
+                if(json.get("tipoPlan").toString().equalsIgnoreCase("PARTICULAR")){
+                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET costoClase = ?, costoTE = ?, estatusPago = ? WHERE idEstudiante = ? AND idSesion = ?");
+                    actualizar.setDouble(1, Double.parseDouble(json.get("costoClase").toString()));
+                    actualizar.setDouble(2, Double.parseDouble(json.get("costoTE").toString()));
+                    actualizar.setString(3, json.get("estatusPago").toString());
+                    actualizar.setInt(4, Integer.parseInt(json.get("idEstudiante").toString()));
+                    actualizar.setInt(5, Integer.parseInt(json.get("idSesion").toString()));
+                    actualizar.execute();
+                }else{
+                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO pagos (token, costoClase, costoTE, estatusPago, idEstudiante, idSesion) VALUES (?,?,?,?,?,?)");
+                    actualizar.setString(1, "TIPO PLAN - " + json.get("tipoPlan").toString());
+                    actualizar.setDouble(2, Double.parseDouble(json.get("costoClase").toString()));
+                    actualizar.setDouble(3, Double.parseDouble(json.get("costoTE").toString()));
+                    actualizar.setString(4, json.get("estatusPago").toString());
+                    actualizar.setInt(5, Integer.parseInt(json.get("idEstudiante").toString()));
+                    actualizar.setInt(6, Integer.parseInt(json.get("idSesion").toString()));
+                    actualizar.execute();
+                }
+                
             }catch(SQLException ex){
                 ex.printStackTrace();
             }

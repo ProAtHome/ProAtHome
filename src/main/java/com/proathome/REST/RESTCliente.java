@@ -353,10 +353,8 @@ public class RESTCliente {
     public void eliminarSesionWeb(String datos){
 
         try{
-            
             JSONObject eliminar = (JSONObject) parser.parse(datos);
-            sesiones.eliminarSesion(Integer.parseInt(eliminar.get("idClase").toString()));
-            
+            sesiones.eliminarSesion(eliminar);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
@@ -367,7 +365,7 @@ public class RESTCliente {
     @Path("eliminarSesion")
     public Response eliminarSesion(JSONObject jsonDatos){
         
-        sesiones.eliminarSesion(Integer.parseInt(jsonDatos.get("idSesion").toString()));
+        sesiones.eliminarSesion(jsonDatos);
         
         return Response.ok("Sesión eliminada exitosamente.", MediaType.APPLICATION_JSON).build();
     
