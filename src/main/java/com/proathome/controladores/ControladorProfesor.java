@@ -142,7 +142,7 @@ public class ControladorProfesor {
             
             try{
                 
-                PreparedStatement sesionesMatch = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes AND profesores_idprofesores = ?");
+                PreparedStatement sesionesMatch = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes AND profesores_idprofesores = ? ORDER BY idsesiones DESC");
                 sesionesMatch.setInt(1 , idProfesor);
                 ResultSet resultado = sesionesMatch.executeQuery();
                 

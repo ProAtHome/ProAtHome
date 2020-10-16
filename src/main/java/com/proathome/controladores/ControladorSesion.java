@@ -463,7 +463,7 @@ public class ControladorSesion {
                     obtenida.setIdSeccion(resultado.getInt("idSeccion"));
                     obtenida.setIdNivel(resultado.getInt("idNivel"));
                     obtenida.setIdBloque(resultado.getInt("idBloque"));
-                    obtenida.setFecha(resultado.getDate("fecha"));
+                    obtenida.setFecha(resultado.getString("fecha"));
                     obtenida.setSumar(resultado.getBoolean("sumar"));
                     obtenida.setFinalizado(resultado.getBoolean("finalizado"));
                     obtenida.setTipoPlan(resultado.getString("tipoPlan"));
@@ -502,11 +502,13 @@ public class ControladorSesion {
                     eliminar.execute();
                 }else{
                     //Regresamos las horas a su lugar.
+                    System.out.println(jsonDatos);
                     PreparedStatement consultarMonedero = conectar.prepareStatement("SELECT monedero FROM planes WHERE clientes_idclientes = ?");
                     consultarMonedero.setInt(1, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
                     ResultSet monedero = consultarMonedero.executeQuery();
                     if(monedero.next()){
                         //Actualizar monedero
+                        
                         int monederoAct = monedero.getInt("monedero") + Integer.parseInt(jsonDatos.get("horas").toString());
                         PreparedStatement actualizar = conectar.prepareStatement("UPDATE planes SET monedero = ? WHERE clientes_idclientes = ?");
                         actualizar.setInt(1, monederoAct);

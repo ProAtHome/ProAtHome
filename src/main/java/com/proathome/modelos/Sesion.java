@@ -7,7 +7,7 @@ public class Sesion {
     private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion, tiempo, idSeccion, idNivel, idBloque;
     private String tipoPlan, horario, lugar, extras, tipoClase, profesor, actualizado, fotoProfesor, correoProfesor, descripcionProfesor;
     private double latitud, longitud;
-    private java.sql.Date fecha;
+    private String fecha;
     private boolean sumar, finalizado;
 
     public String getTipoPlan() {
@@ -186,11 +186,11 @@ public class Sesion {
         this.tipoClase = tipoClase;
     }
 
-    public Date getFecha() {
+    public String getFecha() {
         return fecha;
     }
 
-    public void setFecha(Date fecha) {
+    public void setFecha(String fecha) {
         this.fecha = fecha;
     }
       
