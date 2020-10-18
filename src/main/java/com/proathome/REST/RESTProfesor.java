@@ -36,11 +36,15 @@ public class RESTProfesor {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/obtenerValoracion/{idEstudiante}")
+    public JSONArray obtenerValoracion(@PathParam("idEstudiante") int idEstudiante){
+        return profesor.obtenerValoracion(idEstudiante);
+    }
+    
+    @GET
     @Path("/validarClaseFinalizada/{idSesion}/{idProfesor}")
-    public JSONObject validarClaseFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
-        
+    public JSONObject validarClaseFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){      
         return sesiones.validarClaseFinalizada(idSesion, idProfesor);
-        
     }
     
     @GET

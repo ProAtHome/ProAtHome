@@ -15,7 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.json.JSONException;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -39,178 +39,143 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/obtenerValoracion/{idProfesor}")
+    public JSONArray obtenerValoracion(@PathParam("idProfesor") int idProfesor){
+        return cliente.obtenerValoracion(idProfesor);
+    }
+    
+    @GET
     @Path("/verificarPlan/{idEstudiante}")
     public JSONObject verificarPlan(@PathParam("idEstudiante") int idEstudiante){
-        
-        return cliente.verificarPlan(idEstudiante);
-        
+        return cliente.verificarPlan(idEstudiante);        
     }
     
     @GET
     @Path("/verificarSesionesPagadas/{idEstudiante}")
-    public JSONObject verificarSesionesPagadas(@PathParam("idEstudiante") int idEstudiante){
-    
-        return cliente.verificarSesionesPagadas(idEstudiante);
-        
+    public JSONObject verificarSesionesPagadas(@PathParam("idEstudiante") int idEstudiante){  
+        return cliente.verificarSesionesPagadas(idEstudiante);     
     }
     
     @GET
     @Path("/obtenerToken/{idSesion}/{idEstudiante}")
-    public JSONObject obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
-    
+    public JSONObject obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){  
         return cliente.obtenerToken(idSesion, idEstudiante);
-        
     }
     
     @GET
     @Path("/obtenerPreOrden/{idEstudiante}/{idSesion}")
-    public JSONObject obtenerPreOrden(@PathParam("idEstudiante") int idEstudiante, @PathParam("idSesion") int idSesion){
-        
-        return cliente.obtenerPreOrden(idEstudiante, idSesion);
-   
+    public JSONObject obtenerPreOrden(@PathParam("idEstudiante") int idEstudiante, @PathParam("idSesion") int idSesion){       
+        return cliente.obtenerPreOrden(idEstudiante, idSesion); 
     }
     
     @GET
     @Path("/validarClaseFinalizada/{idSesion}/{idEstudiante}")
-    public JSONObject validarClaseFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
-        
-        return sesiones.validarClaseFinalizadaEstudiante(idSesion, idEstudiante);
-        
+    public JSONObject validarClaseFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){      
+        return sesiones.validarClaseFinalizadaEstudiante(idSesion, idEstudiante);     
     }
     
     @GET
     @Path("/validarEstatusClase/{idSesion}/{idEstudiante}")
     public JSONObject validarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
-        
-        return sesiones.validarEstatusClaseEstudiante(idSesion, idEstudiante);
-        
+        return sesiones.validarEstatusClaseEstudiante(idSesion, idEstudiante);      
     }
     
     @GET
     @Path("/sincronizarClase/{idSesion}/{idEstudiante}")
-    public JSONObject sincronizarClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
-        
-       return sesiones.sincronizarClase(idSesion, idEstudiante);
-        
+    public JSONObject sincronizarClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){       
+       return sesiones.sincronizarClase(idSesion, idEstudiante);      
     }
     
     @GET
     @Path("/obtenerSesionActual/{idEstudiante}")
-    public JSONObject obtenerRutaAprendizaje(@PathParam("idEstudiante") int idEstudiante){
-        
-        return ruta.obtenerSesionActual(idEstudiante);
-        
+    public JSONObject obtenerRutaAprendizaje(@PathParam("idEstudiante") int idEstudiante){     
+        return ruta.obtenerSesionActual(idEstudiante);   
     }
     
     @GET
     @Path("estadoRutaAprendizaje/{idCliente}/{tipo}")
-    public JSONObject estadoRutaAprendizaje(@PathParam("idCliente") int idCliente, @PathParam("tipo") int tipo){
-        
-        return ruta.estadoRutaAprendizaje(idCliente, tipo);
-        
+    public JSONObject estadoRutaAprendizaje(@PathParam("idCliente") int idCliente, @PathParam("tipo") int tipo){    
+        return ruta.estadoRutaAprendizaje(idCliente, tipo); 
     }
     
     @GET
     @Path("/estatusExamenDiagnostico/{idCliente}")
-    public JSONObject estatusExamenDiagnostico(@PathParam("idCliente") int idCliente){
-        
-        return examen.estatusExamenDiagnostico(idCliente);
-        
+    public JSONObject estatusExamenDiagnostico(@PathParam("idCliente") int idCliente){      
+        return examen.estatusExamenDiagnostico(idCliente);    
     }//Fin método enCursoExamenDiagnostico.
     
     @GET
     @Path("infoExamenDiagnostico/{idCliente}")
-    public JSONObject infoExamenDiagnostico(@PathParam("idCliente") int idCliente){
-        
-        return examen.infoExamenDiagnostico(idCliente);
-        
+    public JSONObject infoExamenDiagnostico(@PathParam("idCliente") int idCliente){     
+        return examen.infoExamenDiagnostico(idCliente);     
     }//Fin método infoExamenDiagnostico.
     
     @GET
     @Path("infoExamenDiagnosticoFinal/{idCliente}")
-    public JSONObject infoExamenDiagnosticoFinal(@PathParam("idCliente") int idCliente){
-        
-        return examen.infoExamenDiagnosticoFinal(idCliente);
-        
+    public JSONObject infoExamenDiagnosticoFinal(@PathParam("idCliente") int idCliente){ 
+        return examen.infoExamenDiagnosticoFinal(idCliente);    
     }//Fin método infoExamenDiagnostico.
     
     @GET
     @Path("/obtenerSesionesMaps/{idSesion}")
     public String obtenerSesionesMaps(@PathParam("idSesion") int idSesion){
-        
         objetoUbicaciones.obtenerSesionesMaps(idSesion);
         String jsonUbicaciones = gson.toJson(objetoUbicaciones);
         
         return jsonUbicaciones;
-   
-        
     }//Fin método obtenerSesionesMaps.
 
     @GET
     @Path("/sesionCliente/{correo}/{contrasena}")
     public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena) {
-
         cliente.iniciarSesion(correo, contrasena);
         gson.toJson(cliente.datosSesion());
         
         return gson.toJson(cliente.datosSesion());
-
     }//Fin método sesionCliente.
 
     @GET
     @Path("/perfilCliente/{idCliente}")
     public String perfilCliente(@PathParam("idCliente") int idCliente) {
-
         cliente.perfilCliente(idCliente);
         String perfil = gson.toJson(cliente.datosSesion());
 
         return perfil;
-
     }//Fin método perfilCliente.
     
     @GET
     @Path("/obtenerDatosBancarios/{idCliente}")
     public String obtenerDatosBancarios(@PathParam("idCliente") int idCliente) {
-
         Gson gson = new Gson();
         String jsonDatos = gson.toJson(cliente.obtenerCuentaBancaria(idCliente));
 
         return jsonDatos;
-
     }//Fin método obtenerDatosBancarios.
     
     @GET
     @Path("/obtenerDatosBancariosWeb/{idCliente}")
     public String obtenerDatosBancariosWeb(@PathParam("idCliente") int idCliente) {
-
         Gson gson = new Gson();
         String jsonDatos = gson.toJson(cliente.obtenerCuentaBancaria(idCliente));
 
         return jsonDatos;
-
     }//Fin método obtenerDatosBancarios.
 
     @GET
     @Path("/detallesSesion/{idSesion}")
     public JSONObject detallesSesion(@PathParam("idSesion") int idSesion){
-        
         return cliente.detallesSesion(idSesion);
-        
     }//Fin método detallesSesion.
     
     @GET
     @Path("/obtenerSesiones/{idCliente}")
     public String obtenerSesiones(@PathParam("idCliente") int idCliente){
-        
         Gson gson = new Gson();
         String jsonArray = "";
-        
         sesiones.obtenerSesiones(idCliente);
         jsonArray = gson.toJson(sesiones);
-        System.out.println(jsonArray);
         
         return jsonArray;
-        
     }//Fin método obtenerSesiones.
     
     @POST

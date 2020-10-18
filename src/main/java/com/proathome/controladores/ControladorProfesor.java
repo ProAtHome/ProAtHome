@@ -26,15 +26,74 @@ public class ControladorProfesor {
     private JSONObject jsonSesionesMatchProfesor = new JSONObject();
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
+    
+    public JSONArray obtenerValoracion(int idEstudiante){
+        
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject clienteJSON = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        if(conectar != null){
+            //Obtener la info del profesor.
+            try{
+                PreparedStatement estudiante = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
+                estudiante.setInt(1, idEstudiante);
+                ResultSet resultado = estudiante.executeQuery();
+                
+                if(resultado.next()){
+                    //Obtener promedio
+                    clienteJSON.put("idEstudiante", resultado.getInt("idclientes"));
+                    clienteJSON.put("nombre", resultado.getString("nombre"));
+                    clienteJSON.put("correo", resultado.getString("correo"));
+                    clienteJSON.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                    clienteJSON.put("foto", resultado.getString("foto"));
+                    clienteJSON.put("descripcion", resultado.getString("descripcion"));
+                    clienteJSON.put("valoraciones", false);
+                    jsonArray.add(clienteJSON);
+                    
+                    //Obtener Valoraciones
+                    PreparedStatement valoraciones = conectar.prepareStatement("SELECT * FROM valoracionestudiante WHERE clientes_idclientes = ?");
+                    valoraciones.setInt(1, idEstudiante);
+                    ResultSet resultadoVal = valoraciones.executeQuery();
+                    
+                    if(resultadoVal.next()){
+                        JSONObject jsonValoraciones1 = new JSONObject();
+                            jsonValoraciones1.put("valoraciones", true);
+                            jsonValoraciones1.put("valoracion", resultadoVal.getFloat("valoracion"));
+                            jsonValoraciones1.put("comentario", resultadoVal.getString("comentario"));
+                            jsonValoraciones1.put("error", false);
+                            jsonArray.add(jsonValoraciones1);
+                        while(resultadoVal.next()){
+                            JSONObject jsonValoraciones = new JSONObject();
+                            jsonValoraciones.put("valoraciones", true);
+                            jsonValoraciones.put("valoracion", resultadoVal.getFloat("valoracion"));
+                            jsonValoraciones.put("comentario", resultadoVal.getString("comentario"));
+                            jsonValoraciones.put("error", false);
+                            jsonArray.add(jsonValoraciones);
+                        }
+                    }else{
+                        JSONObject jsonValoraciones = new JSONObject();
+                        jsonValoraciones.put("valoraciones", true);
+                        jsonValoraciones.put("error", true);
+                        jsonArray.add(jsonValoraciones);
+                    }
+                    
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+         }else{
+            System.out.println("Error en obtenerValoracion.");
+        }
+        
+        return jsonArray;
+        
+    }
 
     public void iniciarSesion(String correo, String contrasena) {
-
         conectar = ConexionMySQL.connection();
-
         if (conectar != null) {
-
             try {
-
                 String query = "SELECT * FROM profesores WHERE BINARY correo = ? AND BINARY contrasena = ?";
                 PreparedStatement obtenerDatos = conectar.prepareStatement(query);
                 obtenerDatos.setString(1, correo);
@@ -151,6 +210,7 @@ public class ControladorProfesor {
                     JSONObject jsonSesionesMatchProfesor = new JSONObject();
                     jsonSesionesMatchProfesor.put("idsesiones", resultado.getInt("idsesiones"));
                     jsonSesionesMatchProfesor.put("nombreEstudiante", resultado.getString("nombre"));
+                    jsonSesionesMatchProfesor.put("idEstudiante", resultado.getInt("clientes_idclientes"));
                     jsonSesionesMatchProfesor.put("descripcion", resultado.getString("descripcion"));
                     jsonSesionesMatchProfesor.put("correo", resultado.getString("correo"));
                     jsonSesionesMatchProfesor.put("latitud", resultado.getDouble("latitud"));

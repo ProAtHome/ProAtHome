@@ -403,23 +403,18 @@ public class ControladorSesion {
         if (conectar != null) {
 
             try {
-
                 Statement estado = conectar.createStatement();
                 ResultSet resultado = estado.executeQuery("SELECT * FROM sesiones WHERE clientes_idclientes = " + idCliente);
                 int numeroSesiones = 0;
                 
                 while(resultado.next()){
-                    
-                    numeroSesiones++;
-                    
+                    numeroSesiones++;                 
                 }
                 
                 sesiones = new Sesion[numeroSesiones];
                 int aux = 0;
-                
                 estado = conectar.createStatement();
                 resultado = estado.executeQuery("SELECT * FROM sesiones WHERE clientes_idclientes = " + idCliente  + " ORDER BY idsesiones DESC");
-                
                 
                 while(resultado.next()){
                     
@@ -433,6 +428,7 @@ public class ControladorSesion {
                         obtenida.setFotoProfesor("Sin foto");
                         obtenida.setDescripcionProfesor("Sin descripcion");
                         obtenida.setCorreoProfesor("Sin correo");
+                        obtenida.setProfesores_idprofesores(0);
  
                     }else{
                         
@@ -445,6 +441,7 @@ public class ControladorSesion {
                             obtenida.setCorreoProfesor(nombreProfesor.getString("correo"));
                             obtenida.setDescripcionProfesor(nombreProfesor.getString("descripcion"));
                             obtenida.setFotoProfesor(nombreProfesor.getString("foto"));
+                            obtenida.setProfesores_idprofesores(resultado.getInt("profesores_idprofesores"));
                         }else{                  
                             obtenida.setProfesor("Error al obtener profesor.");                    
                         }

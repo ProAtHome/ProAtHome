@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Date;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
@@ -27,6 +28,69 @@ public class ControladorCliente {
     private Cliente cliente = new Cliente();
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
+    
+    public JSONArray obtenerValoracion(int idProfesor){
+        
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject profesorJSON = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        if(conectar != null){
+            //Obtener la info del profesor.
+            try{
+                PreparedStatement profesor = conectar.prepareStatement("SELECT * FROM profesores WHERE idprofesores = ?");
+                profesor.setInt(1, idProfesor);
+                ResultSet resultado = profesor.executeQuery();
+                
+                if(resultado.next()){
+                    //Obtener promedio
+                    profesorJSON.put("idProfesor", resultado.getInt("idprofesores"));
+                    profesorJSON.put("nombre", resultado.getString("nombre"));
+                    profesorJSON.put("correo", resultado.getString("correo"));
+                    profesorJSON.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                    profesorJSON.put("foto", resultado.getString("foto"));
+                    profesorJSON.put("descripcion", resultado.getString("descripcion"));
+                    profesorJSON.put("valoraciones", false);
+                    jsonArray.add(profesorJSON);
+                    
+                    //Obtener Valoraciones
+                    PreparedStatement valoraciones = conectar.prepareStatement("SELECT * FROM valoracionprofesor WHERE profesores_idprofesores = ?");
+                    valoraciones.setInt(1, idProfesor);
+                    ResultSet resultadoVal = valoraciones.executeQuery();
+                    
+                    if(resultadoVal.next()){
+                        JSONObject jsonValoraciones1 = new JSONObject();
+                            jsonValoraciones1.put("valoraciones", true);
+                            jsonValoraciones1.put("valoracion", resultadoVal.getFloat("valoracion"));
+                            jsonValoraciones1.put("comentario", resultadoVal.getString("comentario"));
+                            jsonValoraciones1.put("error", false);
+                            jsonArray.add(jsonValoraciones1);
+                        while(resultadoVal.next()){
+                            JSONObject jsonValoraciones = new JSONObject();
+                            jsonValoraciones.put("valoraciones", true);
+                            jsonValoraciones.put("valoracion", resultadoVal.getFloat("valoracion"));
+                            jsonValoraciones.put("comentario", resultadoVal.getString("comentario"));
+                            jsonValoraciones.put("error", false);
+                            jsonArray.add(jsonValoraciones);
+                        }
+                    }else{
+                        JSONObject jsonValoraciones = new JSONObject();
+                        jsonValoraciones.put("valoraciones", true);
+                        jsonValoraciones.put("error", true);
+                        jsonArray.add(jsonValoraciones);
+                    }
+                    
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+         }else{
+            System.out.println("Error en obtenerValoracion.");
+        }
+        
+        return jsonArray;
+        
+    }
     
     public void finalizarPlan(int idEstudiante){
     
