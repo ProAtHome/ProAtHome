@@ -29,6 +29,55 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public JSONObject validarValoracion(int idSesion, int idProfesor){
+    
+       Connection conectar = ConexionMySQL.connection();
+       JSONObject jsonRespuesta = new JSONObject();
+       if(conectar != null){
+           try{
+               PreparedStatement validar = conectar.prepareStatement("SELECT * FROM valoracionprofesor WHERE sesiones_idsesiones = ? AND profesores_idprofesores = ?");
+               validar.setInt(1, idSesion);
+               validar.setInt(2, idProfesor);
+               ResultSet resultado = validar.executeQuery();
+               
+               if(resultado.next()){
+                   jsonRespuesta.put("valorado", true);
+               }else{
+                   jsonRespuesta.put("valorado", false);
+               }
+           }catch(SQLException ex){
+               ex.printStackTrace();
+           }
+       }else{
+           System.out.println("Error en validarValoracion.");
+       }
+       
+       return jsonRespuesta;
+       
+    }
+    
+    public void valorarProfesor(JSONObject jsonDatos){
+        
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                PreparedStatement valorar = conectar.prepareStatement("INSERT INTO valoracionprofesor (profesores_idprofesores, clientes_idclientes, valoracion, comentario, sesiones_idsesiones) VALUES (?,?,?,?,?)");
+                valorar.setInt(1, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                valorar.setInt(2, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                valorar.setFloat(3, Float.parseFloat(jsonDatos.get("valoracion").toString()));
+                valorar.setString(4, jsonDatos.get("comentario").toString());
+                valorar.setInt(5, Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                valorar.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            
+        }else{
+            System.out.println("Error en validarValoracion.");
+        }
+    
+    }
+    
     public JSONArray obtenerValoracion(int idProfesor){
         
         Connection conectar = ConexionMySQL.connection();

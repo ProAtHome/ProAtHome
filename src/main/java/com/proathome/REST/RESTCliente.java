@@ -39,6 +39,12 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/validarValoracion/{idSesion}/{idProfesor}")
+    public JSONObject validarValoracion(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
+        return cliente.validarValoracion(idSesion, idProfesor);
+    }
+    
+    @GET
     @Path("/obtenerValoracion/{idProfesor}")
     public JSONArray obtenerValoracion(@PathParam("idProfesor") int idProfesor){
         return cliente.obtenerValoracion(idProfesor);
@@ -177,6 +183,12 @@ public class RESTCliente {
         
         return jsonArray;
     }//Fin método obtenerSesiones.
+    
+    @POST
+    @Path("/valorarProfesor")
+    public void valorarProfesor(JSONObject jsonDatos){
+        cliente.valorarProfesor(jsonDatos);
+    }
     
     @POST
     @Path("/generarPlan")
