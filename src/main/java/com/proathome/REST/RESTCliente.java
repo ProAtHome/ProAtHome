@@ -39,6 +39,12 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/bloquearPerfil/{idEstudiante}")
+    public JSONObject bloquearPerfil(@PathParam("idEstudiante") int idEstudiante){
+        return cliente.bloquearPerfil(idEstudiante);
+    }
+    
+    @GET
     @Path("/validarValoracion/{idSesion}/{idProfesor}")
     public JSONObject validarValoracion(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
         return cliente.validarValoracion(idSesion, idProfesor);
@@ -217,14 +223,12 @@ public class RESTCliente {
     @POST()
     @Path("/iniciarProcesoRuta")
     public void iniciarProcesoRuta(String datos){
-    
         try{
             JSONObject json = (JSONObject)parser.parse(datos);
             cliente.iniciarProcesoRuta(json);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
-    
     }
     
     @POST
@@ -241,20 +245,17 @@ public class RESTCliente {
     @POST
     @Path("/sumarClaseRuta")
     public void sumarClaseRuta(String datos){
-        
         try{
             JSONObject json = (JSONObject) parser.parse(datos);
             ruta.sumarClaseRuta(json);
         }catch(ParseException ex){
             ex.printStackTrace();
-        } 
-        
+        }  
     }
     
     @POST
     @Path("/rutaEnCurso")
     public JSONObject rutaEnCurso(String datos){
-        
         JSONObject estado = new JSONObject();
         estado.put("estado", ControladorRutaAprendizaje.RUTA_ACTUALIZADA);
         
@@ -265,148 +266,104 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return estado;
-        
+        return estado; 
     }
 
     @POST
     @Path("/actualizarFoto")
     public void actualizarFoto(String datos) {
-
         try {
-
             JSONObject jsonFoto = (JSONObject) parser.parse(datos);
             cliente.actualizarFoto(jsonFoto);
-
         } catch (ParseException ex) {
-
             ex.printStackTrace();
-
         }
-
     }//Fin método actializarFoto.
     
     @POST
     @Path("/agregarClienteWeb")
     public void agregarClienteWeb(String datos) {
-
-        System.out.println(datos);
         try {
-
             JSONObject jsonCliente = (JSONObject) parser.parse(datos);
             cliente.nuevoCliente(jsonCliente);
             cliente.guardarCliente();
-
         } catch (ParseException ex) {
-
             ex.printStackTrace();
-
         }
-
     }//Fin método agregarCliente.
 
     @POST
     @Path("/agregarCliente")
     public Response agregarCliente(String datos) {
-
-        System.out.println(datos);
         try {
-
             JSONObject jsonCliente = (JSONObject) parser.parse(datos);
             cliente.nuevoCliente(jsonCliente);
             cliente.guardarCliente();
-
         } catch (ParseException ex) {
-
             ex.printStackTrace();
-
         }
         
          return Response.ok("Registro Exitoso.",MediaType.APPLICATION_JSON).build();
-
     }//Fin método agregarCliente.
     
     @POST
     @Path("eliminarSesionWeb")
     public void eliminarSesionWeb(String datos){
-
         try{
             JSONObject eliminar = (JSONObject) parser.parse(datos);
             sesiones.eliminarSesion(eliminar);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
-    
     }
     
     @POST
     @Path("eliminarSesion")
     public Response eliminarSesion(JSONObject jsonDatos){
-        
         sesiones.eliminarSesion(jsonDatos);
         
         return Response.ok("Sesión eliminada exitosamente.", MediaType.APPLICATION_JSON).build();
-    
     }
     
     @POST
     @Path("/agregarCuentaBancaria")
     public void agregarCuentaBancaria(String datos) {
-
         try {
-
             JSONObject jsonCuenta = (JSONObject) parser.parse(datos);
             cliente.nuevaCuentaBancaria(jsonCuenta);
             cliente.guardarCuentaBancaria(Integer.parseInt(String.valueOf(jsonCuenta.get("idCliente"))));
-
         } catch (ParseException ex) {
-
             ex.printStackTrace();
-
         }
-
     }//Fin método agregarCuentaBancaria.
     
     @POST
     @Path("/agregarEvaluacion")
     public void agregarEvaluacion(String datos) {
-
         try {
-
             JSONObject jsonEvaluacion = (JSONObject) parser.parse(datos);
             cliente.nuevaEvaluacion(jsonEvaluacion);
             cliente.guardarEvaluacion(Integer.parseInt(String.valueOf(jsonEvaluacion.get("idCliente"))));
-
         } catch (ParseException ex) {
-
             ex.printStackTrace();
-
         }
-
     }//Fin método agregarEvaluacion.
 
     @POST
     @Path("/agregarSesion")
     public void agregarSesion(String datos) {
-
         try {
-
             JSONObject datosJSON = (JSONObject)parser.parse(datos);
             cliente.nuevaSesion(datosJSON);
-            cliente.guardarSesion();
-            
-        }catch(ParseException ex){
-            
-            ex.printStackTrace();
-            
+            cliente.guardarSesion(); 
+        }catch(ParseException ex){ 
+            ex.printStackTrace();  
         }
-
     }//Fin método agregarSesion.
     
     @POST
     @Path("/examenDiagnostico")
     public JSONObject examenDiagnostico(String datos){
-        
         JSONObject estatus = new JSONObject();
         estatus.clear();
         
@@ -424,21 +381,30 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return estatus;
-        
+        return estatus; 
     }//Fin método examenDiagnostico.
+    
+    @PUT
+    @Path("/saldarDeuda")
+    public void saldarDeuda(String datos){
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            cliente.saldarDeuda(jsonDatos);
+            System.out.println(datos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    }
     
     @PUT()
     @Path("/actualizarMonedero")
     public void actualizarMonedero(String datos){
-    
         try{
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
             cliente.actualizarMonedero(jsonDatos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
-        
     }
     
     @PUT

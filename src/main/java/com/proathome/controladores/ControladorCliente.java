@@ -29,6 +29,69 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public void saldarDeuda(JSONObject jsonDatos){
+       
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                PreparedStatement saldarDeuda = conectar.prepareStatement("UPDATE pagos SET estatusPago = ? WHERE idSesion = ?");
+                saldarDeuda.setString(1, "Pagado");
+                saldarDeuda.setInt(2, Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                saldarDeuda.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en saldarDeuda.");
+        }
+        
+    }
+    
+    public JSONObject bloquearPerfil(int idEstudiante){
+        
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject bloquearJSON = new JSONObject();
+        boolean bloquear = false;
+        if(conectar != null){
+            try{
+                //Recorrer cada sesion.
+                PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN pagos WHERE sesiones.clientes_idclientes = ? AND pagos.idSesion = sesiones.idsesiones");
+                sesiones.setInt(1, idEstudiante);
+                ResultSet resultado = sesiones.executeQuery();
+                
+                while(resultado.next()){
+                    if(resultado.getBoolean("finalizado") && resultado.getString("estatusPago").equalsIgnoreCase("Deuda")){
+                        bloquear = true;
+                        bloquearJSON.put("bloquear", bloquear);
+                        bloquearJSON.put("idSesion", resultado.getInt("idSesion"));
+                        bloquearJSON.put("deuda", resultado.getDouble("costoClase") + resultado.getDouble("costoTE"));
+                        bloquearJSON.put("idSeccion", resultado.getInt("idSeccion"));
+                        bloquearJSON.put("idNivel", resultado.getInt("idNivel"));
+                        bloquearJSON.put("idBloque", resultado.getInt("idBloque"));
+                        bloquearJSON.put("lugar", resultado.getString("lugar"));
+                    }
+                }
+                
+                PreparedStatement estudiante = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
+                estudiante.setInt(1, idEstudiante);
+                ResultSet resultadoEst = estudiante.executeQuery();
+                
+                if(resultadoEst.next()){
+                    bloquearJSON.put("nombre", resultadoEst.getString("nombre"));
+                    bloquearJSON.put("correo", resultadoEst.getString("correo"));
+                }
+                
+                bloquearJSON.put("bloquear", bloquear);
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en bloquearPerfil.");
+        }
+        
+        return bloquearJSON;
+    }
+    
     public JSONObject validarValoracion(int idSesion, int idProfesor){
     
        Connection conectar = ConexionMySQL.connection();
