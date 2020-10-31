@@ -43,6 +43,7 @@ public class RESTProAtHome {
         JSONObject fechaServidor = new JSONObject();
         fechaServidor.put("fechaServidor", fecha);
         
+        System.out.println(fechaServidor);
         return fechaServidor;
         
         

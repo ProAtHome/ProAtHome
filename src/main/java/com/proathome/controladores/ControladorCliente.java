@@ -371,6 +371,7 @@ public class ControladorCliente {
         if(conectar != null){
             try{
                 //Actualizar plan en el perfil.
+                System.out.println("Etnro generar");
                 PreparedStatement actualizarPlan = conectar.prepareStatement("UPDATE planes SET tipoPlan = ?, fechaInicio = ?, fechaFin = ?, monedero = ? WHERE clientes_idclientes = ?");
                 actualizarPlan.setString(1, jsonPlan.get("tipoPlan").toString());
                 actualizarPlan.setDate(2, java.sql.Date.valueOf(jsonPlan.get("fechaInicio").toString()));
@@ -723,6 +724,26 @@ public class ControladorCliente {
                 
                 if(resultado.next()){
                     
+                    if(resultado.getString("profesores_idprofesores") == null){
+                        jsonDetalles.put("profesor", "Sin profesor asignado.");
+                        jsonDetalles.put("fotoProfesor", "Sin foto");
+                        jsonDetalles.put("descripcionProfesor", "Sin descripcion");
+                        jsonDetalles.put("correoProfesor", "Sin correo");
+                        jsonDetalles.put("idProfesor", 0);
+                    }else{
+                        PreparedStatement profesor = conectar.prepareStatement("SELECT * FROM profesores WHERE idprofesores = ?");
+                        profesor.setInt(1 , resultado.getInt("profesores_idprofesores"));
+                        ResultSet resultadoProfesor = profesor.executeQuery();
+                        
+                        if(resultadoProfesor.next()){
+                            jsonDetalles.put("profesor", resultadoProfesor.getString("nombre"));
+                            jsonDetalles.put("fotoProfesor", resultadoProfesor.getString("foto"));
+                            jsonDetalles.put("descripcionProfesor", resultadoProfesor.getString("descripcion"));
+                            jsonDetalles.put("correoProfesor", resultadoProfesor.getString("correo"));
+                            jsonDetalles.put("idProfesor", resultadoProfesor.getInt("idprofesores"));
+                        }
+                    }
+                    
                     jsonDetalles.put("idSesion", resultado.getString("clientes_idclientes"));
                     jsonDetalles.put("horario", resultado.getString("horario"));
                     jsonDetalles.put("lugar", resultado.getString("lugar"));
@@ -762,10 +783,8 @@ public class ControladorCliente {
         
          Connection conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
-            
-            try{
-                
+        if(conectar != null){        
+            try{          
                 String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase, latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso, sumar, tipoPlan) "
                         + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
@@ -786,18 +805,13 @@ public class ControladorCliente {
                 agregarDatos.setBoolean(15, sesion.getSumar());
                 agregarDatos.setString(16, sesion.getTipoPlan());
                 agregarDatos.execute();
-            
-                
-            }catch(SQLException ex){
-                
-                System.out.println(ex.getMessage());
-                
+   
+            }catch(SQLException ex){  
+                ex.printStackTrace();
             }        
             
-        }else{
-            
-            System.out.println("Error en la conexión en guardarSesion.");
-            
+        }else{     
+            System.out.println("Error en la conexión en guardarSesion.");         
         }
         
     }//Fin método guardarSesion.
