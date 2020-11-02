@@ -131,10 +131,8 @@ public class RESTProfesor {
     
     @GET
     @Path("informacionSesionMatch/{idSesion}")
-    public JSONObject informacionSesionMatch(@PathParam("idSesion") int idSesion){
-        
-        return profesor.informacionSesionMatch(idSesion);
-        
+    public JSONObject informacionSesionMatch(@PathParam("idSesion") int idSesion){  
+        return profesor.informacionSesionMatch(idSesion);     
     }
     
     @POST

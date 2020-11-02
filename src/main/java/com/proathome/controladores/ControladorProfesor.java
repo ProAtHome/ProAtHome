@@ -295,18 +295,15 @@ public class ControladorProfesor {
     
     public JSONObject informacionSesionMatch(int idSesion){
         
-        conectar = ConexionMySQL.connection();
-        
-        if(conectar != null){
-            
-            try{
-                
+        conectar = ConexionMySQL.connection(); 
+        if(conectar != null){      
+            try{            
                 PreparedStatement sesion = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes AND idsesiones = ?");
                 sesion.setInt(1 , idSesion);
                 ResultSet resultado = sesion.executeQuery();
                 
                 if(resultado.next()){
-                    
+                    jsonMatch.put("idEstudiante", resultado.getInt("clientes_idclientes"));
                     jsonMatch.put("idSesion", resultado.getInt("idsesiones"));
                     jsonMatch.put("nombre", resultado.getString("nombre"));
                     jsonMatch.put("idProfesor", resultado.getInt("profesores_idprofesores"));
@@ -323,19 +320,14 @@ public class ControladorProfesor {
                     jsonMatch.put("tipoClase", resultado.getString("tipoClase"));
                     jsonMatch.put("extras", resultado.getString("extras"));
                     jsonMatch.put("horario", resultado.getString("horario"));     
-                    
                 }
-                
-                
-                
+            
             }catch(SQLException ex){
                 ex.printStackTrace();
             }
             
         }else{
-            
-            System.out.println("Error en informacionSesionMatch.");
-            
+            System.out.println("Error en informacionSesionMatch."); 
         }
         
         return jsonMatch;
