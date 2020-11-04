@@ -41,7 +41,18 @@ public class ControladorProfesor {
                if(resultado.next()){
                    jsonRespuesta.put("valorado", true);
                }else{
-                   jsonRespuesta.put("valorado", false);
+                   PreparedStatement sesion = conectar.prepareStatement("SELECT finalizado FROM sesiones WHERE idsesiones = ?");
+                   sesion.setInt(1, idSesion);
+                   ResultSet resSesion = sesion.executeQuery();
+                   if(resSesion.next()){
+                       if(resSesion.getBoolean("finalizado"))
+                           jsonRespuesta.put("valorado", false);
+                       else 
+                           jsonRespuesta.put("valorado", true);
+                   }else{
+                       jsonRespuesta.put("valorado", true);
+                   }
+                   
                }
            }catch(SQLException ex){
                ex.printStackTrace();
