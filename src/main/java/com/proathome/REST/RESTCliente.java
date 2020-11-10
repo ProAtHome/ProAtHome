@@ -390,7 +390,6 @@ public class RESTCliente {
         try{
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
             cliente.saldarDeuda(jsonDatos);
-            System.out.println(datos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
@@ -400,6 +399,7 @@ public class RESTCliente {
     @Path("/actualizarMonedero")
     public void actualizarMonedero(String datos){
         try{
+            System.out.println("Llega: " + datos);
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
             cliente.actualizarMonedero(jsonDatos);
         }catch(ParseException ex){

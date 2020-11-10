@@ -361,7 +361,7 @@ public class ControladorCliente {
         }else{
             System.out.println("Error en verificarPlan.");
         }
-        
+        System.out.println("Va: " + jsonPlan);
         return jsonPlan;
     
     }
