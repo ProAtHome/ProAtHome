@@ -23,6 +23,61 @@ public class ControladorAdmin {
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
     
+    public JSONArray obtenerMsgTicket(int idUsuario, int tipoUsuario, int idTicket){
+        Connection conectar = ConexionMySQL.connection();
+        JSONArray mensajesArray = new JSONArray();
+        
+        if(conectar != null){
+            try{
+                /*Consultar Ticket*/
+                PreparedStatement ticket = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE idtickets_ayuda = ? AND tipoUsuario = ?");
+                ticket.setInt(1, idTicket);
+                ticket.setInt(2, tipoUsuario);
+                ResultSet ticketRes = ticket.executeQuery();
+                JSONObject jsonObjectTicket = new JSONObject();
+                
+                if(ticketRes.next()){//Datos ticket
+                    jsonObjectTicket.put("topico", ticketRes.getString("topico"));
+                    jsonObjectTicket.put("descripcion", ticketRes.getString("descripcion"));
+                    jsonObjectTicket.put("fechaCreacion", ticketRes.getDate("fechaCreacion"));
+                    jsonObjectTicket.put("estatus", ticketRes.getInt("estatus"));
+                    jsonObjectTicket.put("operador", ticketRes.getInt("operadores_idoperadores"));
+                    JSONObject jsonTicket = new JSONObject();
+                    jsonTicket.put("ticket", jsonObjectTicket);
+                    mensajesArray.add(jsonTicket);
+                }
+                
+                /*Consulta de mensajes Ticket*/
+                PreparedStatement mensajes = conectar.prepareStatement("SELECT * FROM msg_tickets WHERE tickets_ayuda_idtickets_ayuda = ?");
+                mensajes.setInt(1, idTicket);
+                ResultSet msgRes = mensajes.executeQuery();
+                JSONArray jsonMensajesTicket = new JSONArray();
+                
+                
+                while(msgRes.next()){
+                    JSONObject msgJSON = new JSONObject();
+                    msgJSON.put("msg", msgRes.getString("mensaje"));
+                    msgJSON.put("operador", msgRes.getBoolean("operadorBool"));
+                    msgJSON.put("idUsuario", msgRes.getInt("idUsuario_Operador"));
+                    jsonMensajesTicket.add(msgJSON);
+                }
+                
+                
+                JSONObject mensajesTotalesJSON = new JSONObject();
+                mensajesTotalesJSON.put("mensajes", jsonMensajesTicket);
+                mensajesArray.add(mensajesTotalesJSON);
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+
+        }else{
+            System.out.println("Error en obtenerMsgTicket");
+        }
+        
+        return mensajesArray;
+    }
+    
     public JSONArray obtenerMensajes(int tipoCliente){
         
         conectar = ConexionMySQL.connection();

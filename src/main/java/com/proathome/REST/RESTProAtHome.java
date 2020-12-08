@@ -35,63 +35,59 @@ public class RESTProAtHome {
     // CREAR UN LATIDO DE CORAZON MYSQL.
     
     @GET
+    @Path("/obtenerMsgTicket/{idUsuario}/{tipoUsuario}/{idTicket}")
+    public JSONArray obtenerMsgTicket(@PathParam("idUsuario") int idUsuario,
+            @PathParam("tipoUsuario") int tipoUsuario, @PathParam("idTicket") int idTicket){
+        return admin.obtenerMsgTicket(idUsuario, tipoUsuario, idTicket);
+    }
+    
+    @GET
     @Path("/fechaServidor")
     public JSONObject fechaServidor(){
-    
         Calendar calendar = Calendar.getInstance();
-        String fecha = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
+        String fecha = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) +
+                "-" + calendar.get(Calendar.DAY_OF_MONTH);
         JSONObject fechaServidor = new JSONObject();
         fechaServidor.put("fechaServidor", fecha);
         
-        System.out.println(fechaServidor);
         return fechaServidor;
-        
-        
     }
     
     @GET
     @Path("/obtenerMensajes/{tipoCliente}")
     public JSONArray obtenerMensajes(@PathParam("tipoCliente") int tipoCliente){
-        
-        return admin.obtenerMensajes(tipoCliente);
-        
+        return admin.obtenerMensajes(tipoCliente);  
     }
     
     @GET
     @Path("/obtenerSolicitudes")
-    public String obtenerSolicitudes(){
-        
-        return admin.obtenerSolicitudes();
-        
+    public String obtenerSolicitudes(){ 
+        return admin.obtenerSolicitudes(); 
     }//Fin método obtenerSolicitudes.
     
     @GET
     @Path("/sesionAdmin/{usuario}/{contrasena}")
-    public String sesionAdmin(@PathParam("usuario") String usuario, @PathParam("contrasena") String contrasena){
-        
+    public String sesionAdmin(@PathParam("usuario") String usuario,
+            @PathParam("contrasena") String contrasena){ 
         return admin.iniciarSesion(usuario, contrasena);
-        
     }//Fin método iniciarSesion.
     
     @POST
     @Path("/enviarMensaje")
     public void enviarMensaje(String datos){
-        
         try{
             JSONObject mensaje = (JSONObject) parser.parse(datos);
             admin.enviarMensaje(mensaje);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
-        
     }
     
     @PUT
     @Path("/cambiarEstado/{idProfesor}/{estado}")
-    public void cambiarEstado(@PathParam("idProfesor") int idProfesor, @PathParam("estado") boolean estado){
-        
+    public void cambiarEstado(@PathParam("idProfesor") int idProfesor,
+            @PathParam("estado") boolean estado){
         admin.cambiarEstado(idProfesor, estado);
-        
     }//Fin método cambiarEstado.
 
 }

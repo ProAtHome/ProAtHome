@@ -30,6 +30,25 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public void enviarMsgTicket(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        System.out.println(jsonDatos);
+        if(conectar != null){
+            try{
+                PreparedStatement mensaje = conectar.prepareStatement("INSERT INTO msg_tickets (mensaje, idUsuario_Operador, operadorBool, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?)");
+                mensaje.setString(1, jsonDatos.get("mensaje").toString());
+                mensaje.setInt(2, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
+                mensaje.setBoolean(3, Boolean.valueOf(jsonDatos.get("operador").toString()));
+                mensaje.setInt(4, Integer.parseInt(jsonDatos.get("idTicket").toString()));
+                mensaje.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en enviarMsgTicket.");
+        }
+    }
+    
     public JSONArray obtenerTickets(int idEstudiante){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonTickets = new JSONArray();
@@ -46,6 +65,7 @@ public class ControladorCliente {
                     vacio = false;
                     JSONObject jsonTicket = new JSONObject();
                     jsonTicket.put("noTicket", "00" + resultado.getInt("idtickets_ayuda"));
+                    jsonTicket.put("idTicket", resultado.getInt("idtickets_ayuda"));
                     jsonTicket.put("tipoUsuario", resultado.getInt("tipoUsuario"));
                     jsonTicket.put("topico", resultado.getString("topico"));
                     jsonTicket.put("descripcion", resultado.getString("descripcion"));
@@ -68,7 +88,6 @@ public class ControladorCliente {
         }else{
             System.out.println("Error en obtenerTickets.");
         }
-        
         System.out.println(jsonTickets);
         return jsonTickets;
     }

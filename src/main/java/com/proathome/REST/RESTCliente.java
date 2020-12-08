@@ -197,6 +197,12 @@ public class RESTCliente {
     }//Fin método obtenerSesiones.
     
     @POST
+    @Path("/enviarMsgTicket")
+    public void enviarMsgTicket(JSONObject jsonDatos){
+        cliente.enviarMsgTicket(jsonDatos);
+    }
+    
+    @POST
     @Path("/nuevoTicket")
     public void nueboTicket(JSONObject jsonDatos){
         cliente.nuevoTicket(jsonDatos);
