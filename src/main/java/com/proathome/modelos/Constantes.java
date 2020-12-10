@@ -14,6 +14,12 @@ public class Constantes {
     public static final int TIPO_USUARIO_ESTUDIANTE = 1;
     public static final int TIPO_USUARIO_PROFESOR = 2;
     
+    /*Estatus tickets ayuda*/
+    public static final int ESTATUS_SIN_OPERADOR = 1;
+    public static final int ESTATUS_EN_CURSO = 2;
+    public static final int ESTATUS_SOLUCIONADO = 3;
+    
+    
     public static final int ESTATUS_ENCURSO = 11;
     public static final int ESTATUS_ENPAUSA = 12;
     public static final int ESTATUS_TERMINADO = 13;

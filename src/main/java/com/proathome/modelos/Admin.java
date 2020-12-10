@@ -6,8 +6,40 @@ package com.proathome.modelos;
  */
 public class Admin {
     
-    private int idAdmin;
-    private String usuario, contrasena;
+    private int idAdmin, rango;
+    private String usuario, contrasena, nombre, apellidoPaterno, apellidoMaterno;
+
+    public int getRango() {
+        return rango;
+    }
+
+    public void setRango(int rango) {
+        this.rango = rango;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getApellidoPaterno() {
+        return apellidoPaterno;
+    }
+
+    public void setApellidoPaterno(String apellidoPaterno) {
+        this.apellidoPaterno = apellidoPaterno;
+    }
+
+    public String getApellidoMaterno() {
+        return apellidoMaterno;
+    }
+
+    public void setApellidoMaterno(String apellidoMaterno) {
+        this.apellidoMaterno = apellidoMaterno;
+    }
 
     public int getIdAdmin() {
         return idAdmin;

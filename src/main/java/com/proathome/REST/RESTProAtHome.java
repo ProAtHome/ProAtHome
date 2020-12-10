@@ -35,6 +35,25 @@ public class RESTProAtHome {
     // CREAR UN LATIDO DE CORAZON MYSQL.
     
     @GET
+    @Path("/ticketsAsociados/{idOperador}")
+    public JSONArray ticketsAsociados (@PathParam("idOperador") int idOperador){
+        return admin.obtenerTicketsAsociados(idOperador);
+    }
+    
+    @GET
+    @Path("/obtenerInfoTicket/{idTicket}/{tipoUsuario}")
+    public JSONObject obtenerInfoTicket(@PathParam("idTicket") int idTicket,
+            @PathParam("tipoUsuario") int tipoUsuario){
+        return admin.infoTicketAdmin(idTicket, tipoUsuario);
+    }
+    
+    @GET
+    @Path("/obtenerTicketsAdmin")
+    public JSONArray obtenerTicketsAdmin(){
+        return admin.obtenerTicketsAdmin();
+    }
+    
+    @GET
     @Path("/obtenerMsgTicket/{idUsuario}/{tipoUsuario}/{idTicket}")
     public JSONArray obtenerMsgTicket(@PathParam("idUsuario") int idUsuario,
             @PathParam("tipoUsuario") int tipoUsuario, @PathParam("idTicket") int idTicket){
@@ -67,7 +86,7 @@ public class RESTProAtHome {
     
     @GET
     @Path("/sesionAdmin/{usuario}/{contrasena}")
-    public String sesionAdmin(@PathParam("usuario") String usuario,
+    public JSONObject sesionAdmin(@PathParam("usuario") String usuario,
             @PathParam("contrasena") String contrasena){ 
         return admin.iniciarSesion(usuario, contrasena);
     }//Fin método iniciarSesion.
@@ -78,6 +97,18 @@ public class RESTProAtHome {
         try{
             JSONObject mensaje = (JSONObject) parser.parse(datos);
             admin.enviarMensaje(mensaje);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @PUT
+    @Path("/asociarTicket")
+    public void asociarTicket(String datos){
+        try{
+            JSONObject asociarJSON = (JSONObject) parser.parse(datos);
+            admin.asociarTicketAdmin(Integer.parseInt(asociarJSON.get("idTicket").toString()),
+                    Integer.parseInt(asociarJSON.get("idOperador").toString()));
         }catch(ParseException ex){
             ex.printStackTrace();
         }

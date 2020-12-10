@@ -2,6 +2,7 @@ package com.proathome.controladores;
 
 import com.google.gson.Gson;
 import com.proathome.modelos.Admin;
+import com.proathome.modelos.Constantes;
 import com.proathome.modelos.Profesor;
 import com.proathome.mysql.ConexionMySQL;
 import java.sql.Connection;
@@ -22,6 +23,126 @@ public class ControladorAdmin {
     private Connection conectar;
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
+    
+    public JSONArray obtenerTicketsAsociados(int idOperador){
+        Connection conectar = ConexionMySQL.connection();
+        JSONArray jsonAsociados = new JSONArray();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement asociados = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ?");
+                asociados.setInt(1, idOperador);
+                asociados.setInt(2, Constantes.ESTATUS_EN_CURSO);
+                ResultSet resultado = asociados.executeQuery();
+                
+                while(resultado.next()){
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("idTicket", resultado.getInt("idtickets_ayuda"));
+                    jsonObject.put("noTicket", "00" + resultado.getInt("idtickets_ayuda"));
+                    jsonObject.put("tipoUsuario", resultado.getInt("tipoUsuario"));
+                    jsonObject.put("descripcion", resultado.getString("descripcion"));
+                    jsonObject.put("topico", resultado.getString("topico"));
+                    jsonObject.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    jsonObject.put("estatus", resultado.getInt("estatus"));
+                    jsonObject.put("idUsuario", resultado.getInt("idUsuario"));
+                    jsonAsociados.add(jsonObject);
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en obtenerTicketsAsociados.");
+        }
+        
+        return jsonAsociados;
+    }
+    
+    public void asociarTicketAdmin(int idTicket, int idOperador){
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                PreparedStatement actualizar = conectar.prepareStatement("UPDATE tickets_ayuda SET operadores_idoperadores = ?, estatus = ? WHERE idtickets_ayuda = ?");
+                actualizar.setInt(1, idOperador);
+                actualizar.setInt(2, Constantes.ESTATUS_EN_CURSO);
+                actualizar.setInt(3, idTicket);
+                actualizar.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error");
+        }
+    }
+    
+    public JSONObject infoTicketAdmin(int idTicket, int tipoUsuario){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject ticketInfo = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                String consulta = "";
+                if(tipoUsuario == Constantes.TIPO_USUARIO_ESTUDIANTE)
+                    consulta = "SELECT * FROM tickets_ayuda INNER JOIN clientes WHERE tickets_ayuda.idtickets_ayuda = ? AND clientes.idclientes = tickets_ayuda.idUsuario";
+                else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESOR)
+                    consulta = "SELECT * FROM tickets_ayuda INNER JOIN profesores WHERE tickets_ayuda.idtickets_ayuda = ? AND profesores.idprofesores = tickets_ayuda.idUsuario";
+                
+                
+                PreparedStatement ticket = conectar.prepareStatement(consulta);
+                ticket.setInt(1, idTicket);
+                ResultSet resultado = ticket.executeQuery();
+
+                if(resultado.next()){
+                    ticketInfo.put("idTicket", resultado.getInt("idtickets_ayuda"));
+                    ticketInfo.put("nombreUsuario", resultado.getString("nombre"));
+                    ticketInfo.put("correo", resultado.getString("correo"));
+                    ticketInfo.put("tipoUsuario", resultado.getInt("tipoUsuario"));
+                    ticketInfo.put("topico", resultado.getString("topico"));
+                    ticketInfo.put("descripcion", resultado.getString("descripcion"));
+                    ticketInfo.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en infoTicketAdmin.");
+        }
+        
+        return ticketInfo;
+    }
+    
+    public JSONArray obtenerTicketsAdmin(){
+        Connection conectar = ConexionMySQL.connection();
+        JSONArray tickets = new JSONArray();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement ticketsConsulta = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE estatus = ?");
+                ticketsConsulta.setInt(1, Constantes.ESTATUS_SIN_OPERADOR);
+                ResultSet resultado = ticketsConsulta.executeQuery();
+                
+                while(resultado.next()){
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("idTicket", resultado.getInt("idtickets_ayuda"));
+                    jsonObject.put("noTicket", "00" + resultado.getInt("idtickets_ayuda"));
+                    jsonObject.put("tipoUsuario", resultado.getInt("tipoUsuario"));
+                    jsonObject.put("descripcion", resultado.getString("descripcion"));
+                    jsonObject.put("topico", resultado.getString("topico"));
+                    jsonObject.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    jsonObject.put("estatus", resultado.getInt("estatus"));
+                    jsonObject.put("idUsuario", resultado.getInt("idUsuario"));
+                    tickets.add(jsonObject);
+                }
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en obtenerTicketsAdmin.");
+        }
+        
+        return tickets;
+    }
     
     public JSONArray obtenerMsgTicket(int idUsuario, int tipoUsuario, int idTicket){
         Connection conectar = ConexionMySQL.connection();
@@ -215,61 +336,41 @@ public class ControladorAdmin {
         
     }
     
-    public Admin datosAdmin(String usuario, String contrasena, int idAdmin){
-        
+    public Admin datosAdmin(String usuario, String contrasena, int idAdmin){ 
         Admin admin = new Admin();
         admin.setUsuario(usuario);
         admin.setContrasena(contrasena);
         admin.setIdAdmin(idAdmin);
         
-        return admin;
-        
+        return admin;   
     }
     
-    public String iniciarSesion(String usuario, String contrasena){
-        
-        boolean usuarioEncontrado = false;
-        gson = new Gson();
+    public JSONObject iniciarSesion(String usuario, String contrasena){
         conectar = ConexionMySQL.connection();
-        int idAdmin = 0;
+        JSONObject jsonAdmin = new JSONObject();
         
         if(conectar != null){
-            
             try{
-                
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM admins WHERE usuario = ? AND contrasena = ?");
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM operadores WHERE BINARY usuario = ? AND BINARY contrasena = ?");
                 consulta.setString(1 , usuario);
                 consulta.setString(2 , contrasena);
                 ResultSet resultado = consulta.executeQuery();
                 if(resultado.next()){
-                    
-                    usuarioEncontrado = true;
-                    idAdmin = resultado.getInt("idadmins");
-                    
+                    jsonAdmin.put("idOperador", resultado.getInt("idoperadores"));  
+                    jsonAdmin.put("rango", resultado.getInt("rango"));
+                    jsonAdmin.put("result", true);
                 }else{
-                
-                    usuarioEncontrado = false;
-                    
-                }
-                
-                
-            }catch(SQLException ex){
-                
+                    jsonAdmin.put("result", false);
+                    jsonAdmin.put("error", "Usuario no encontrado.");
+                }   
+            }catch(SQLException ex){ 
                 ex.printStackTrace();
-                
-            }
-            
-        }else{
-            
-            System.out.println("Error en iniciarSesion.");
-            
+            } 
+        }else{ 
+            System.out.println("Error en iniciarSesion."); 
         }
         
-        if(usuarioEncontrado)
-            return "{\"result\":true, \"sesion\":" + gson.toJson(datosAdmin(usuario, contrasena, idAdmin)) + "}";
-        else
-            return "{\"result\":false, \"sesion\":\"Usuario no encontrado.\"}";
-        
+        return jsonAdmin;     
     }//Fin método iniciarSesion.
     
 }
