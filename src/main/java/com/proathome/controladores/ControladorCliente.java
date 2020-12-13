@@ -30,6 +30,24 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public void finalizarTicket(int idTicket){
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement ticket = conectar.prepareStatement("UPDATE tickets_ayuda SET estatus = ? WHERE idtickets_ayuda = ?");
+                ticket.setInt(1, Constantes.ESTATUS_SOLUCIONADO);
+                ticket.setInt(2, idTicket);
+                ticket.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en solicitudTicketFinalizado.");
+        }
+        
+    }
+    
     public void enviarMsgTicket(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         System.out.println(jsonDatos);

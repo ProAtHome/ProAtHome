@@ -24,6 +24,121 @@ public class ControladorAdmin {
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
     
+    public JSONObject ticketSolucionado(int idTicket){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject ticketJSON = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement solucionado = conectar.prepareStatement("SELECT estatus FROM tickets_ayuda WHERE idtickets_ayuda = ?");
+                solucionado.setInt(1, idTicket);
+                ResultSet resultado = solucionado.executeQuery();
+                
+                if(resultado.next()){
+                    if(resultado.getInt("estatus") == Constantes.ESTATUS_SOLUCIONADO)
+                        ticketJSON.put("solucionado", true);
+                    else
+                        ticketJSON.put("solucionado", false);
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en ticketSolucionado.");
+        }
+        
+        return ticketJSON;
+    }
+    
+    public void enviarMensaje(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement mensaje = conectar.prepareStatement("INSERT INTO msg_tickets (mensaje, idUsuario_Operador, operadorBool, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?)");
+                mensaje.setString(1, jsonDatos.get("mensaje").toString());
+                mensaje.setInt(2, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
+                mensaje.setBoolean(3, Boolean.parseBoolean(jsonDatos.get("operador").toString()));
+                mensaje.setInt(4, Integer.parseInt(jsonDatos.get("idTicket").toString()));
+                mensaje.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en enviarMensaje.");
+        }
+    }
+    
+    public JSONArray obtenerMensajes(int idTicket, int tipoUsuario){
+        Connection conectar = ConexionMySQL.connection();
+        JSONArray mensajes = new JSONArray();
+        
+        if(conectar != null){
+            try{
+                String query = "";
+                if(tipoUsuario == Constantes.TIPO_USUARIO_ESTUDIANTE)
+                    query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
+                else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESOR)
+                    query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idporfesores = msg_tickets.idUsuario_Operador";
+             
+                PreparedStatement mensajesConsulta = conectar.prepareStatement(query);
+                mensajesConsulta.setInt(1, idTicket);
+                ResultSet resultado = mensajesConsulta.executeQuery();
+                
+                while(resultado.next()){
+                    JSONObject mensaje = new JSONObject();
+                    if(resultado.getBoolean("operadorBool"))
+                        mensaje.put("nombreUsuario", "Yo");
+                    else 
+                       mensaje.put("nombreUsuario", resultado.getString("nombre"));
+                    mensaje.put("mensaje", resultado.getString("mensaje"));
+                    mensaje.put("idUsuario", resultado.getInt("idUsuario_Operador"));
+                    mensaje.put("operadorBool", resultado.getBoolean("operadorBool"));
+                    mensajes.add(mensaje);
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en obtenerMensajes.");
+        }
+        
+        return mensajes;
+    }
+    
+    public JSONArray ticketsFinalizados(int idOperador){
+        Connection conectar = ConexionMySQL.connection();
+        JSONArray jsonFinalizados = new JSONArray();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement finalizados = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ?");
+                finalizados.setInt(1, idOperador);
+                finalizados.setInt(2, Constantes.ESTATUS_SOLUCIONADO);
+                ResultSet resultado = finalizados.executeQuery();
+                
+                while(resultado.next()){
+                    JSONObject ticket = new JSONObject();
+                    ticket.put("idTicket", resultado.getInt("idtickets_ayuda"));
+                    ticket.put("noTicket", "00" + resultado.getInt("idtickets_ayuda"));
+                    ticket.put("topico", resultado.getString("topico"));
+                    ticket.put("descripcion", resultado.getString("descripcion"));
+                    ticket.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    ticket.put("estatus", resultado.getInt("estatus"));
+                    ticket.put("idUsuario", resultado.getInt("idUsuario"));
+                    ticket.put("tipoUsuario", resultado.getInt("tipoUsuario"));
+                    jsonFinalizados.add(ticket);
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en ticketsFinalizados.");
+        }
+        
+        return jsonFinalizados;
+    }
+    
     public JSONArray obtenerTicketsAsociados(int idOperador){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonAsociados = new JSONArray();
@@ -93,6 +208,7 @@ public class ControladorAdmin {
 
                 if(resultado.next()){
                     ticketInfo.put("idTicket", resultado.getInt("idtickets_ayuda"));
+                    ticketInfo.put("noTicket", "00" + resultado.getInt("idtickets_ayuda"));
                     ticketInfo.put("nombreUsuario", resultado.getString("nombre"));
                     ticketInfo.put("correo", resultado.getString("correo"));
                     ticketInfo.put("tipoUsuario", resultado.getInt("tipoUsuario"));
@@ -108,6 +224,7 @@ public class ControladorAdmin {
             System.out.println("Error en infoTicketAdmin.");
         }
         
+        System.out.println("AVE: " + ticketInfo);
         return ticketInfo;
     }
     
@@ -169,7 +286,13 @@ public class ControladorAdmin {
                 }
                 
                 /*Consulta de mensajes Ticket*/
-                PreparedStatement mensajes = conectar.prepareStatement("SELECT * FROM msg_tickets WHERE tickets_ayuda_idtickets_ayuda = ?");
+                String query = "";
+                if(tipoUsuario == Constantes.TIPO_USUARIO_ESTUDIANTE)
+                    query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
+                else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESOR)
+                    query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idprofesores = msg_tickets.idUsuario_Operador";
+                
+                PreparedStatement mensajes = conectar.prepareStatement(query);
                 mensajes.setInt(1, idTicket);
                 ResultSet msgRes = mensajes.executeQuery();
                 JSONArray jsonMensajesTicket = new JSONArray();
@@ -177,6 +300,10 @@ public class ControladorAdmin {
                 
                 while(msgRes.next()){
                     JSONObject msgJSON = new JSONObject();
+                    if(msgRes.getBoolean("operadorBool"))
+                        msgJSON.put("nombreUsuario", msgRes.getString("nombre"));
+                    else
+                        msgJSON.put("nombreUsuario", "Yo");
                     msgJSON.put("msg", msgRes.getString("mensaje"));
                     msgJSON.put("operador", msgRes.getBoolean("operadorBool"));
                     msgJSON.put("idUsuario", msgRes.getInt("idUsuario_Operador"));
@@ -198,67 +325,6 @@ public class ControladorAdmin {
         
         return mensajesArray;
     }
-    
-    public JSONArray obtenerMensajes(int tipoCliente){
-        
-        conectar = ConexionMySQL.connection();
-        JSONArray arrayMensajes = new JSONArray();
-        
-        if(conectar != null){
-            try{
-                if(tipoCliente == ControladorAdmin.ESTUDIANTE){
-                    PreparedStatement mensajesConsulta = conectar.prepareStatement("SELECT * FROM ayuda INNER JOIN clientes WHERE clientes.idclientes = ayuda.idCliente AND ayuda.tipoCliente = ?");
-                    mensajesConsulta.setInt(1, tipoCliente);
-                    ResultSet resultado = mensajesConsulta.executeQuery();
-                    while(resultado.next()){
-                        JSONObject mensajes = new JSONObject();
-                        mensajes.put("nombre", resultado.getString("nombre"));
-                        mensajes.put("correo", resultado.getString("correo"));
-                        mensajes.put("mensaje", resultado.getString("mensaje"));
-                        arrayMensajes.add(mensajes);
-                    }
-                }else if(tipoCliente == ControladorAdmin.PROFESOR){
-                    PreparedStatement mensajesConsulta = conectar.prepareStatement("SELECT * FROM ayuda INNER JOIN profesores WHERE profesores.idprofesores = ayuda.idCliente AND ayuda.tipoCliente = ?");
-                    mensajesConsulta.setInt(1, tipoCliente);
-                    ResultSet resultado = mensajesConsulta.executeQuery();
-                    while(resultado.next()){
-                        JSONObject mensajes = new JSONObject();
-                        mensajes.put("nombre", resultado.getString("nombre"));
-                        mensajes.put("correo", resultado.getString("correo"));
-                        mensajes.put("mensaje", resultado.getString("mensaje"));
-                        arrayMensajes.add(mensajes);
-                    }
-                }
-          
-            }catch(SQLException ex){
-                ex.printStackTrace();
-            }
-        }else{
-            System.out.println("Error en obtenerMensajes");
-        }
-        
-        return arrayMensajes;
-        
-    }
-    
-    public void enviarMensaje(JSONObject mensaje){
-        
-        conectar = ConexionMySQL.connection();
-        if(conectar != null){
-            try{
-                PreparedStatement enviar = conectar.prepareStatement("INSERT INTO ayuda (mensaje, idCliente, tipoCliente) VALUES (?,?,?)");
-                enviar.setString(1, mensaje.get("mensaje").toString());
-                enviar.setInt(2, Integer.parseInt(mensaje.get("idCliente").toString()));
-                enviar.setInt(3, Integer.parseInt(mensaje.get("tipoCliente").toString()));
-                enviar.execute();
-            }catch(SQLException ex){
-                ex.printStackTrace();
-            }
-        }else{
-            System.out.println("Error en enviarMensaje");
-        }
-        
-    }//Fin método enviarMensaje.
     
     public void cambiarEstado(int idProfesor, boolean estado){
         

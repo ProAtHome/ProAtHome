@@ -35,6 +35,25 @@ public class RESTProAtHome {
     // CREAR UN LATIDO DE CORAZON MYSQL.
     
     @GET
+    @Path("/ticketSolucionado/{idTicket}")
+    public JSONObject ticketSolucionado(@PathParam("idTicket") int idTicket){
+        return admin.ticketSolucionado(idTicket);
+    }
+    
+    @GET
+    @Path("/obtenerMensajes/{idTicket}/{tipoUsuario}")
+    public JSONArray obtenerMensajes(@PathParam("idTicket") int idTicket,
+            @PathParam("tipoUsuario") int tipoUsuario){
+        return admin.obtenerMensajes(idTicket, tipoUsuario);
+    }
+    
+    @GET
+    @Path("/ticketsFinalizados/{idOperador}")
+    public JSONArray ticketsFinalizados(@PathParam("idOperador") int idOperador){
+        return admin.ticketsFinalizados(idOperador);
+    }
+    
+    @GET
     @Path("/ticketsAsociados/{idOperador}")
     public JSONArray ticketsAsociados (@PathParam("idOperador") int idOperador){
         return admin.obtenerTicketsAsociados(idOperador);
@@ -44,6 +63,7 @@ public class RESTProAtHome {
     @Path("/obtenerInfoTicket/{idTicket}/{tipoUsuario}")
     public JSONObject obtenerInfoTicket(@PathParam("idTicket") int idTicket,
             @PathParam("tipoUsuario") int tipoUsuario){
+        System.out.println(idTicket + "" + tipoUsuario);
         return admin.infoTicketAdmin(idTicket, tipoUsuario);
     }
     
@@ -70,12 +90,6 @@ public class RESTProAtHome {
         fechaServidor.put("fechaServidor", fecha);
         
         return fechaServidor;
-    }
-    
-    @GET
-    @Path("/obtenerMensajes/{tipoCliente}")
-    public JSONArray obtenerMensajes(@PathParam("tipoCliente") int tipoCliente){
-        return admin.obtenerMensajes(tipoCliente);  
     }
     
     @GET

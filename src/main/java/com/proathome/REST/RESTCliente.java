@@ -39,6 +39,12 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/finalizarTicket/{idTicket}")
+    public void solicitudTicketFinalizado(@PathParam("idTicket") int idTicket){
+        cliente.finalizarTicket(idTicket);
+    }
+    
+    @GET
     @Path("/obtenerTickets/{idEstudiante}")
     public JSONArray obtenerTickets(@PathParam("idEstudiante") int idEstudiante){
         return cliente.obtenerTickets(idEstudiante);
