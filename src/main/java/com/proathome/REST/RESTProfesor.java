@@ -36,6 +36,18 @@ public class RESTProfesor {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/finalizarTicket/{idTicket}")
+    public void solicitudTicketFinalizado(@PathParam("idTicket") int idTicket){
+        profesor.finalizarTicket(idTicket);
+    }
+    
+    @GET
+    @Path("/obtenerTickets/{idEstudiante}")
+    public JSONArray obtenerTickets(@PathParam("idEstudiante") int idEstudiante){
+        return profesor.obtenerTickets(idEstudiante);
+    }
+    
+    @GET
     @Path("/validarValoracion/{idSesion}/{idEstudiante}")
     public JSONObject validarValoracion(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
         return profesor.validarValoracion(idSesion, idEstudiante);
@@ -133,6 +145,18 @@ public class RESTProfesor {
     @Path("informacionSesionMatch/{idSesion}")
     public JSONObject informacionSesionMatch(@PathParam("idSesion") int idSesion){  
         return profesor.informacionSesionMatch(idSesion);     
+    }
+    
+    @POST
+    @Path("/enviarMsgTicket")
+    public void enviarMsgTicket(JSONObject jsonDatos){
+        profesor.enviarMsgTicket(jsonDatos);
+    }
+    
+    @POST
+    @Path("/nuevoTicket")
+    public void nueboTicket(JSONObject jsonDatos){
+        profesor.nuevoTicket(jsonDatos);
     }
     
     @POST

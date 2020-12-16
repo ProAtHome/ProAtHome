@@ -79,7 +79,7 @@ public class ControladorAdmin {
                 if(tipoUsuario == Constantes.TIPO_USUARIO_ESTUDIANTE)
                     query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
                 else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESOR)
-                    query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idporfesores = msg_tickets.idUsuario_Operador";
+                    query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idprofesores = msg_tickets.idUsuario_Operador";
              
                 PreparedStatement mensajesConsulta = conectar.prepareStatement(query);
                 mensajesConsulta.setInt(1, idTicket);
@@ -87,10 +87,7 @@ public class ControladorAdmin {
                 
                 while(resultado.next()){
                     JSONObject mensaje = new JSONObject();
-                    if(resultado.getBoolean("operadorBool"))
-                        mensaje.put("nombreUsuario", "Yo");
-                    else 
-                       mensaje.put("nombreUsuario", resultado.getString("nombre"));
+                    mensaje.put("nombreUsuario", resultado.getString("nombre"));
                     mensaje.put("mensaje", resultado.getString("mensaje"));
                     mensaje.put("idUsuario", resultado.getInt("idUsuario_Operador"));
                     mensaje.put("operadorBool", resultado.getBoolean("operadorBool"));

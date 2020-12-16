@@ -1,5 +1,6 @@
 package com.proathome.controladores;
 
+import com.proathome.modelos.Constantes;
 import com.proathome.modelos.CuentaBancaria;
 import com.proathome.modelos.Profesor;
 import java.sql.Connection;
@@ -26,6 +27,106 @@ public class ControladorProfesor {
     private JSONObject jsonSesionesMatchProfesor = new JSONObject();
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
+    
+    public void nuevoTicket(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario) VALUES (?,?,?,?,?,?)");
+                nuevoTicket.setInt(1, Integer.parseInt(jsonDatos.get("tipoUsuario").toString()));
+                nuevoTicket.setString(2, jsonDatos.get("topico").toString());
+                nuevoTicket.setString(3, jsonDatos.get("descripcion").toString());
+                nuevoTicket.setDate(4, java.sql.Date.valueOf(jsonDatos.get("fechaCreacion").toString()));
+                nuevoTicket.setInt(5, Integer.parseInt(jsonDatos.get("estatus").toString()));
+                nuevoTicket.setInt(6, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
+                nuevoTicket.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en nuevoTicket.");
+        }
+    }
+    
+     public void enviarMsgTicket(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+
+        if(conectar != null){
+            try{
+                PreparedStatement mensaje = conectar.prepareStatement("INSERT INTO msg_tickets (mensaje, idUsuario_Operador, operadorBool, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?)");
+                mensaje.setString(1, jsonDatos.get("mensaje").toString());
+                mensaje.setInt(2, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
+                mensaje.setBoolean(3, Boolean.valueOf(jsonDatos.get("operador").toString()));
+                mensaje.setInt(4, Integer.parseInt(jsonDatos.get("idTicket").toString()));
+                mensaje.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en enviarMsgTicket.");
+        }
+    }
+    
+    public JSONArray obtenerTickets(int idEstudiante){
+        Connection conectar = ConexionMySQL.connection();
+        JSONArray jsonTickets = new JSONArray();
+        boolean vacio = true;
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE idUsuario = ? AND tipoUsuario = ? ORDER BY idtickets_ayuda DESC");
+                consulta.setInt(1, idEstudiante);
+                consulta.setInt(2, Constantes.TIPO_USUARIO_PROFESOR);
+                ResultSet resultado = consulta.executeQuery();
+                
+                while(resultado.next()){
+                    vacio = false;
+                    JSONObject jsonTicket = new JSONObject();
+                    jsonTicket.put("noTicket", "00" + resultado.getInt("idtickets_ayuda"));
+                    jsonTicket.put("idTicket", resultado.getInt("idtickets_ayuda"));
+                    jsonTicket.put("tipoUsuario", resultado.getInt("tipoUsuario"));
+                    jsonTicket.put("topico", resultado.getString("topico"));
+                    jsonTicket.put("descripcion", resultado.getString("descripcion"));
+                    jsonTicket.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    jsonTicket.put("estatus", resultado.getInt("estatus"));
+                    jsonTicket.put("idUsuario", resultado.getInt("idUsuario"));
+                    jsonTicket.put("idOperador", resultado.getInt("operadores_idoperadores"));
+                    jsonTicket.put("sinTickets", false);
+                    jsonTickets.add(jsonTicket);
+                }
+                       
+                if(vacio){
+                    JSONObject jsonSinTickets = new JSONObject();
+                    jsonSinTickets.put("sinTickets", true);
+                    jsonTickets.add(jsonSinTickets);
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en obtenerTickets.");
+        }
+
+        return jsonTickets;
+    }
+    
+    public void finalizarTicket(int idTicket){
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement ticket = conectar.prepareStatement("UPDATE tickets_ayuda SET estatus = ? WHERE idtickets_ayuda = ?");
+                ticket.setInt(1, Constantes.ESTATUS_SOLUCIONADO);
+                ticket.setInt(2, idTicket);
+                ticket.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en solicitudTicketFinalizado.");
+        }
+    }
     
     public JSONObject validarValoracion(int idSesion, int idEstudiante){
     

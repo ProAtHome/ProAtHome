@@ -45,12 +45,11 @@ public class ControladorCliente {
         }else{
             System.out.println("Error en solicitudTicketFinalizado.");
         }
-        
     }
     
     public void enviarMsgTicket(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
-        System.out.println(jsonDatos);
+     
         if(conectar != null){
             try{
                 PreparedStatement mensaje = conectar.prepareStatement("INSERT INTO msg_tickets (mensaje, idUsuario_Operador, operadorBool, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?)");
@@ -106,7 +105,7 @@ public class ControladorCliente {
         }else{
             System.out.println("Error en obtenerTickets.");
         }
-        System.out.println(jsonTickets);
+
         return jsonTickets;
     }
     
