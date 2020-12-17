@@ -208,6 +208,7 @@ public class ControladorAdmin {
                     ticketInfo.put("noTicket", "00" + resultado.getInt("idtickets_ayuda"));
                     ticketInfo.put("nombreUsuario", resultado.getString("nombre"));
                     ticketInfo.put("correo", resultado.getString("correo"));
+                    ticketInfo.put("estatus", resultado.getInt("estatus"));
                     ticketInfo.put("tipoUsuario", resultado.getInt("tipoUsuario"));
                     ticketInfo.put("topico", resultado.getString("topico"));
                     ticketInfo.put("descripcion", resultado.getString("descripcion"));

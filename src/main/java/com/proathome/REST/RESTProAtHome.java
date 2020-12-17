@@ -63,7 +63,6 @@ public class RESTProAtHome {
     @Path("/obtenerInfoTicket/{idTicket}/{tipoUsuario}")
     public JSONObject obtenerInfoTicket(@PathParam("idTicket") int idTicket,
             @PathParam("tipoUsuario") int tipoUsuario){
-        System.out.println(idTicket + "" + tipoUsuario);
         return admin.infoTicketAdmin(idTicket, tipoUsuario);
     }
     
