@@ -36,6 +36,12 @@ public class RESTProfesor {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/estatusDocumentos/{idProfesor}")
+    public JSONObject estatusDocumentos(@PathParam("idProfesor") int idProfesor){
+        return profesor.estatusDocumentos(idProfesor);
+    }
+    
+    @GET
     @Path("/finalizarTicket/{idTicket}")
     public void solicitudTicketFinalizado(@PathParam("idTicket") int idTicket){
         profesor.finalizarTicket(idTicket);
@@ -78,56 +84,44 @@ public class RESTProfesor {
     
     @GET
     @Path("/sincronizarClase/{idSesion}/{idProfesor}")
-    public JSONObject sincronizarClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
-        
-       return sesiones.sincronizarClaseProfesor(idSesion, idProfesor);
-        
+    public JSONObject sincronizarClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){    
+       return sesiones.sincronizarClaseProfesor(idSesion, idProfesor);  
     }
     
     @GET
     @Path("/obtenerSesionesProfesorMatch/{idProfesor}")
     public JSONArray obtenerSesionesProfesorMatch(@PathParam("idProfesor") int idProfesor){
-        
         return profesor.sesionesMatchProfesor(idProfesor);
-        
     }//Fin método obtenerSesionesProfesorMatch.
     
     @GET
     @Path("/obtenerSesionesMaps")
     public String obtenerSesionesMaps(){
-        
         objetoUbicaciones.obtenerSesionesEstudiantes();
         String jsonUbicaciones = gson.toJson(objetoUbicaciones);
         
         return jsonUbicaciones;
-    
     }//Fin método obtenerSesiones.
     
     @GET
     @Path("/obtenerSesionesMovil")
-    public JSONArray obtenerSesionesMovil(){
-        
-       return profesor.obtenerSesionesMovil(); 
-       
+    public JSONArray obtenerSesionesMovil(){    
+       return profesor.obtenerSesionesMovil();  
     }//Fin método obtenerSesionesMovil.
     
     @GET
     @Path("/sesionProfesor/{correo}/{contrasena}")
-    public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena){
-        
+    public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena){  
         profesor.iniciarSesion(correo, contrasena);
-        return gson.toJson(profesor.datosSesion());
-        
+        return gson.toJson(profesor.datosSesion());  
     }//Fin método sesionCliente.
     
     @GET
     @Path("obtenerDatosBancarios/{idProfesor}")
     public String obtenerDatosBancarios(@PathParam("idProfesor") int idProfesor){
-        
         String jsonDatos = gson.toJson(profesor.obtenerCuentaBancaria(idProfesor));
         
-        return jsonDatos;
-        
+        return jsonDatos; 
     }//Fin método obtenerDatosBancarios.
    
     @GET
@@ -185,19 +179,13 @@ public class RESTProfesor {
     @POST
     @Path("/agregarProfesorWeb")
     public void agregarProfesorWeb(String datos) {
-
         try {
-
             JSONObject jsonProfesor = (JSONObject) parser.parse(datos);
             profesor.nuevoProfesor(jsonProfesor);
             profesor.guardarProfesor();
-
         } catch (ParseException ex) {
-
             ex.printStackTrace();
-
         }
-
     }//Fin método agregarProfesor.
     
     @POST

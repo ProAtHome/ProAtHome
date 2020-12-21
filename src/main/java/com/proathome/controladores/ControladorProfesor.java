@@ -28,6 +28,29 @@ public class ControladorProfesor {
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
     
+    public JSONObject estatusDocumentos(int idProfesor){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject estatus = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement documentos = conectar.prepareStatement("SELECT * FROM documentacionprofesor WHERE profesores_idprofesores = ?");
+                documentos.setInt(1, idProfesor);
+                ResultSet resultado = documentos.executeQuery();
+                
+                if(resultado.next())
+                    estatus.put("estatus", true);
+                else
+                    estatus.put("estatus", false);
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else
+            System.out.println("Error en estatusDocumentos.");
+        
+        return estatus;
+    }
+    
     public void nuevoTicket(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         
@@ -266,28 +289,17 @@ public class ControladorProfesor {
                     profesor.setIdProfesor(resultado.getInt("idprofesores"));
                     profesor.setNombre(resultado.getString("nombre"));
                     profesor.setFoto(resultado.getString("foto"));
-                    profesor.setEstado(resultado.getBoolean("estado"));
-
-                    
+                    profesor.setEstado(resultado.getString("estado"));
                     profesorRegistrado = true;
-
                 } else {
-
-                    profesorRegistrado = false;
-                    
-
+                    profesorRegistrado = false;                   
                 }
 
             } catch (SQLException ex) {
-
-                System.out.println(ex.getMessage());
-
+                ex.printStackTrace();
             }
-
         } else {
-
             System.out.println("Error en la conexión iniciarSesion.");
-
         }
 
     }//Fin método iniciarSesion.

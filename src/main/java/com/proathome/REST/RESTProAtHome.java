@@ -92,12 +92,6 @@ public class RESTProAtHome {
     }
     
     @GET
-    @Path("/obtenerSolicitudes")
-    public String obtenerSolicitudes(){ 
-        return admin.obtenerSolicitudes(); 
-    }//Fin método obtenerSolicitudes.
-    
-    @GET
     @Path("/sesionAdmin/{usuario}/{contrasena}")
     public JSONObject sesionAdmin(@PathParam("usuario") String usuario,
             @PathParam("contrasena") String contrasena){ 

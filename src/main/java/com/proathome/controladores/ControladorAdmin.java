@@ -351,55 +351,6 @@ public class ControladorAdmin {
         
     }//Fin método cambiarEstado.
     
-    public String obtenerSolicitudes(){
-        
-        gson = new Gson();
-        conectar = ConexionMySQL.connection();
-        
-        if(conectar != null){
-            
-            try{
-                
-                PreparedStatement registros = conectar.prepareStatement("SELECT COUNT(*) AS registros FROM profesores");
-                ResultSet resultadoRegistros = registros.executeQuery();
-                
-                
-                if(resultadoRegistros.next()){
-                    
-                    profesores = new Profesor[resultadoRegistros.getInt("registros")];
-                    PreparedStatement solicitudes = conectar.prepareStatement("SELECT * FROM profesores ORDER BY fechaDeRegistro DESC");
-                    ResultSet resultado = solicitudes.executeQuery();
-                    int aux = 0;
-                    
-                    while(resultado.next()){
-                        
-                        Profesor profesor = new Profesor();
-                        profesor.setIdProfesor(resultado.getInt("idprofesores"));
-                        profesor.setNombre(resultado.getString("nombre"));
-                        profesor.setCorreo(resultado.getString("correo"));
-                        profesor.setEdad(resultado.getInt("edad"));
-                        profesor.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
-                        profesor.setEstado(resultado.getBoolean("estado"));
-                        profesores[aux] = profesor;
-                        aux++;
-                        
-                    }
-                }
-                
-            }catch(SQLException ex){
-                ex.printStackTrace();
-            }
-            
-        }else{
-            
-            System.out.println("Error en obtenerSolicitudes.");
-            
-        }
-        
-        return gson.toJson(profesores);
-        
-    }
-    
     public Admin datosAdmin(String usuario, String contrasena, int idAdmin){ 
         Admin admin = new Admin();
         admin.setUsuario(usuario);

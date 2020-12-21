@@ -10,10 +10,9 @@ import java.sql.Date;
 
 public class Profesor {
 
-    private String nombre, correo, contrasena, clv, foto, descripcion;
+    private String nombre, correo, contrasena, clv, foto, descripcion, estado;
     private java.sql.Date fechaNacimiento, fechaRegistro;
     private int edad, idProfesor;
-    private boolean estado;
     public static CuentaBancaria cuenta;
     public static EvaluacionProfesor evaluacion;
     public static Ubicacion ubicacion;
@@ -21,12 +20,12 @@ public class Profesor {
     public Profesor() {
         
     }
-    
-    public boolean isEstado() {
+
+    public String getEstado() {
         return estado;
     }
 
-    public void setEstado(boolean estado) {
+    public void setEstado(String estado) {
         this.estado = estado;
     }
 
