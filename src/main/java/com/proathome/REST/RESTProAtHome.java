@@ -35,6 +35,18 @@ public class RESTProAtHome {
     // CREAR UN LATIDO DE CORAZON MYSQL.
     
     @GET
+    @Path("/getSolicitudesAsignadas/{idOperador}")
+    public JSONArray getSolicitudesAsignadas(@PathParam("idOperador") int idOperador){
+        return admin.getSolicitudesAsignadas(idOperador);
+    }
+    
+    @GET
+    @Path("/obtenerSolicitudes")
+    public JSONArray obtenerSolicitudes(){
+        return admin.obtenerSolicitudes();
+    }
+    
+    @GET
     @Path("/ticketSolucionado/{idTicket}")
     public JSONObject ticketSolucionado(@PathParam("idTicket") int idTicket){
         return admin.ticketSolucionado(idTicket);
@@ -99,6 +111,17 @@ public class RESTProAtHome {
     }//Fin método iniciarSesion.
     
     @POST
+    @Path("/asociarSolicitud")
+    public void asociarSolicitud(String datos){
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            admin.asociarSolicitud(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @POST
     @Path("/enviarMensaje")
     public void enviarMensaje(String datos){
         try{
@@ -116,6 +139,17 @@ public class RESTProAtHome {
             JSONObject asociarJSON = (JSONObject) parser.parse(datos);
             admin.asociarTicketAdmin(Integer.parseInt(asociarJSON.get("idTicket").toString()),
                     Integer.parseInt(asociarJSON.get("idOperador").toString()));
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @PUT
+    @Path("/rechazarDocumentacion")
+    public void rechazarDocumentacion(String datos){
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            admin.rechazarDocumentacion(jsonDatos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
