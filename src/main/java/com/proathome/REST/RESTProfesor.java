@@ -36,6 +36,12 @@ public class RESTProfesor {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/obtenerCita/{idProfesor}")
+    public JSONObject obtenerCita(@PathParam("idProfesor") int idProfesor){
+        return profesor.obtenerCita(idProfesor);
+    }
+    
+    @GET
     @Path("/estatusDocumentos/{idProfesor}")
     public JSONObject estatusDocumentos(@PathParam("idProfesor") int idProfesor){
         return profesor.estatusDocumentos(idProfesor);

@@ -111,6 +111,21 @@ public class RESTProAtHome {
     }//Fin método iniciarSesion.
     
     @POST
+    @Path("/agendarCita")
+    public JSONObject agendarCita(String datos){
+        JSONObject jsonDatos = new JSONObject();
+        try{
+            System.out.println(datos);
+            jsonDatos = (JSONObject) parser.parse(datos);
+            return admin.agendarCita(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return jsonDatos;
+    }
+    
+    @POST
     @Path("/asociarSolicitud")
     public void asociarSolicitud(String datos){
         try{

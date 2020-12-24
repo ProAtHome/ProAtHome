@@ -6,6 +6,7 @@ import com.proathome.modelos.Constantes;
 import com.proathome.modelos.Profesor;
 import com.proathome.mysql.ConexionMySQL;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,6 +24,63 @@ public class ControladorAdmin {
     private Connection conectar;
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
+    
+    public JSONObject agendarCita(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+    
+        if(conectar != null){
+            try{
+                //Verifricar la disponibilidad de la cita en fecha 1.
+                PreparedStatement consultaF1 = conectar.prepareStatement("SELECT * FROM citas WHERE fecha1 = ? AND horario1 = ?");
+                consultaF1.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha1").toString()));
+                consultaF1.setString(2, jsonDatos.get("horario1").toString());
+                ResultSet resultadoF1 = consultaF1.executeQuery();
+                
+                if(resultadoF1.next()){
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", "El horario de la FECHA 1 ya tiene una posible cita agendada.");
+                }else{
+                    //Validamos la fecha 2.
+                    PreparedStatement consultaF2 = conectar.prepareStatement("SELECT * FROM citas WHERE fecha2 = ? AND horario2 = ?");
+                    consultaF2.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha2").toString()));
+                    consultaF2.setString(2, jsonDatos.get("horario2").toString());
+                    ResultSet resultadoF2 = consultaF2.executeQuery();
+                    
+                    if(resultadoF2.next()){
+                        respuesta.put("respuesta", false);
+                        respuesta.put("mensaje", "El horario de la FECHA 2 ya tiene una posible cita agendada.");
+                    }else{
+                        //Guardar cita
+                        PreparedStatement guardar = conectar.prepareStatement("INSERT INTO citas (fecha1, fecha2, horario1, horario2,"
+                                + " tipoCita, profesores_idprofesores, operadores_idoperadores, datosAdicionales) VALUES (?,?,?,?,?,?,?,?)");
+                        guardar.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha1").toString()));
+                        guardar.setDate(2, java.sql.Date.valueOf(jsonDatos.get("fecha2").toString()));
+                        guardar.setString(3, jsonDatos.get("horario1").toString());
+                        guardar.setString(4, jsonDatos.get("horario2").toString());
+                        guardar.setString(5, jsonDatos.get("tipoCita").toString());
+                        guardar.setInt(6, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                        guardar.setInt(7, Integer.parseInt(jsonDatos.get("idOperador").toString()));
+                        guardar.setString(8, jsonDatos.get("datosAdicionales").toString());
+                        guardar.execute();
+                        //Cambiar estatus
+                        PreparedStatement estatus = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
+                        estatus.setString(1, "cita");
+                        estatus.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                        estatus.execute();
+                        respuesta.put("respuesta", true);
+                        respuesta.put("mensaje", "Hay disponibilidad.");
+                    }
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en agendarCita.");
+        }
+    
+        return respuesta;
+    }
     
     public void rechazarDocumentacion(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();

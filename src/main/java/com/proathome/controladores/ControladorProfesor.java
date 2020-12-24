@@ -28,6 +28,36 @@ public class ControladorProfesor {
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
     
+    public JSONObject obtenerCita(int idProfesor){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject cita = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECt * FROM citas WHERE profesores_idprofesores = ?");
+                consulta.setInt(1, idProfesor);
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    cita.put("fecha1", resultado.getDate("fecha1"));
+                    cita.put("fecha2", resultado.getDate("fecha2"));
+                    cita.put("horario1", resultado.getString("horario1"));
+                    cita.put("horario2", resultado.getString("horario2"));
+                    cita.put("fechaAcordada", resultado.getDate("fechaAcordada"));
+                    cita.put("horarioAcordado", resultado.getString("horarioAcordado"));
+                    cita.put("tipoCita", resultado.getString("tipoCita"));
+                    cita.put("datosAdicionales", resultado.getString("datosAdicionales"));
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en obtenerCita.");
+        }
+        
+        return cita;
+    }
+    
     public JSONObject estatusDocumentos(int idProfesor){
         Connection conectar = ConexionMySQL.connection();
         JSONObject estatus = new JSONObject();
