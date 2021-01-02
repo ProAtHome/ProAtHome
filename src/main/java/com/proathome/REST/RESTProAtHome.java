@@ -2,6 +2,7 @@ package com.proathome.REST;
 
 import com.proathome.controladores.ControladorAdmin;
 import com.proathome.controladores.ControladorNivelIdioma;
+import java.sql.SQLException;
 import java.util.Calendar;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -33,6 +34,48 @@ public class RESTProAtHome {
     
     
     // CREAR UN LATIDO DE CORAZON MYSQL.
+    
+     @GET
+    @Path("/getPerfilProfesor/{idProfesor}")
+    public JSONObject getPerfilProfesor(@PathParam("idProfesor") int idProfesor){
+        return admin.getPerfilProfesor(idProfesor);
+    }
+    
+    @GET
+    @Path("/getPerfilEstudiante/{idEstudiante}")
+    public JSONObject getPerfilEstudiante(@PathParam("idEstudiante") int idEstudiante){
+        return admin.getPerfilEstudiante(idEstudiante);
+    }
+    
+    @GET
+    @Path("/getProfesoresRegistrados")
+    public JSONObject getProfesoresRegistrados(){
+        return admin.getProfesoresRegistrados();
+    }
+    
+    @GET
+    @Path("/getEstudiantesRegistrados")
+    public JSONObject getEstudiantesRegistrados(){
+        return admin.getEstudiantesRegistrados();
+    }
+    
+    @GET
+    @Path("/eliminarOperador/{idOperador}")
+    public JSONObject eliminarOperador(@PathParam("idOperador") int idOperador){
+        return admin.eliminarOperador(idOperador);
+    }
+    
+    @GET
+    @Path("/getOperadoresUsuario")
+    public JSONObject getOperadoresUsuario(){
+        return admin.getOperadoresUsuario();
+    }
+    
+    @GET
+    @Path("/getOperadoresSoporte")
+    public JSONObject getOperadoresSoporte(){
+        return admin.getOperadoresSoporte();
+    }
     
     @GET
     @Path("/getSolicitudesAsignadas/{idOperador}")
@@ -111,11 +154,38 @@ public class RESTProAtHome {
     }//Fin método iniciarSesion.
     
     @POST
+    @Path("/guardarOperador")
+    public JSONObject guardarOperador(String datos){
+        JSONObject jsonRespuesta = new JSONObject();
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            jsonRespuesta = admin.guardarOperador(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        System.out.println(jsonRespuesta);
+        return jsonRespuesta;
+    }
+    
+    @POST
+    @Path("/reagendarCita")
+    public JSONObject reagendarCita(String datos){
+        JSONObject jsonRespuesta = new JSONObject();
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            jsonRespuesta = admin.reagendarCita(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return jsonRespuesta;
+    }
+    
+    @POST
     @Path("/agendarCita")
     public JSONObject agendarCita(String datos){
         JSONObject jsonDatos = new JSONObject();
         try{
-            System.out.println(datos);
             jsonDatos = (JSONObject) parser.parse(datos);
             return admin.agendarCita(jsonDatos);
         }catch(ParseException ex){
@@ -137,11 +207,51 @@ public class RESTProAtHome {
     }
     
     @POST
+    @Path("/agendaActual")
+    public JSONObject agendaActual(String datos){
+        JSONObject respuesta = new JSONObject();
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = admin.agendaActual(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+    }
+    
+    @POST
     @Path("/enviarMensaje")
     public void enviarMensaje(String datos){
         try{
             JSONObject mensaje = (JSONObject) parser.parse(datos);
             admin.enviarMensaje(mensaje);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @PUT
+    @Path("/actualizarOperador")
+    public JSONObject actualizarOperador(String datos){
+        JSONObject respuesta = new JSONObject();
+        
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = admin.actualizarOperador(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+    }
+    
+    @PUT
+    @Path("/activarPerfil")
+    public void activarPerfil(String datos){
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            admin.activarPerfil(jsonDatos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }

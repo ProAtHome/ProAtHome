@@ -233,11 +233,21 @@ public class RESTProfesor {
     }//Fin método agregarCuentaBancaria.
     
     @PUT
+    @Path("/agendarCita")
+    public void agendarCita(String datos){
+        try{
+            System.out.println(datos);
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            profesor.agendarCita(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @PUT
     @Path("/cambiarEstatusClase/{idSesion}/{idProfesor}/{estatus}")
-    public void cambiarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("estatus") int estatus){
-        
+    public void cambiarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor, @PathParam("estatus") int estatus){    
         sesiones.cambiarEstatusClaseProfesor(idSesion, idProfesor, estatus);
-        
     }
     
     @PUT

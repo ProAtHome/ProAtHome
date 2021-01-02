@@ -28,6 +28,24 @@ public class ControladorProfesor {
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
     
+    public void agendarCita(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement agendar = conectar.prepareStatement("UPDATE citas SET fechaAcordada = ?, horarioAcordado = ? WHERE profesores_idprofesores = ?");
+                agendar.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fechaAcordada").toString()));
+                agendar.setString(2, jsonDatos.get("horarioAcordado").toString());
+                agendar.setInt(3, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                agendar.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en agendarCita.");
+        }
+    }
+    
     public JSONObject obtenerCita(int idProfesor){
         Connection conectar = ConexionMySQL.connection();
         JSONObject cita = new JSONObject();
