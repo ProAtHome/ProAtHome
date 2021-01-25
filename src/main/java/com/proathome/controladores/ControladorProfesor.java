@@ -104,13 +104,14 @@ public class ControladorProfesor {
         
         if(conectar != null){
             try{
-                PreparedStatement nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario) VALUES (?,?,?,?,?,?)");
+                PreparedStatement nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario, categoria) VALUES (?,?,?,?,?,?,?)");
                 nuevoTicket.setInt(1, Integer.parseInt(jsonDatos.get("tipoUsuario").toString()));
                 nuevoTicket.setString(2, jsonDatos.get("topico").toString());
                 nuevoTicket.setString(3, jsonDatos.get("descripcion").toString());
                 nuevoTicket.setDate(4, java.sql.Date.valueOf(jsonDatos.get("fechaCreacion").toString()));
                 nuevoTicket.setInt(5, Integer.parseInt(jsonDatos.get("estatus").toString()));
                 nuevoTicket.setInt(6, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
+                nuevoTicket.setString(7, jsonDatos.get("categoria").toString());
                 nuevoTicket.execute();
             }catch(SQLException ex){
                 ex.printStackTrace();

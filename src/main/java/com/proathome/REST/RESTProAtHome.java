@@ -103,15 +103,15 @@ public class RESTProAtHome {
     }
     
     @GET
-    @Path("/ticketsFinalizados/{idOperador}")
-    public JSONArray ticketsFinalizados(@PathParam("idOperador") int idOperador){
-        return admin.ticketsFinalizados(idOperador);
+    @Path("/ticketsFinalizados/{idOperador}/{categoria}")
+    public JSONArray ticketsFinalizados(@PathParam("idOperador") int idOperador, @PathParam("categoria") String categoria){
+        return admin.ticketsFinalizados(idOperador, categoria);
     }
     
     @GET
-    @Path("/ticketsAsociados/{idOperador}")
-    public JSONArray ticketsAsociados (@PathParam("idOperador") int idOperador){
-        return admin.obtenerTicketsAsociados(idOperador);
+    @Path("/ticketsAsociados/{idOperador}/{categoria}")
+    public JSONArray ticketsAsociados (@PathParam("idOperador") int idOperador, @PathParam("categoria") String categoria){
+        return admin.obtenerTicketsAsociados(idOperador, categoria);
     }
     
     @GET
@@ -122,9 +122,10 @@ public class RESTProAtHome {
     }
     
     @GET
-    @Path("/obtenerTicketsAdmin")
-    public JSONArray obtenerTicketsAdmin(){
-        return admin.obtenerTicketsAdmin();
+    @Path("/obtenerTicketsAdmin/{categoria}")
+    public JSONArray obtenerTicketsAdmin(@PathParam("categoria") String categoria){
+        System.out.println(categoria);
+        return admin.obtenerTicketsAdmin(categoria);
     }
     
     @GET

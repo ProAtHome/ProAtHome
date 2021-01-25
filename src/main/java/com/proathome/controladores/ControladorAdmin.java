@@ -781,15 +781,16 @@ public class ControladorAdmin {
         return mensajes;
     }
     
-    public JSONArray ticketsFinalizados(int idOperador){
+    public JSONArray ticketsFinalizados(int idOperador, String categoria){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonFinalizados = new JSONArray();
         
         if(conectar != null){
             try{
-                PreparedStatement finalizados = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ?");
+                PreparedStatement finalizados = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ? AND categoria = ?");
                 finalizados.setInt(1, idOperador);
                 finalizados.setInt(2, Constantes.ESTATUS_SOLUCIONADO);
+                finalizados.setString(3, categoria);
                 ResultSet resultado = finalizados.executeQuery();
                 
                 while(resultado.next()){
@@ -814,15 +815,16 @@ public class ControladorAdmin {
         return jsonFinalizados;
     }
     
-    public JSONArray obtenerTicketsAsociados(int idOperador){
+    public JSONArray obtenerTicketsAsociados(int idOperador, String categoria){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonAsociados = new JSONArray();
         
         if(conectar != null){
             try{
-                PreparedStatement asociados = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ?");
+                PreparedStatement asociados = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ? AND categoria = ?");
                 asociados.setInt(1, idOperador);
                 asociados.setInt(2, Constantes.ESTATUS_EN_CURSO);
+                asociados.setString(3, categoria);
                 ResultSet resultado = asociados.executeQuery();
                 
                 while(resultado.next()){
@@ -891,6 +893,7 @@ public class ControladorAdmin {
                     ticketInfo.put("topico", resultado.getString("topico"));
                     ticketInfo.put("descripcion", resultado.getString("descripcion"));
                     ticketInfo.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    ticketInfo.put("categoria", resultado.getString("categoria"));
                 }
                 
             }catch(SQLException ex){
@@ -904,14 +907,15 @@ public class ControladorAdmin {
         return ticketInfo;
     }
     
-    public JSONArray obtenerTicketsAdmin(){
+    public JSONArray obtenerTicketsAdmin(String categoria){
         Connection conectar = ConexionMySQL.connection();
         JSONArray tickets = new JSONArray();
         
         if(conectar != null){
             try{
-                PreparedStatement ticketsConsulta = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE estatus = ?");
+                PreparedStatement ticketsConsulta = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE estatus = ? AND categoria = ?");
                 ticketsConsulta.setInt(1, Constantes.ESTATUS_SIN_OPERADOR);
+                ticketsConsulta.setString(2, categoria);
                 ResultSet resultado = ticketsConsulta.executeQuery();
                 
                 while(resultado.next()){
