@@ -90,6 +90,7 @@ public class ControladorCliente {
                     jsonTicket.put("estatus", resultado.getInt("estatus"));
                     jsonTicket.put("idUsuario", resultado.getInt("idUsuario"));
                     jsonTicket.put("idOperador", resultado.getInt("operadores_idoperadores"));
+                    jsonTicket.put("categoria", resultado.getString("categoria"));
                     jsonTicket.put("sinTickets", false);
                     jsonTickets.add(jsonTicket);
                 }

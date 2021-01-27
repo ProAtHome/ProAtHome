@@ -164,6 +164,7 @@ public class ControladorProfesor {
                     jsonTicket.put("estatus", resultado.getInt("estatus"));
                     jsonTicket.put("idUsuario", resultado.getInt("idUsuario"));
                     jsonTicket.put("idOperador", resultado.getInt("operadores_idoperadores"));
+                    jsonTicket.put("categoria", resultado.getString("categoria"));
                     jsonTicket.put("sinTickets", false);
                     jsonTickets.add(jsonTicket);
                 }
@@ -508,18 +509,12 @@ public class ControladorProfesor {
     }//Fin método informacionSesionMatch.
     
     public JSONArray obtenerSesionesMovil(){
-        
         conectar = ConexionMySQL.connection();
-        
-        if(conectar != null){
-            
-            try{
-                
+        if(conectar != null){ 
+            try{   
                 PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes");
-                ResultSet resultado = sesiones.executeQuery();
-                
-                while(resultado.next()){
-                    
+                ResultSet resultado = sesiones.executeQuery();             
+                while(resultado.next()){ 
                     JSONObject json = new JSONObject();
                     json.put("idSesion", resultado.getInt("idsesiones"));
                     json.put("latitud", resultado.getDouble("latitud"));
@@ -529,21 +524,16 @@ public class ControladorProfesor {
                     json.put("idSeccion", resultado.getInt("idSeccion"));
                     json.put("idNivel", resultado.getInt("idNivel"));
                     json.put("idBloque", resultado.getInt("idBloque"));
+                    json.put("tipoPlan", resultado.getString("tipoPlan"));
                     arrayJson.add(json);
-                    json = null;
-                    
-                }
-                
-                
-                
+                    json = null;  
+                }  
             }catch(SQLException ex){
                 ex.printStackTrace();
             }
             
-        }else{
-            
-            System.out.println("Error en obtenerSesionesMovil.");
-            
+        }else{ 
+            System.out.println("Error en obtenerSesionesMovil."); 
         }
         
         return arrayJson;
