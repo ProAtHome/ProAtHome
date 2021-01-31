@@ -335,16 +335,14 @@ public class ControladorProfesor {
                 ResultSet resultado = obtenerDatos.executeQuery();
 
                 if (resultado.next()) {
-
                     profesor.setIdProfesor(resultado.getInt("idprofesores"));
                     profesor.setNombre(resultado.getString("nombre"));
                     profesor.setFoto(resultado.getString("foto"));
                     profesor.setEstado(resultado.getString("estado"));
                     profesorRegistrado = true;
-                } else {
+                } else 
                     profesorRegistrado = false;                   
-                }
-
+                
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }

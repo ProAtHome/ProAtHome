@@ -78,9 +78,21 @@ public class RESTProAtHome {
     }
     
     @GET
+    @Path("/getSolicitudesAsignadasEstudiantes/{idOperador}")
+    public JSONArray getSolicitudesAsignadasEstudiantes(@PathParam("idOperador") int idOperador){
+        return admin.getSolicitudesAsignadasEstudiantes(idOperador);
+    }
+    
+    @GET
     @Path("/getSolicitudesAsignadas/{idOperador}")
     public JSONArray getSolicitudesAsignadas(@PathParam("idOperador") int idOperador){
         return admin.getSolicitudesAsignadas(idOperador);
+    }
+    
+    @GET
+    @Path("/obtenerSolicitudesEstudiantes")
+    public JSONArray obtenerSolicitudesEstudiantes(){
+        return admin.obtenerSolicitudesEstudiantes();
     }
     
     @GET
@@ -197,6 +209,17 @@ public class RESTProAtHome {
     }
     
     @POST
+    @Path("/asociarSolicitudEstudiante")
+    public void asociarSolicitudEstudiante(String datos){
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            admin.asociarSolicitudEstudiante(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @POST
     @Path("/asociarSolicitud")
     public void asociarSolicitud(String datos){
         try{
@@ -265,6 +288,31 @@ public class RESTProAtHome {
             JSONObject asociarJSON = (JSONObject) parser.parse(datos);
             admin.asociarTicketAdmin(Integer.parseInt(asociarJSON.get("idTicket").toString()),
                     Integer.parseInt(asociarJSON.get("idOperador").toString()));
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @PUT
+    @Path("/activarEstudiante")
+    public JSONObject activarEstudiante(String datos){
+        JSONObject respuesta = new JSONObject();
+        try{
+            JSONObject datosJSON = (JSONObject) parser.parse(datos);
+            respuesta = admin.activarEstudiante(datosJSON);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+    }
+    
+    @PUT
+    @Path("/rechazarDocumentacionEstudiante")
+    public void rechazarDocumentacionEstudiante(String datos){
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            admin.rechazarDocumentacionEstudiante(jsonDatos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }

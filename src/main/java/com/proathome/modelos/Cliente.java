@@ -10,15 +10,96 @@ import java.sql.Date;
 
 public class Cliente {
    
-    private String nombre, correo, contrasena, foto, descripcion, tipoPlan;
+    private String nombre, apellidoPaterno, apellidoMaterno, correo, celular, telefonoLocal, direccion, genero,
+            contrasena, foto, descripcion, tipoPlan, estado;
     private java.sql.Date fechaNacimiento, fechaRegistro;
-    private int edad, idCliente, monedero;
+    private int idCliente, monedero;
     public static CuentaBancaria cuenta;
     public static EvaluacionCliente evaluacion;
     public static Ubicacion ubicacion;
     
     public Cliente(){
         
+    }
+
+    public String getApellidoPaterno() {
+        return apellidoPaterno;
+    }
+
+    public void setApellidoPaterno(String apellidoPaterno) {
+        this.apellidoPaterno = apellidoPaterno;
+    }
+
+    public String getApellidoMaterno() {
+        return apellidoMaterno;
+    }
+
+    public void setApellidoMaterno(String apellidoMaterno) {
+        this.apellidoMaterno = apellidoMaterno;
+    }
+
+    public String getCelular() {
+        return celular;
+    }
+
+    public void setCelular(String celular) {
+        this.celular = celular;
+    }
+
+    public String getTelefonoLocal() {
+        return telefonoLocal;
+    }
+
+    public void setTelefonoLocal(String telefonoLocal) {
+        this.telefonoLocal = telefonoLocal;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public static CuentaBancaria getCuenta() {
+        return cuenta;
+    }
+
+    public static void setCuenta(CuentaBancaria cuenta) {
+        Cliente.cuenta = cuenta;
+    }
+
+    public static EvaluacionCliente getEvaluacion() {
+        return evaluacion;
+    }
+
+    public static void setEvaluacion(EvaluacionCliente evaluacion) {
+        Cliente.evaluacion = evaluacion;
+    }
+
+    public static Ubicacion getUbicacion() {
+        return ubicacion;
+    }
+
+    public static void setUbicacion(Ubicacion ubicacion) {
+        Cliente.ubicacion = ubicacion;
     }
 
     public String getTipoPlan() {
@@ -99,14 +180,6 @@ public class Cliente {
 
     public void setFechaRegistro(Date fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
-    }
-
-    public int getEdad() {
-        return edad;
-    }
-
-    public void setEdad(int edad) {
-        this.edad = edad;
     }
     
 }

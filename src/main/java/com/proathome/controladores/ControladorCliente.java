@@ -30,6 +30,29 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public JSONObject estatusDocumentos(int idCliente){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject estatus = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement documentos = conectar.prepareStatement("SELECT * FROM documentacioncliente WHERE clientes_idclientes = ?");
+                documentos.setInt(1, idCliente  );
+                ResultSet resultado = documentos.executeQuery();
+                
+                if(resultado.next())
+                    estatus.put("estatus", true);
+                else
+                    estatus.put("estatus", false);
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else
+            System.out.println("Error en estatusDocumentos.");
+        
+        return estatus;
+    }
+    
     public void finalizarTicket(int idTicket){
         Connection conectar = ConexionMySQL.connection();
         
@@ -1002,13 +1025,9 @@ public class ControladorCliente {
     }//Fin método actualizarDatosPerfil.
 
     public void iniciarSesion(String correo, String contrasena) {
-
          Connection conectar = ConexionMySQL.connection();
-
         if (conectar != null) {
-
             try {
-
                 String query = "SELECT * FROM clientes WHERE BINARY correo = ? AND BINARY contrasena = ?";
                 PreparedStatement obtenerDatos = conectar.prepareStatement(query);
                 obtenerDatos.setString(1, correo);
@@ -1016,30 +1035,20 @@ public class ControladorCliente {
                 ResultSet resultado = obtenerDatos.executeQuery();
 
                 if (resultado.next()) {
-
                     cliente.setIdCliente(resultado.getInt("idclientes"));
                     cliente.setNombre(resultado.getString("nombre"));
-                    cliente.setFoto(resultado.getString("foto"));
-                    
+                    cliente.setFoto(resultado.getString("foto")); 
+                    cliente.setEstado(resultado.getString("estado"));
                     clienteRegistrado = true;
-
                 } else {
-
                     clienteRegistrado = false;
-
                 }
-
             } catch (SQLException ex) {
-
-                System.out.println(ex.getMessage());
-
+                ex.printStackTrace();
             }
 
-        } else {
-
+        } else 
             System.out.println("Error en la conexión iniciarSesion.");
-
-        }
 
     }//Fin método iniciarSesion.
     
@@ -1107,7 +1116,6 @@ public class ControladorCliente {
                     cliente.setNombre(resultado.getString("nombre"));
                     cliente.setCorreo(resultado.getString("correo"));
                     cliente.setContrasena(resultado.getString("contrasena"));
-                    cliente.setEdad(resultado.getInt("edad"));
                     cliente.setFechaNacimiento(resultado.getDate("fechaNacimiento"));
                     cliente.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
                     cliente.setFoto(resultado.getString("foto"));
@@ -1154,49 +1162,49 @@ public class ControladorCliente {
     public void nuevoCliente(JSONObject jsonCliente) {
 
         cliente.setNombre(String.valueOf(jsonCliente.get("nombre")));
+        cliente.setApellidoPaterno(jsonCliente.get("paterno").toString());
+        cliente.setApellidoMaterno(jsonCliente.get("materno").toString());
         cliente.setCorreo(String.valueOf(jsonCliente.get("correo")));
+        cliente.setCelular(jsonCliente.get("celular").toString());
+        cliente.setTelefonoLocal(jsonCliente.get("telefono").toString());
+        cliente.setDireccion(jsonCliente.get("direccion").toString());
+        cliente.setGenero(jsonCliente.get("genero").toString());
+        cliente.setEstado("REGISTRO");
         cliente.setContrasena(String.valueOf(jsonCliente.get("contrasena")));
 
         //Formateo de fechas a tipo SQL Date.
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         java.sql.Date dateFechaNacimiento = (java.sql.Date.valueOf(String.valueOf(jsonCliente.get("fechaNacimiento"))));
-        java.sql.Date dateFechaRegistro = (java.sql.Date.valueOf(String.valueOf(jsonCliente.get("fechaRegistro"))));
 
         cliente.setFechaNacimiento(dateFechaNacimiento);
-        cliente.setFechaRegistro(dateFechaRegistro);
-        cliente.setEdad(Integer.parseInt(String.valueOf(jsonCliente.get("edad"))));
+        cliente.setFechaRegistro(java.sql.Date.valueOf("2021-01-27"));
 
     }//Fin Constructor.
 
     public void guardarCliente() {
 
          Connection conectar = ConexionMySQL.connection();
-
         if (conectar != null) {
-
             try {
-
-                String query = "INSERT INTO clientes (nombre, correo, contrasena, edad, fechaNacimiento, fechaDeRegistro) VALUES (?,?,?,?,?,?)";
+                String query = "INSERT INTO clientes (nombre, apellidoPaterno, apellidoMaterno, correo, celular, telefonoLocal, direccion, fechaNacimiento, genero, fechaDeRegistro, contrasena, estado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setString(1, cliente.getNombre());
-                agregarDatos.setString(2, cliente.getCorreo());
-                agregarDatos.setString(3, cliente.getContrasena());
-                agregarDatos.setInt(4, cliente.getEdad());
-                agregarDatos.setDate(5, cliente.getFechaNacimiento());
-                agregarDatos.setDate(6, cliente.getFechaRegistro());
+                agregarDatos.setString(2, cliente.getApellidoPaterno());
+                agregarDatos.setString(3, cliente.getApellidoMaterno());
+                agregarDatos.setString(4, cliente.getCorreo());
+                agregarDatos.setString(5, cliente.getCelular());
+                agregarDatos.setString(6, cliente.getTelefonoLocal());
+                agregarDatos.setString(7, cliente.getDireccion());
+                agregarDatos.setDate(8, cliente.getFechaNacimiento());
+                agregarDatos.setString(9, cliente.getGenero());
+                agregarDatos.setDate(10, cliente.getFechaRegistro());
+                agregarDatos.setString(11, cliente.getContrasena());
+                agregarDatos.setString(12, cliente.getEstado());
                 agregarDatos.execute();
-
             } catch (SQLException ex) {
-
-                System.out.println(ex.getMessage());
-
+                ex.printStackTrace();
             }
-
-        } else {
-
+        } else 
             System.out.println("Error en la conexión guardarCliente.");
-
-        }
 
     }//Fin método guardarCliente.
 

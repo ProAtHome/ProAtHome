@@ -24,6 +24,35 @@ public class ControladorAdmin {
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
     
+    public JSONObject activarEstudiante(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                System.out.println(jsonDatos);
+                //Cambiar el estatus activo y foto
+                PreparedStatement actualizar = conectar.prepareStatement("UPDATE clientes SET foto = ?, estado = ? WHERE idclientes = ?");
+                actualizar.setString(1, jsonDatos.get("foto").toString());
+                actualizar.setString(2, "ACTIVO");
+                actualizar.setInt(3, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                actualizar.execute();
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Perfil activado correctamente.");
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Ocurrió un error al consultar en BD.");
+            }
+            
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Ocurrió un error en el servidor.");
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject getPerfilProfesor(int idProfesor){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
@@ -616,14 +645,77 @@ public class ControladorAdmin {
         }
     }
     
+    public void rechazarDocumentacionEstudiante(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                //Cambiar estatus a registro.
+                PreparedStatement registro = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
+                registro.setString(1, "REGISTRO");
+                registro.setInt(2, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                registro.execute();
+                //Eliminamos la documentación.
+                PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM documentacioncliente WHERE idDocumentacion = ? AND clientes_idclientes= ?");
+                eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idDocumentacion").toString()));
+                eliminar.setInt(2, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                eliminar.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en rechazarDocumentación.");
+        }
+    }
+    
+    public JSONArray getSolicitudesAsignadasEstudiantes(int idOperador){
+        Connection conectar = ConexionMySQL.connection();
+        JSONArray jsonAsignados = new JSONArray();
+        
+        if(conectar != null){
+            try{ 
+                PreparedStatement asigandos = conectar.prepareStatement("SELECT * FROM documentacioncliente INNER JOIN clientes WHERE documentacioncliente.operadores_idoperadores = ? AND clientes.idclientes = documentacioncliente.clientes_idclientes");
+                asigandos.setInt(1, idOperador);
+                ResultSet resultado = asigandos.executeQuery();
+                
+                while(resultado.next()){
+                    //Consultar primero si ya esta activo
+                    PreparedStatement cita = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ? AND estado = ?");
+                    cita.setInt(1, resultado.getInt("clientes_idclientes"));
+                    cita.setString(2, "ACTIVO");
+                    ResultSet resultadoCita = cita.executeQuery();
+                    if(!resultadoCita.next()){
+                        JSONObject jsonProf = new JSONObject();
+                        jsonProf.put("nombre", resultado.getString("nombre") + " " + resultado.getString("apellidoPaterno") + " " + resultado.getString("apellidoMaterno"));
+                        jsonProf.put("correo", resultado.getString("correo"));
+                        jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                        jsonProf.put("direccion", resultado.getString("direccion"));
+                        jsonProf.put("celular", resultado.getString("celular"));
+                        jsonProf.put("telefono", resultado.getString("telefonoLocal"));
+                        jsonProf.put("fechaNacimiento", resultado.getDate("fechaNacimiento"));
+                        jsonProf.put("foto", resultado.getString("foto"));
+                        jsonProf.put("ine", resultado.getString("ine"));
+                        jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
+                        jsonProf.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                        jsonAsignados.add(jsonProf);
+                    } 
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en getSolicitudesAsignadas.");
+        }
+        
+        return jsonAsignados;
+    }
+    
     public JSONArray getSolicitudesAsignadas(int idOperador){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonAsignados = new JSONArray();
         
         if(conectar != null){
-            try{
-                
-                
+            try{ 
                 PreparedStatement asigandos = conectar.prepareStatement("SELECT * FROM documentacionprofesor INNER JOIN profesores WHERE documentacionprofesor.operadores_idoperadores = ? AND profesores.idprofesores = documentacionprofesor.profesores_idprofesores");
                 asigandos.setInt(1, idOperador);
                 ResultSet resultado = asigandos.executeQuery();
@@ -657,6 +749,22 @@ public class ControladorAdmin {
         return jsonAsignados;
     }
     
+    public void asociarSolicitudEstudiante(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        if(conectar != null){
+            try{
+                PreparedStatement asociar = conectar.prepareStatement("UPDATE documentacioncliente SET operadores_idoperadores = ? WHERE idDocumentacion = ?");
+                asociar.setInt(1, Integer.parseInt(jsonDatos.get("idOperador").toString()));
+                asociar.setInt(2, Integer.parseInt(jsonDatos.get("idDocumentacion").toString()));
+                asociar.execute();
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en asociarSolicitud.");
+        }
+    }
+    
     public void asociarSolicitud(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
@@ -671,6 +779,35 @@ public class ControladorAdmin {
         }else{
             System.out.println("Error en asociarSolicitud.");
         }
+    }
+    
+    public JSONArray obtenerSolicitudesEstudiantes(){
+        Connection conectar = ConexionMySQL.connection();
+        JSONArray jsonSolicitudes = new JSONArray();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement solicitudes = conectar.prepareStatement("SELECT * FROM clientes INNER JOIN documentacioncliente WHERE documentacioncliente.clientes_idclientes = clientes.idclientes AND clientes.estado = ? AND documentacioncliente.operadores_idoperadores IS NULL");
+                solicitudes.setString(1, "DOCUMENTACION");
+                ResultSet resultado = solicitudes.executeQuery();
+                while(resultado.next()){
+                    JSONObject jsonProf = new JSONObject();
+                    jsonProf.put("nombre", resultado.getString("nombre"));
+                    jsonProf.put("correo", resultado.getString("correo"));
+                    jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                    jsonProf.put("foto", resultado.getString("foto"));
+                    jsonProf.put("ine", resultado.getString("ine"));
+                    jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
+                    jsonSolicitudes.add(jsonProf);
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            System.out.println("Error en obtenerSolicitudes.");
+        }
+        
+        return jsonSolicitudes;
     }
     
     public JSONArray obtenerSolicitudes(){
@@ -696,7 +833,7 @@ public class ControladorAdmin {
                 ex.printStackTrace();
             }
         }else{
-            System.out.println("Error en obtenerSOlicitudes.");
+            System.out.println("Error en obtenerSolicitudes.");
         }
         
         return jsonSolicitudes;

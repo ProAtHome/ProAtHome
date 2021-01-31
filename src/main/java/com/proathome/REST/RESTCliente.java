@@ -39,6 +39,12 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/estatusDocumentos/{idCliente}")
+    public JSONObject estatusDocumentos(@PathParam("idCliente") int idCliente){
+        return cliente.estatusDocumentos(idCliente);
+    }
+    
+    @GET
     @Path("/finalizarTicket/{idTicket}")
     public void solicitudTicketFinalizado(@PathParam("idTicket") int idTicket){
         cliente.finalizarTicket(idTicket);
@@ -153,8 +159,6 @@ public class RESTCliente {
     @Path("/sesionCliente/{correo}/{contrasena}")
     public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena) {
         cliente.iniciarSesion(correo, contrasena);
-        gson.toJson(cliente.datosSesion());
-        
         return gson.toJson(cliente.datosSesion());
     }//Fin método sesionCliente.
 
@@ -303,22 +307,11 @@ public class RESTCliente {
             ex.printStackTrace();
         }
     }//Fin método actializarFoto.
-    
-    @POST
-    @Path("/agregarClienteWeb")
-    public void agregarClienteWeb(String datos) {
-        try {
-            JSONObject jsonCliente = (JSONObject) parser.parse(datos);
-            cliente.nuevoCliente(jsonCliente);
-            cliente.guardarCliente();
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-        }
-    }//Fin método agregarCliente.
 
     @POST
     @Path("/agregarCliente")
-    public Response agregarCliente(String datos) {
+    public void agregarCliente(String datos) {
+        
         try {
             JSONObject jsonCliente = (JSONObject) parser.parse(datos);
             cliente.nuevoCliente(jsonCliente);
@@ -326,8 +319,7 @@ public class RESTCliente {
         } catch (ParseException ex) {
             ex.printStackTrace();
         }
-        
-         return Response.ok("Registro Exitoso.",MediaType.APPLICATION_JSON).build();
+        System.out.println(datos);
     }//Fin método agregarCliente.
     
     @POST
