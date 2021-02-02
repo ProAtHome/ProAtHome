@@ -35,7 +35,13 @@ public class RESTProAtHome {
     
     // CREAR UN LATIDO DE CORAZON MYSQL.
     
-     @GET
+    @GET
+    @Path("/verClase/{idSesion}")
+    public JSONObject verClase(@PathParam("idSesion") int idSesion){
+        return admin.verClase(idSesion);
+    }
+    
+    @GET
     @Path("/getPerfilProfesor/{idProfesor}")
     public JSONObject getPerfilProfesor(@PathParam("idProfesor") int idProfesor){
         return admin.getPerfilProfesor(idProfesor);

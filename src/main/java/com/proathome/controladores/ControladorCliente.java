@@ -138,7 +138,11 @@ public class ControladorCliente {
         
         if(conectar != null){
             try{
-                PreparedStatement nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario, categoria) VALUES (?,?,?,?,?,?,?)");
+                PreparedStatement nuevoTicket;
+                //Validar si es tipo General o Clase
+                if(Integer.parseInt(jsonDatos.get("idSesion").toString()) == 0)
+                    nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario, categoria) VALUES (?,?,?,?,?,?,?)");
+                else nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario, categoria, sesiones_idsesiones) VALUES (?,?,?,?,?,?,?,?)");
                 nuevoTicket.setInt(1, Integer.parseInt(jsonDatos.get("tipoUsuario").toString()));
                 nuevoTicket.setString(2, jsonDatos.get("topico").toString());
                 nuevoTicket.setString(3, jsonDatos.get("descripcion").toString());
@@ -146,6 +150,8 @@ public class ControladorCliente {
                 nuevoTicket.setInt(5, Integer.parseInt(jsonDatos.get("estatus").toString()));
                 nuevoTicket.setInt(6, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
                 nuevoTicket.setString(7, jsonDatos.get("categoria").toString());
+                if(Integer.parseInt(jsonDatos.get("idSesion").toString()) != 0)
+                    nuevoTicket.setInt(8, Integer.parseInt(jsonDatos.get("idSesion").toString()));
                 nuevoTicket.execute();
             }catch(SQLException ex){
                 ex.printStackTrace();

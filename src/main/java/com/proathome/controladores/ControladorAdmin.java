@@ -24,6 +24,101 @@ public class ControladorAdmin {
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
     
+    public JSONObject getProfesor(int idProfesor, Connection conectar){
+        JSONObject profesor = new JSONObject();
+        try{
+            PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM profesores WHERE idprofesores = ?");
+            consulta.setInt(1, idProfesor);
+            ResultSet resultado = consulta.executeQuery();
+            
+            if(resultado.next()){
+                profesor.put("nombre", resultado.getString("nombre"));
+                profesor.put("correo", resultado.getString("correo"));
+            }else{
+                profesor.put("nombre", "Error al obtener nombre de profesor.");
+                profesor.put("correo", "Error al obtener correo de profesor.");
+            }
+        }catch(SQLException ex){
+            ex.printStackTrace();
+            profesor.put("nombre", "Error al obtener nombre de profesor.");
+            profesor.put("correo", "Error al obtener correo de profesor.");
+        }
+        
+        return profesor;
+    }
+    
+    public JSONObject verClase(int idSesion){
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ?");
+                consulta.setInt(1, idSesion);
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    JSONObject datosSesion = new JSONObject();
+                    JSONObject profesor = getProfesor(resultado.getInt("profesores_idprofesores"), conectar);
+                    datosSesion.put("profesor", resultado.getInt("profesores_idprofesores") == 0 ? "Sin profesor asignado" : profesor.get("nombre").toString());
+                    datosSesion.put("correo",  resultado.getInt("profesores_idprofesores") == 0 ? "Sin profesor asignado" : profesor.get("correo").toString());
+                    datosSesion.put("horario", resultado.getString("horario"));
+                    datosSesion.put("lugar", resultado.getString("lugar"));
+                    datosSesion.put("tiempo", resultado.getInt("tiempo"));
+                    datosSesion.put("extras", resultado.getString("extras"));
+                    datosSesion.put("tipoClase", resultado.getString("tipoClase"));
+                    datosSesion.put("latitud", resultado.getDouble("latitud"));
+                    datosSesion.put("longitud", resultado.getDouble("longitud"));
+                    datosSesion.put("idSeccion", resultado.getInt("idSeccion"));
+                    datosSesion.put("idNivel", resultado.getInt("idNivel"));
+                    datosSesion.put("idBloque", resultado.getInt("idBloque"));
+                    datosSesion.put("fecha", resultado.getDate("fecha"));
+                    datosSesion.put("estatus", resultado.getInt("estatus"));
+                    datosSesion.put("progreso", resultado.getInt("progreso"));
+                    datosSesion.put("progresoSegundos", resultado.getInt("progresoSegundos"));
+                    datosSesion.put("finalizado", resultado.getBoolean("finalizado"));
+                    datosSesion.put("TE", resultado.getBoolean("TE"));
+                    datosSesion.put("progresoTE", resultado.getInt("progresoTE"));
+                    datosSesion.put("progresoSegundosTE", resultado.getInt("progresoSegundosTE"));
+                    datosSesion.put("sumar", resultado.getBoolean("sumar"));
+                    datosSesion.put("tipoPlan", resultado.getString("tipoPlan"));
+                    
+                    //Consultar pago
+                    PreparedStatement consultaPago = conectar.prepareStatement("SELECT * FROM pagos WHERE idSesion = ?");
+                    consultaPago.setInt(1, idSesion);
+                    ResultSet resultadoPago = consultaPago.executeQuery();
+                    
+                    if(resultadoPago.next()){
+                        JSONObject pago = new JSONObject();
+                        pago.put("token", resultadoPago.getString("token"));
+                        pago.put("costoClase", resultadoPago.getDouble("costoClase"));
+                        pago.put("costoTE", resultadoPago.getDouble("costoTE"));
+                        pago.put("estatusPago", resultadoPago.getString("estatusPago"));
+                        datosSesion.put("pago", true);
+                        datosSesion.put("datosPago", pago);
+                    }else
+                        datosSesion.put("pago", false);
+                    
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", datosSesion);
+                }else{
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", "Error en la conexión, sin resultados.");
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+            
+        
+        return respuesta;
+    }
+    
     public JSONObject activarEstudiante(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
@@ -940,6 +1035,7 @@ public class ControladorAdmin {
                     ticket.put("estatus", resultado.getInt("estatus"));
                     ticket.put("idUsuario", resultado.getInt("idUsuario"));
                     ticket.put("tipoUsuario", resultado.getInt("tipoUsuario"));
+                    ticket.put("idSesion", resultado.getInt("sesiones_idsesiones"));
                     jsonFinalizados.add(ticket);
                 }
             }catch(SQLException ex){
@@ -974,6 +1070,7 @@ public class ControladorAdmin {
                     jsonObject.put("fechaCreacion", resultado.getDate("fechaCreacion"));
                     jsonObject.put("estatus", resultado.getInt("estatus"));
                     jsonObject.put("idUsuario", resultado.getInt("idUsuario"));
+                    jsonObject.put("idSesion", resultado.getInt("sesiones_idsesiones"));
                     jsonAsociados.add(jsonObject);
                 }
             }catch(SQLException ex){
@@ -1031,6 +1128,7 @@ public class ControladorAdmin {
                     ticketInfo.put("descripcion", resultado.getString("descripcion"));
                     ticketInfo.put("fechaCreacion", resultado.getDate("fechaCreacion"));
                     ticketInfo.put("categoria", resultado.getString("categoria"));
+                    ticketInfo.put("idSesion", resultado.getInt("sesiones_idsesiones"));
                 }
                 
             }catch(SQLException ex){
@@ -1065,6 +1163,7 @@ public class ControladorAdmin {
                     jsonObject.put("fechaCreacion", resultado.getDate("fechaCreacion"));
                     jsonObject.put("estatus", resultado.getInt("estatus"));
                     jsonObject.put("idUsuario", resultado.getInt("idUsuario"));
+                    jsonObject.put("idSesion", resultado.getInt("sesiones_idsesiones"));
                     tickets.add(jsonObject);
                 }
                 
