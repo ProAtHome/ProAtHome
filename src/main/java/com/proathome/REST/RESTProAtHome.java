@@ -173,6 +173,21 @@ public class RESTProAtHome {
     }//Fin método iniciarSesion.
     
     @POST
+    @Path("/crearReporte")
+    public JSONObject crearReporte(String datos){
+        System.out.println("ss");
+        JSONObject respuesta = null;
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = admin.crearReporte(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+    }
+    
+    @POST
     @Path("/guardarOperador")
     public JSONObject guardarOperador(String datos){
         JSONObject jsonRespuesta = new JSONObject();

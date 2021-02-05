@@ -24,6 +24,57 @@ public class ControladorAdmin {
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
     
+    public JSONObject crearReporte(JSONObject jsonDatos){
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+  
+        if(conectar != null){
+            try{
+                PreparedStatement guardar = conectar.prepareStatement("INSERT INTO reportes (descripcion, idUsuario, tipoUsuario, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?)");
+                guardar.setString(1, jsonDatos.get("descripcionReporte").toString());
+                guardar.setInt(2, Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()));
+                guardar.setString(3, jsonDatos.get("tipoUsuarioReportado").toString());
+                guardar.setInt(4, Integer.parseInt(jsonDatos.get("idTicket").toString()));
+                guardar.execute();
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Reporte creado correctamente,");
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD,");
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD,");
+        }      
+        
+        return respuesta;
+    }
+    
+    public JSONObject getEstudiante(int idEstudiante, Connection conectar){
+        JSONObject estudiante = new JSONObject();
+        try{
+            PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
+            consulta.setInt(1, idEstudiante);
+            ResultSet resultado = consulta.executeQuery();
+            
+            if(resultado.next()){
+                estudiante.put("idEstudiante", resultado.getInt("idclientes"));
+                estudiante.put("nombre", resultado.getString("nombre") + resultado.getString("apellidoPaterno") + resultado.getString("apellidoMaterno"));
+                estudiante.put("correo", resultado.getString("correo"));
+            }else{
+                estudiante.put("idEstudiante", "Error al obtener estudiante.");
+                estudiante.put("nombre", "Error al obtener estudiante.");
+                estudiante.put("correo", "Error al obtener estudiante.");
+            }
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+        
+        return estudiante;
+    }
+    
     public JSONObject getProfesor(int idProfesor, Connection conectar){
         JSONObject profesor = new JSONObject();
         try{
@@ -60,8 +111,13 @@ public class ControladorAdmin {
                 if(resultado.next()){
                     JSONObject datosSesion = new JSONObject();
                     JSONObject profesor = getProfesor(resultado.getInt("profesores_idprofesores"), conectar);
+                    JSONObject estudiante = getEstudiante(resultado.getInt("clientes_idclientes"), conectar);
                     datosSesion.put("profesor", resultado.getInt("profesores_idprofesores") == 0 ? "Sin profesor asignado" : profesor.get("nombre").toString());
                     datosSesion.put("correo",  resultado.getInt("profesores_idprofesores") == 0 ? "Sin profesor asignado" : profesor.get("correo").toString());
+                    datosSesion.put("idProfesor", resultado.getInt("profesores_idprofesores"));
+                    datosSesion.put("idEstudiante", estudiante.get("idEstudiante"));
+                    datosSesion.put("estudiante", estudiante.get("nombre"));
+                    datosSesion.put("correoEstudiante", estudiante.get("correo"));
                     datosSesion.put("horario", resultado.getString("horario"));
                     datosSesion.put("lugar", resultado.getString("lugar"));
                     datosSesion.put("tiempo", resultado.getInt("tiempo"));

@@ -30,6 +30,75 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public void bloquearPerfil(int idEstudiante, Connection conectar){
+        try{
+            PreparedStatement bloquear = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
+            bloquear.setString(1, "BLOQUEADO");
+            bloquear.setInt(2, idEstudiante);
+            bloquear.execute();
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    public JSONObject getReportes(int idEstudiante){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement reportes = conectar.prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+                reportes.setInt(1, idEstudiante);
+                reportes.setString(2, "ESTUDIANTE");
+                ResultSet resultadoNum = reportes.executeQuery();
+                
+                if(resultadoNum.next()){
+                    int numReportes = resultadoNum.getInt("num");
+                    
+                    if(numReportes == 0){
+                        JSONObject mensaje = new JSONObject();
+                        mensaje.put("reportes", numReportes);
+                        mensaje.put("aviso", "Sin reportes");
+                        respuesta.put("respuesta", true);
+                        respuesta.put("mensaje", mensaje);
+                    }else{
+                        //Verificar bloqueo
+                        if(numReportes >= 3)
+                            bloquearPerfil(idEstudiante, conectar);
+                        PreparedStatement descripcion = conectar.prepareStatement("SELECT * FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+                        descripcion.setInt(1, idEstudiante);
+                        descripcion.setString(2, "ESTUDIANTE");
+                        ResultSet resultadoDesc = descripcion.executeQuery();
+                        if(resultadoDesc.next()){
+                            String desText = resultadoDesc.getString("descripcion");
+                            JSONObject mensaje = new JSONObject();
+                            mensaje.put("reportes", numReportes);
+                            mensaje.put("aviso", desText);
+                            respuesta.put("respuesta", true);
+                            respuesta.put("mensaje", mensaje);
+                        }else{
+                            respuesta.put("respuesta", false);
+                            respuesta.put("mensaje", "Error en la conexión a BD");
+                        }
+                    }
+                    
+                }else{
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", "Error en la conexión a BD");
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD");
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD");
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject estatusDocumentos(int idCliente){
         Connection conectar = ConexionMySQL.connection();
         JSONObject estatus = new JSONObject();

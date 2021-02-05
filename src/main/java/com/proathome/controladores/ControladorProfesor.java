@@ -28,6 +28,79 @@ public class ControladorProfesor {
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
     
+    public void bloquearPerfil(int idProfesor, Connection conectar){
+        try{
+            PreparedStatement bloquear = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
+            bloquear.setString(1, "BLOQUEADO");
+            bloquear.setInt(2, idProfesor);
+            bloquear.execute();
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    public JSONObject getReportes(int idProfesor){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement reportes = conectar.prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+                reportes.setInt(1, idProfesor);
+                reportes.setString(2, "PROFESOR");
+                ResultSet resultadoNum = reportes.executeQuery();
+                
+                if(resultadoNum.next()){
+                    int numReportes = resultadoNum.getInt("num");
+                    
+                    if(numReportes == 0){
+                        JSONObject mensaje = new JSONObject();
+                        mensaje.put("reportes", numReportes);
+                        mensaje.put("aviso", "Sin reportes");
+                        respuesta.put("respuesta", true);
+                        respuesta.put("mensaje", mensaje);
+                    }else{
+                        //Verificar bloqueo
+                        if(numReportes >= 3)
+                            bloquearPerfil(idProfesor, conectar);
+                        PreparedStatement descripcion = conectar.prepareStatement("SELECT * FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+                        descripcion.setInt(1, idProfesor);
+                        descripcion.setString(2, "PROFESOR");
+                        ResultSet resultadoDesc = descripcion.executeQuery();
+                        if(resultadoDesc.next()){
+                            String desText = null;
+                            while(resultadoDesc.next()){
+                                desText = resultadoDesc.getString("descripcion");
+                            }
+
+                            JSONObject mensaje = new JSONObject();
+                            mensaje.put("reportes", numReportes);
+                            mensaje.put("aviso", desText);
+                            respuesta.put("respuesta", true);
+                            respuesta.put("mensaje", mensaje);
+                        }else{
+                            respuesta.put("respuesta", false);
+                            respuesta.put("mensaje", "Error en la conexión a BD");
+                        }
+                    }
+                    
+                }else{
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", "Error en la conexión a BD");
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD");
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD");
+        }
+        
+        return respuesta;
+    }
+    
     public void agendarCita(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         
@@ -104,7 +177,11 @@ public class ControladorProfesor {
         
         if(conectar != null){
             try{
-                PreparedStatement nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario, categoria) VALUES (?,?,?,?,?,?,?)");
+                PreparedStatement nuevoTicket;
+                //Validar si es tipo General o Clase
+                if(Integer.parseInt(jsonDatos.get("idSesion").toString()) == 0)
+                    nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario, categoria) VALUES (?,?,?,?,?,?,?)");
+                else nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario, categoria, sesiones_idsesiones) VALUES (?,?,?,?,?,?,?,?)");
                 nuevoTicket.setInt(1, Integer.parseInt(jsonDatos.get("tipoUsuario").toString()));
                 nuevoTicket.setString(2, jsonDatos.get("topico").toString());
                 nuevoTicket.setString(3, jsonDatos.get("descripcion").toString());
@@ -112,6 +189,8 @@ public class ControladorProfesor {
                 nuevoTicket.setInt(5, Integer.parseInt(jsonDatos.get("estatus").toString()));
                 nuevoTicket.setInt(6, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
                 nuevoTicket.setString(7, jsonDatos.get("categoria").toString());
+                if(Integer.parseInt(jsonDatos.get("idSesion").toString()) != 0)
+                    nuevoTicket.setInt(8, Integer.parseInt(jsonDatos.get("idSesion").toString()));
                 nuevoTicket.execute();
             }catch(SQLException ex){
                 ex.printStackTrace();

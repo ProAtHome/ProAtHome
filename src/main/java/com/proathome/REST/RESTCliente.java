@@ -39,6 +39,12 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/getReportes/{idEstudiante}")
+    public JSONObject getReportes(@PathParam("idEstudiante") int idEstudiante){
+        return cliente.getReportes(idEstudiante);
+    }
+    
+    @GET
     @Path("/estatusDocumentos/{idCliente}")
     public JSONObject estatusDocumentos(@PathParam("idCliente") int idCliente){
         return cliente.estatusDocumentos(idCliente);
