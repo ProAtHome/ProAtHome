@@ -18,11 +18,85 @@ import org.json.simple.JSONObject;
  */
 public class ControladorAdmin {
     
-    private Gson gson;
-    private Profesor profesores[];
     private Connection conectar;
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
+    
+    public JSONObject desbloquearPerfil(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement desbloquear = null;
+                if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_ESTUDIANTE)
+                    desbloquear = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
+                else if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_PROFESOR)
+                    desbloquear = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
+                
+                desbloquear.setString(1, "ACTIVO");
+                desbloquear.setInt(2, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
+                desbloquear.execute();
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Perfil desbloqueado correctamente.");
+            }catch(SQLException ex){
+                respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+                ex.printStackTrace();
+            }
+            
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+        
+        return respuesta;
+    }
+    
+    public void bloqueoPerfilEstudiante(int idEstudiante, Connection conectar){
+        try{
+            PreparedStatement consulta = conectar.prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+            consulta.setInt(1, idEstudiante);
+            consulta.setString(2, "ESTUDIANTE");
+            ResultSet resultado = consulta.executeQuery();
+            
+            if(resultado.next()){
+                int numReportes = resultado.getInt("num");
+                if(numReportes >= 3){
+                    //Bloqueado
+                    PreparedStatement bloquear = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
+                    bloquear.setString(1, "BLOQUEADO");
+                    bloquear.setInt(2, idEstudiante);
+                    bloquear.execute();
+                }
+            }
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    public void bloqueoPerfilProfesor(int idProfesor, Connection conectar){
+        try{
+            PreparedStatement consulta = conectar.prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+            consulta.setInt(1, idProfesor);
+            consulta.setString(2, "PROFESOR");
+            ResultSet resultado = consulta.executeQuery();
+            
+            if(resultado.next()){
+                int numReportes = resultado.getInt("num");
+                if(numReportes >= 3){
+                    //Bloqueado
+                    PreparedStatement bloquear = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
+                    bloquear.setString(1, "BLOQUEADO");
+                    bloquear.setInt(2, idProfesor);
+                    bloquear.execute();
+                }
+            }
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+    }
     
     public JSONObject crearReporte(JSONObject jsonDatos){
         JSONObject respuesta = new JSONObject();
@@ -36,6 +110,12 @@ public class ControladorAdmin {
                 guardar.setString(3, jsonDatos.get("tipoUsuarioReportado").toString());
                 guardar.setInt(4, Integer.parseInt(jsonDatos.get("idTicket").toString()));
                 guardar.execute();
+                
+                //Validar bloqueo de perfil
+                if(jsonDatos.get("tipoUsuarioReportado").toString().equals("ESTUDIANTE"))
+                    bloqueoPerfilEstudiante(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()), conectar);
+                else if(jsonDatos.get("tipoUsuarioReportado").toString().equals("PROFESOR"))
+                    bloqueoPerfilProfesor(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()), conectar);
                 
                 respuesta.put("respuesta", true);
                 respuesta.put("mensaje", "Reporte creado correctamente,");
@@ -281,6 +361,7 @@ public class ControladorAdmin {
                    JSONObject jsonPerfil = new JSONObject();
                    jsonPerfil.put("nombre", resPerfil.getString("nombre"));
                    jsonPerfil.put("correo", resPerfil.getString("correo"));
+                   jsonPerfil.put("estado", resPerfil.getString("estado"));
                    jsonPerfil.put("tipoPlan", resPerfil.getString("tipoPlan"));
                    jsonPerfil.put("monedero", resPerfil.getInt("monedero"));
                    jsonPerfil.put("fechaNacimiento", resPerfil.getDate("fechaNacimiento"));

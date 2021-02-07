@@ -62,9 +62,9 @@ public class ControladorCliente {
                         respuesta.put("respuesta", true);
                         respuesta.put("mensaje", mensaje);
                     }else{
-                        //Verificar bloqueo
+                        /*Verificar bloqueo
                         if(numReportes >= 3)
-                            bloquearPerfil(idEstudiante, conectar);
+                            bloquearPerfil(idEstudiante, conectar);*/
                         PreparedStatement descripcion = conectar.prepareStatement("SELECT * FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
                         descripcion.setInt(1, idEstudiante);
                         descripcion.setString(2, "ESTUDIANTE");
