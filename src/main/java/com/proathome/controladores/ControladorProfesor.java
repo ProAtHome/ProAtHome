@@ -416,8 +416,8 @@ public class ControladorProfesor {
                 if (resultado.next()) {
                     profesor.setIdProfesor(resultado.getInt("idprofesores"));
                     profesor.setNombre(resultado.getString("nombre"));
-                    profesor.setFoto(resultado.getString("foto"));
                     profesor.setEstado(resultado.getString("estado"));
+                    profesor.setRangoClase(resultado.getInt("rangoClase"));
                     profesorRegistrado = true;
                 } else 
                     profesorRegistrado = false;                   
@@ -585,11 +585,27 @@ public class ControladorProfesor {
         
     }//Fin método informacionSesionMatch.
     
-    public JSONArray obtenerSesionesMovil(){
+    public JSONArray obtenerSesionesMovil(int rango){
         conectar = ConexionMySQL.connection();
+        String query = null;
+        
+        if(rango == Constantes.BASICO)
+            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.idSeccion = ? AND sesiones.clientes_idclientes = clientes.idclientes";
+        else if(rango == Constantes.INTERMEDIO)
+            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE (sesiones.idSeccion = ? OR sesiones.idSeccion = ?) AND sesiones.clientes_idclientes = clientes.idclientes";
+        else if(rango == Constantes.AVANZADO)
+            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE (sesiones.idSeccion = ? OR sesiones.idSeccion = ? OR sesiones.idSeccion = ?) AND sesiones.clientes_idclientes = clientes.idclientes";
+        
         if(conectar != null){ 
             try{   
-                PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes");
+                PreparedStatement sesiones = conectar.prepareStatement(query);
+                sesiones.setInt(1, 1);
+                if(rango == Constantes.INTERMEDIO){
+                    sesiones.setInt(2, 2);
+                }else if(rango == Constantes.AVANZADO){
+                    sesiones.setInt(2, 2);
+                    sesiones.setInt(3, 3);
+                }
                 ResultSet resultado = sesiones.executeQuery();             
                 while(resultado.next()){ 
                     JSONObject json = new JSONObject();
@@ -618,359 +634,240 @@ public class ControladorProfesor {
     }
 
     public void actualizarDatosPerfil() {
-
         conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
-
             try {
-
                 String query = "UPDATE profesores SET nombre = ?, correo = ?, descripcion = ? WHERE idprofesores = ?";
                 PreparedStatement actualizar = conectar.prepareStatement(query);
                 actualizar.setString(1, profesor.getNombre());
                 actualizar.setString(2, profesor.getCorreo());
                 actualizar.setString(3, profesor.getDescripcion());
                 actualizar.setInt(4, profesor.getIdProfesor());
-                actualizar.executeUpdate();
-
-                
-
+                actualizar.executeUpdate();               
             } catch (SQLException ex) {
-
                 System.out.println(ex.getMessage());
-
             }
-
         } else {
-
             System.out.println("Error en la conexión en actualizarDatosPerfil.");
-
         }
-
     }//Fin método actualizarDatosPerfil.
 
     public void actualizarFoto(JSONObject foto) {
-
         profesor.setFoto(String.valueOf(foto.get("nombre")));
         profesor.setIdProfesor(Integer.parseInt(String.valueOf(foto.get("idProfesor"))));
-
         conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
-
             try {
-
                 String query = "UPDATE profesores SET foto = ? WHERE idprofesores = ?";
                 PreparedStatement actualizar = conectar.prepareStatement(query);
                 actualizar.setString(1, profesor.getFoto());
                 actualizar.setInt(2, profesor.getIdProfesor());
-                actualizar.executeUpdate();
-
-                
-
+                actualizar.executeUpdate();               
             } catch (SQLException ex) {
-
                 System.out.println(ex.getMessage());
-
             }
-
         } else {
-
             System.out.println("Error en la conexión actualizarFoto.");
-
         }
 
     }//Fin método actualizarFoto.
 
     public void perfilProfesor(int idProfesor) {
-
         conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
-
             try {
-
                 String query = "SELECT * FROM profesores WHERE idprofesores = ?";
                 PreparedStatement obtenerDatos = conectar.prepareStatement(query);
                 obtenerDatos.setInt(1, idProfesor);
                 ResultSet resultado = obtenerDatos.executeQuery();
-
                 if (resultado.next()) {
-
                     profesor.setIdProfesor(resultado.getInt("idprofesores"));
-                    profesor.setNombre(resultado.getString("nombre"));
+                    profesor.setNombre(resultado.getString("nombre") + " " + resultado.getString("apellidoPaterno") + " " + resultado.getString("apellidoMaterno"));
+                    profesor.setCelular(resultado.getString("celular"));
+                    profesor.setTelefonoLocal(resultado.getString("telefonoLocal"));
+                    profesor.setDireccion(resultado.getString("direccion"));
                     profesor.setCorreo(resultado.getString("correo"));
-                    profesor.setContrasena(resultado.getString("contrasena"));
-                    profesor.setEdad(resultado.getInt("edad"));
                     profesor.setFechaNacimiento(resultado.getDate("fechaNacimiento"));
                     profesor.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
                     profesor.setFoto(resultado.getString("foto"));
-                    profesor.setDescripcion(resultado.getString("descripcion"));
-
-                    
+                    profesor.setDescripcion(resultado.getString("descripcion"));  
                     profesorRegistrado = true;
-
                 } else {
-
-                    profesorRegistrado = false;
-                    
-
+                    profesorRegistrado = false;                 
                 }
-
             } catch (SQLException ex) {
-
                 System.out.println(ex.getMessage());
-
             }
-
         } else {
-
             System.out.println("Error en la conexión iniciarSesion.");
-
         }
-
     }//Fin método perfilProfesor.
 
     public Profesor datosSesion() {
-
         if (profesorRegistrado) {
-
             return profesor;
-
         } else {
-
             return null;
-
         }
-
     }//Fin método datosSesion.
 
     public void nuevoProfesor(JSONObject jsonProfesor) {
-
         profesor.setNombre(String.valueOf(jsonProfesor.get("nombre")));
+        profesor.setApellidoPaterno(jsonProfesor.get("paterno").toString());
+        profesor.setApellidMaterno(jsonProfesor.get("materno").toString());
         profesor.setCorreo(String.valueOf(jsonProfesor.get("correo")));
         profesor.setContrasena(String.valueOf(jsonProfesor.get("contrasena")));
-
-        //Formateo de fechas a tipo SQL Date.
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         java.sql.Date dateFechaNacimiento = (java.sql.Date.valueOf(String.valueOf(jsonProfesor.get("fechaNacimiento"))));
-        java.sql.Date dateFechaRegistro = (java.sql.Date.valueOf(String.valueOf(jsonProfesor.get("fechaRegistro"))));
-
         profesor.setFechaNacimiento(dateFechaNacimiento);
-        profesor.setFechaRegistro(dateFechaRegistro);
-        profesor.setEdad(Integer.parseInt(String.valueOf(jsonProfesor.get("edad"))));
-
+        profesor.setFechaRegistro(java.sql.Date.valueOf("2021-01-27"));
+        profesor.setCelular(jsonProfesor.get("celular").toString());
+        profesor.setTelefonoLocal(jsonProfesor.get("telefono").toString());
+        profesor.setDireccion(jsonProfesor.get("direccion").toString());
+        profesor.setGenero(jsonProfesor.get("genero").toString());
     }
-
-    public ArrayList<String> obtenerTodos() {
-
-        ArrayList<String> list = new ArrayList<>();
-
+ 
+    public JSONObject guardarProfesor() {
         conectar = ConexionMySQL.connection();
-
+        JSONObject respuesta = new JSONObject();
+        
         if (conectar != null) {
-
             try {
-
-                Statement estado = conectar.createStatement();
-                ResultSet resultado = estado.executeQuery("SELECT * FROM profesores");
-
-                while (resultado.next()) {
-                    String nombre = resultado.getString("nombre");
-                    String correo = resultado.getString("correo");
-                    int id = resultado.getInt("idprofesores");
-
-                    String stringJSON = " \"id" + id + "\" :{\"nombre\" : \"" + nombre + "\", \"correo\" : \"" + correo + "\"}";
-                    list.add(stringJSON);
-
-                }
-
-                
-
-            } catch (SQLException ex) {
-
-                System.out.println(ex.getMessage());
-
-            }
-
-        } else {
-
-            System.out.println("Error en la conexión obtenerTodos");
-
-        }
-
-        return list;
-
-    }//Fin método obtenerTodos.
-
-    public void guardarProfesor() {
-
-        conectar = ConexionMySQL.connection();
-
-        if (conectar != null) {
-
-            try {
-
-                String query = "INSERT INTO profesores (nombre, correo, contrasena, edad, fechaNacimiento, fechaDeRegistro) VALUES (?,?,?,?,?,?)";
+                String query = "INSERT INTO profesores (nombre, correo, contrasena, fechaNacimiento, fechaDeRegistro, apellidoPaterno, apellidoMaterno,"
+                        + " celular, telefonoLocal, direccion, genero) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setString(1, profesor.getNombre());
                 agregarDatos.setString(2, profesor.getCorreo());
                 agregarDatos.setString(3, profesor.getContrasena());
-                agregarDatos.setInt(4, profesor.getEdad());
-                agregarDatos.setDate(5, profesor.getFechaNacimiento());
-                agregarDatos.setDate(6, profesor.getFechaRegistro());
+                agregarDatos.setDate(4, profesor.getFechaNacimiento());
+                agregarDatos.setDate(5, profesor.getFechaRegistro());
+                agregarDatos.setString(6, profesor.getApellidoPaterno());
+                agregarDatos.setString(7, profesor.getApellidMaterno());
+                agregarDatos.setString(8, profesor.getCelular());
+                agregarDatos.setString(9, profesor.getTelefonoLocal());
+                agregarDatos.setString(10, profesor.getDireccion());
+                agregarDatos.setString(11, profesor.getGenero());
                 agregarDatos.execute();
-
                 
-
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Profesor registrado exitosamente.");
             } catch (SQLException ex) {
-
-                System.out.println(ex.getMessage());
-
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
             }
-
         } else {
-
-            System.out.println("Error en la conexión agregarProfesor");
-
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
         }
 
+        return respuesta;
     }//Fin método guardarProfesor.
 
-    public CuentaBancaria obtenerCuentaBancaria(int idProfesor) {
-
-        profesor.cuenta = new CuentaBancaria();
+    public JSONObject obtenerCuentaBancaria(int idProfesor) {
+        JSONObject respuesta = new JSONObject();
+        JSONObject datos = new JSONObject();
         conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
-
             try {
-
                 Statement estado = conectar.createStatement();
                 ResultSet resultado = estado.executeQuery("SELECT * FROM datosbancariosprofesores WHERE profesores_idprofesores = " + idProfesor);
-
                 if (resultado.next()) {
-
-                    profesor.cuenta.setNombreTitular(resultado.getString("banco"));
-                    profesor.cuenta.setTarjeta(resultado.getString("direccionFacturacion"));
-                    profesor.cuenta.setMes(resultado.getString("tipoDePago"));
-                    profesor.cuenta.setAno(resultado.getString("numeroCuenta"));
-
+                    datos.put("nombreTitular", resultado.getString("nombreTitular"));
+                    datos.put("banco", resultado.getString("banco"));
+                    datos.put("clabe", resultado.getString("clabe"));
+                    datos.put("existe", true);
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", datos);
                 } else {
-
-                    return null;
-
+                    datos.put("existe", false);
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", datos);
                 }
-
-                
-
             } catch (SQLException ex) {
-
-                System.out.println(ex.getMessage());
-
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error al obtener cuenta registrada.");
             }
-
         } else {
-
-            System.out.println("Error en la conexión obtenerCuentaBancaria.");
-
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error al obtener cuenta registrada.");
         }
 
-        return profesor.cuenta;
+        return respuesta;
 
     }//Fin método obtenerCuentaBancaria.
 
-    public void nuevaCuentaBancaria(JSONObject jsonCuentaBancaria) {
-
-        profesor.cuenta = new CuentaBancaria();
-        profesor.cuenta.setNombreTitular(String.valueOf(jsonCuentaBancaria.get("banco")));
-        profesor.cuenta.setTarjeta(String.valueOf(jsonCuentaBancaria.get("direccionFacturacion")));
-        profesor.cuenta.setMes(String.valueOf(jsonCuentaBancaria.get("tipoDePago")));
-        profesor.cuenta.setAno(String.valueOf(jsonCuentaBancaria.get("numeroCuenta")));
-
-    }//Fin método nuevaCuentaBancaria.
-
-    public void guardarCuentaBancaria(int idProfesor) {
-
+    public JSONObject guardarCuentaBancaria(JSONObject jsonDatos) {
         conectar = ConexionMySQL.connection();
-
+        JSONObject respuesta = new JSONObject();
+        
         if (conectar != null) {
-
             try {
-
-                String query = "INSERT INTO datosbancariosprofesores (profesores_idprofesores, tipoDePago, banco, numeroCuenta, direccionFacturacion) VALUES (?,?,?,?,?)";
+                String query = "INSERT INTO datosbancariosprofesores (nombreTitular, banco, clabe, profesores_idprofesores) VALUES (?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
-                agregarDatos.setInt(1, idProfesor);
-                agregarDatos.setString(2, profesor.cuenta.getNombreTitular());
-                agregarDatos.setString(3, profesor.cuenta.getTarjeta());
-                agregarDatos.setString(4, profesor.cuenta.getMes());
-                agregarDatos.setString(5, profesor.cuenta.getAno());
-                agregarDatos.execute();
-
-                
-
+                agregarDatos.setString(1, jsonDatos.get("nombreTitular").toString());
+                agregarDatos.setString(2, jsonDatos.get("banco").toString());
+                agregarDatos.setString(3, jsonDatos.get("clabe").toString());
+                agregarDatos.setInt(4, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                agregarDatos.execute();    
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Datos bancarios guardados exitosamente.");
             } catch (SQLException ex) {
-
-                System.out.println(ex.getMessage());
-
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
             }
-
         } else {
-
-            System.out.println("Error en la conexión guardarCuentaBancaria.");
-
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
         }
 
+        return respuesta;
     }//Fin método guardarCuentaBancaria.
 
-    public void actualizarCuentaBancaria(int idProfesor) {
-
+    public JSONObject actualizarCuentaBancaria(JSONObject jsonDatos) {
         conectar = ConexionMySQL.connection();
-
+        JSONObject respuesta = new JSONObject();
+        
         if (conectar != null) {
-
-            try {
-                
+            try {               
                 PreparedStatement consultaRegistro = conectar.prepareStatement("SELECT * FROM datosbancariosprofesores WHERE profesores_idprofesores = ?");
-                consultaRegistro.setInt(1 , idProfesor);
+                consultaRegistro.setInt(1 , Integer.parseInt(jsonDatos.get("idProfesor").toString()));
                 ResultSet resultado = consultaRegistro.executeQuery();
                 
-                if(resultado.next()){
-                    
-                    String query = "UPDATE datosbancariosprofesores SET tipoDePago = ?, banco = ?, numeroCuenta = ?, direccionFacturacion = ? WHERE profesores_idprofesores = ?";
+                if(resultado.next()){                   
+                    String query = "UPDATE datosbancariosprofesores SET nombreTitular = ?, banco = ?, clabe = ? WHERE profesores_idprofesores = ?";
                     PreparedStatement agregarDatos = conectar.prepareStatement(query);
-                    agregarDatos.setString(1, profesor.cuenta.getNombreTitular());
-                    agregarDatos.setString(2, profesor.cuenta.getTarjeta());
-                    agregarDatos.setString(3, profesor.cuenta.getMes());
-                    agregarDatos.setString(4, profesor.cuenta.getAno());
-                    agregarDatos.setInt(5, idProfesor);
+                    agregarDatos.setString(1, jsonDatos.get("nombreTitular").toString());
+                    agregarDatos.setString(2, jsonDatos.get("banco").toString());
+                    agregarDatos.setString(3, jsonDatos.get("clabe").toString());
+                    agregarDatos.setInt(4, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
                     agregarDatos.executeUpdate();
-
-                }else{
-                    
-                    PreparedStatement insert = conectar.prepareStatement("INSERT INTO datosbancariosprofesores (profesores_idprofesores, tipoDePago, banco, numeroCuenta, direccionFacturacion) VALUES (?,?,?,?,?)");
-                    insert.setInt(1 , idProfesor);
-                    insert.setString(2, profesor.cuenta.getNombreTitular());
-                    insert.setString(3, profesor.cuenta.getTarjeta());
-                    insert.setString(4, profesor.cuenta.getMes());
-                    insert.setString(5, profesor.cuenta.getAno());
-                    insert.execute();
-                    
-                }
-
-                
-
+                }else{                 
+                    PreparedStatement insert = conectar.prepareStatement("INSERT INTO datosbancariosprofesores (nombreTitular, banco, clabe, profesores_idprofesores) VALUES (?,?,?,?)");
+                    insert.setInt(1 , Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                    insert.setString(2, jsonDatos.get("nombreTitular").toString());
+                    insert.setString(3, jsonDatos.get("banco").toString());
+                    insert.setString(4, jsonDatos.get("clabe").toString());
+                    insert.execute();                   
+                }     
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Datos actualizados exitosamente.");
             } catch (SQLException ex) {
-
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
                 System.out.println(ex.getMessage());
-
             }
-
         } else {
-
-            System.out.println("Error en la conexión guardarCuentaBancaria.");
-
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
         }
+        
+        return respuesta;
 
     }//Fin método guardarCuentaBancaria.
 

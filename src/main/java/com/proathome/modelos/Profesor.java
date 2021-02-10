@@ -10,9 +10,9 @@ import java.sql.Date;
 
 public class Profesor {
 
-    private String nombre, correo, contrasena, clv, foto, descripcion, estado;
+    private String nombre, apellidoPaterno, apellidMaterno, celular, telefonoLocal, direccion, genero, correo, contrasena, clv, foto, descripcion, estado;
     private java.sql.Date fechaNacimiento, fechaRegistro;
-    private int edad, idProfesor;
+    private int idProfesor, rangoClase;
     public static CuentaBancaria cuenta;
     public static EvaluacionProfesor evaluacion;
     public static Ubicacion ubicacion;
@@ -125,12 +125,62 @@ public class Profesor {
         this.fechaRegistro = fechaRegistro;
     }
 
-    public int getEdad() {
-        return edad;
+    public String getApellidoPaterno() {
+        return apellidoPaterno;
     }
 
-    public void setEdad(int edad) {
-        this.edad = edad;
+    public void setApellidoPaterno(String apellidoPaterno) {
+        this.apellidoPaterno = apellidoPaterno;
     }
+
+    public String getApellidMaterno() {
+        return apellidMaterno;
+    }
+
+    public void setApellidMaterno(String apellidMaterno) {
+        this.apellidMaterno = apellidMaterno;
+    }
+
+    public String getCelular() {
+        return celular;
+    }
+
+    public void setCelular(String celular) {
+        this.celular = celular;
+    }
+
+    public String getTelefonoLocal() {
+        return telefonoLocal;
+    }
+
+    public void setTelefonoLocal(String telefonoLocal) {
+        this.telefonoLocal = telefonoLocal;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
+    public int getRangoClase() {
+        return rangoClase;
+    }
+
+    public void setRangoClase(int rangoClase) {
+        this.rangoClase = rangoClase;
+    }
+
+    
   
 }

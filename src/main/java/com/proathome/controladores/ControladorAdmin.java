@@ -300,6 +300,7 @@ public class ControladorAdmin {
                    JSONObject jsonPerfil = new JSONObject();
                    jsonPerfil.put("nombre", resPerfil.getString("nombre"));
                    jsonPerfil.put("correo", resPerfil.getString("correo"));
+                   jsonPerfil.put("rango", resPerfil.getString("rangoClase"));
                    jsonPerfil.put("fechaNacimiento", resPerfil.getDate("fechaNacimiento"));
                    jsonPerfil.put("estatus", resPerfil.getString("estado"));
                    respuesta.put("perfil", jsonPerfil);
@@ -690,7 +691,7 @@ public class ControladorAdmin {
                         guardar.execute();
                         //Cambiar estatus
                         PreparedStatement estatus = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
-                        estatus.setString(1, "cita");
+                        estatus.setString(1, "CITA");
                         estatus.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
                         estatus.execute();
                         respuesta.put("respuesta", true);
@@ -712,9 +713,10 @@ public class ControladorAdmin {
         
         if(conectar != null){
             try{
-                PreparedStatement activar = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
-                activar.setString(1, "activo");
-                activar.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                PreparedStatement activar = conectar.prepareStatement("UPDATE profesores SET estado = ?, rangoClase = ? WHERE idprofesores = ?");
+                activar.setString(1, "ACTIVO");
+                activar.setInt(2, Integer.parseInt(jsonDatos.get("rango").toString()));
+                activar.setInt(3, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
                 activar.execute();
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -837,7 +839,7 @@ public class ControladorAdmin {
                         guardar.execute();
                         //Cambiar estatus
                         PreparedStatement estatus = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
-                        estatus.setString(1, "cita");
+                        estatus.setString(1, "CITA");
                         estatus.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
                         estatus.execute();
                         respuesta.put("respuesta", true);
@@ -964,7 +966,12 @@ public class ControladorAdmin {
                         jsonProf.put("nombre", resultado.getString("nombre"));
                         jsonProf.put("correo", resultado.getString("correo"));
                         jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
-                        jsonProf.put("certificado", resultado.getString("certificado"));
+                        jsonProf.put("foto", resultado.getString("foto"));
+                        jsonProf.put("acta", resultado.getString("acta"));
+                        jsonProf.put("antecedentes", resultado.getString("antecedentes"));
+                        jsonProf.put("certificado1", resultado.getString("certificado1"));
+                        jsonProf.put("certificado2", resultado.getString("certificado2"));
+                        jsonProf.put("certificado3", resultado.getString("certificado3"));
                         jsonProf.put("ine", resultado.getString("ine"));
                         jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
                         jsonProf.put("idProfesor", resultado.getInt("profesores_idprofesores"));
@@ -1049,14 +1056,19 @@ public class ControladorAdmin {
         if(conectar != null){
             try{
                 PreparedStatement solicitudes = conectar.prepareStatement("SELECT * FROM profesores INNER JOIN documentacionprofesor WHERE documentacionprofesor.profesores_idprofesores = profesores.idprofesores AND profesores.estado = ? AND documentacionprofesor.operadores_idoperadores IS NULL");
-                solicitudes.setString(1, "documentacion");
+                solicitudes.setString(1, "DOCUMENTACION");
                 ResultSet resultado = solicitudes.executeQuery();
                 while(resultado.next()){
                     JSONObject jsonProf = new JSONObject();
                     jsonProf.put("nombre", resultado.getString("nombre"));
                     jsonProf.put("correo", resultado.getString("correo"));
                     jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
-                    jsonProf.put("certificado", resultado.getString("certificado"));
+                    jsonProf.put("foto", resultado.getString("foto"));
+                    jsonProf.put("acta", resultado.getString("acta"));
+                    jsonProf.put("antecedentes", resultado.getString("antecedentes"));
+                    jsonProf.put("certificado1", resultado.getString("certificado1"));
+                    jsonProf.put("certificado2", resultado.getString("certificado2"));
+                    jsonProf.put("certificado3", resultado.getString("certificado3"));
                     jsonProf.put("ine", resultado.getString("ine"));
                     jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
                     jsonSolicitudes.add(jsonProf);
@@ -1378,33 +1390,6 @@ public class ControladorAdmin {
         
         return mensajesArray;
     }
-    
-    public void cambiarEstado(int idProfesor, boolean estado){
-        
-        conectar = ConexionMySQL.connection();
-        
-        if(conectar != null){
-            
-            try{
-                
-                PreparedStatement cambiarEstado = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
-                cambiarEstado.setBoolean(1 , estado);
-                cambiarEstado.setInt(2 , idProfesor);
-                cambiarEstado.execute();
-                
-            }catch(SQLException ex){
-                
-                ex.printStackTrace();
-                
-            }
-            
-        }else{
-            
-            System.out.println("Error en cambiarEstado.");
-            
-        }
-        
-    }//Fin método cambiarEstado.
     
     public Admin datosAdmin(String usuario, String contrasena, int idAdmin){ 
         Admin admin = new Admin();

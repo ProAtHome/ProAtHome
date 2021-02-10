@@ -39,6 +39,12 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/getDatosFiscales/{idEstudiante}")
+    public JSONObject getDatosFiscales(@PathParam("idEstudiante") int idEstudiante){
+        return cliente.getDatosFiscales(idEstudiante);
+    }
+    
+    @GET
     @Path("/getReportes/{idEstudiante}")
     public JSONObject getReportes(@PathParam("idEstudiante") int idEstudiante){
         return cliente.getReportes(idEstudiante);
@@ -213,6 +219,21 @@ public class RESTCliente {
     }//Fin método obtenerSesiones.
     
     @POST
+    @Path("/guardarDatosFiscales")
+    public JSONObject guardarDatosFiscales(String datos){
+        JSONObject respuesta = null;
+        
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = cliente.guardarDatosFiscales(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+    }
+    
+    @POST
     @Path("/enviarMsgTicket")
     public void enviarMsgTicket(JSONObject jsonDatos){
         cliente.enviarMsgTicket(jsonDatos);
@@ -316,16 +337,17 @@ public class RESTCliente {
 
     @POST
     @Path("/agregarCliente")
-    public void agregarCliente(String datos) {
-        
+    public JSONObject agregarCliente(String datos) {
+        JSONObject respuesta = new JSONObject();
         try {
             JSONObject jsonCliente = (JSONObject) parser.parse(datos);
             cliente.nuevoCliente(jsonCliente);
-            cliente.guardarCliente();
+            respuesta = cliente.guardarCliente();
         } catch (ParseException ex) {
             ex.printStackTrace();
         }
-        System.out.println(datos);
+        
+        return respuesta;
     }//Fin método agregarCliente.
     
     @POST

@@ -364,12 +364,5 @@ public class RESTProAtHome {
             ex.printStackTrace();
         }
     }
-    
-    @PUT
-    @Path("/cambiarEstado/{idProfesor}/{estado}")
-    public void cambiarEstado(@PathParam("idProfesor") int idProfesor,
-            @PathParam("estado") boolean estado){
-        admin.cambiarEstado(idProfesor, estado);
-    }//Fin método cambiarEstado.
 
 }
