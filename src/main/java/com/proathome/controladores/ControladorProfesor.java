@@ -28,6 +28,87 @@ public class ControladorProfesor {
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
     
+    public JSONObject guardarDatosFiscales(JSONObject jsonDatos){
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                //Consultar si hay registro.
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM datosfiscalesprofesores WHERE profesores_idprofesores = ?");
+                consulta.setInt(1, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    //Actualizamos
+                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE datosfiscalesprofesores SET tipoPersona = ?, razonSocial = ?, rfc = ?, cfdi = ? WHERE profesores_idprofesores = ?");
+                    actualizar.setString(1, jsonDatos.get("tipoPersona").toString());
+                    actualizar.setString(2, jsonDatos.get("razonSocial").toString());
+                    actualizar.setString(3, jsonDatos.get("rfc").toString());
+                    actualizar.setString(4, jsonDatos.get("cfdi").toString());
+                    actualizar.setInt(5, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                    actualizar.execute();
+                }else{
+                    //Guardamos
+                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO datosfiscalesprofesores (tipoPersona, razonSocial, rfc, cfdi, profesores_idprofesores) VALUES (?,?,?,?,?)");
+                    actualizar.setString(1, jsonDatos.get("tipoPersona").toString());
+                    actualizar.setString(2, jsonDatos.get("razonSocial").toString());
+                    actualizar.setString(3, jsonDatos.get("rfc").toString());
+                    actualizar.setString(4, jsonDatos.get("cfdi").toString());
+                    actualizar.setInt(5, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                    actualizar.execute();
+                }
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Actualización de datos exitosa.");
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+        
+        return respuesta;
+    }
+    
+    public JSONObject getDatosFiscales(int idProfesor){
+        JSONObject respuesta = new JSONObject();
+        JSONObject datos = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM datosfiscalesprofesores WHERE profesores_idprofesores = ?");
+                consulta.setInt(1, idProfesor);
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    //Hay registro
+                    datos.put("existe", true);
+                    datos.put("tipoPersona", resultado.getString("tipoPersona"));
+                    datos.put("razonSocial", resultado.getString("razonSocial"));
+                    datos.put("rfc", resultado.getString("rfc"));
+                    datos.put("cfdi", resultado.getString("cfdi"));
+                }else
+                    datos.put("existe", false);
+                
+                respuesta.put("mensaje", datos);
+                respuesta.put("respuesta", true);
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+        
+        return respuesta;
+    }
+    
     public void bloquearPerfil(int idProfesor, Connection conectar){
         try{
             PreparedStatement bloquear = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");

@@ -988,7 +988,7 @@ public class ControladorCliente {
         sesion.setActualizado(datos.get("actualizado").toString());
         sesion.setSumar(Boolean.valueOf(datos.get("sumar").toString()));
         sesion.setTipoPlan(datos.get("tipoPlan").toString());
-        
+        sesion.setPersonas(Integer.parseInt(datos.get("personas").toString()));
         
     }//Fin método nuevaSesion.
     
@@ -1067,8 +1067,8 @@ public class ControladorCliente {
         
         if(conectar != null){        
             try{          
-                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase, latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso, sumar, tipoPlan) "
-                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase, latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso, sumar, tipoPlan, personas) "
+                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setInt(1, sesion.getClientes_idclientes());
                 agregarDatos.setString(2, sesion.getHorario());
@@ -1086,6 +1086,7 @@ public class ControladorCliente {
                 agregarDatos.setInt(14, sesion.getTiempo());
                 agregarDatos.setBoolean(15, sesion.getSumar());
                 agregarDatos.setString(16, sesion.getTipoPlan());
+                agregarDatos.setInt(17, sesion.getPersonas());
                 agregarDatos.execute();
    
             }catch(SQLException ex){  
@@ -1098,45 +1099,38 @@ public class ControladorCliente {
         
     }//Fin método guardarSesion.
     
-    public CuentaBancaria obtenerCuentaBancaria(int idCliente){
-                
+    public JSONObject obtenerCuentaBancaria(int idCliente){
+        JSONObject respuesta = new JSONObject();
+        JSONObject datos = new JSONObject();
         cliente.cuenta = new CuentaBancaria();
-         Connection conectar = ConexionMySQL.connection();
+        Connection conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
-            
-            try{
-                
+        if(conectar != null){           
+            try{               
                 Statement estado = conectar.createStatement();
                 ResultSet resultado = estado.executeQuery("SELECT * FROM datosbancariosclientes WHERE clientes_idclientes = " + idCliente);
                 
-                if(resultado.next()){
-                
-                    cliente.cuenta.setNombreTitular(resultado.getString("nombreTitular"));
-                    cliente.cuenta.setTarjeta(resultado.getString("tarjeta"));
-                    cliente.cuenta.setMes(resultado.getString("mes"));
-                    cliente.cuenta.setAno(resultado.getString("ano"));
-                    
-                }else{
-                    
-                    return null;
-                    
-                }  
-                
-                
-            }catch(SQLException ex){
-                
-                System.out.println(ex.getMessage());
-                
-            }
-                    
-        }else{
-            
-            System.out.println("Error en la conexión obtenerCuentaBancaria.");
-            
+                if(resultado.next()){               
+                    datos.put("nombreTitular", resultado.getString("nombreTitular"));
+                    datos.put("tarjeta", resultado.getString("tarjeta"));
+                    datos.put("mes", resultado.getString("mes"));
+                    datos.put("ano", resultado.getString("ano"));    
+                    datos.put("existe", true);
+                }else
+                    datos.put("existe", false);
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", datos);
+            }catch(SQLException ex){              
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }                  
+        }else{       
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");      
         }
         
-        return cliente.cuenta;
+        return respuesta;
         
     }//Fin método obtenerCuentaBancaria.
     
@@ -1415,20 +1409,17 @@ public class ControladorCliente {
 
     }//Fin método guardarCuentaBancaria.
 
-    public void actualizarCuentaBancaria(int idCliente) {
-
-         Connection conectar = ConexionMySQL.connection();
+    public JSONObject actualizarCuentaBancaria(int idCliente) {
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
-
             try {
-
                 PreparedStatement consultaRegistro = conectar.prepareStatement("SELECT * FROM datosbancariosclientes WHERE clientes_idclientes = ?");
                 consultaRegistro.setInt(1 , idCliente);
                 ResultSet resultado = consultaRegistro.executeQuery();
                 
-                if(resultado.next()){
-                    
+                if(resultado.next()){                  
                     String query = "UPDATE datosbancariosclientes SET nombreTitular = ?, tarjeta = ?, mes = ?, ano = ? WHERE clientes_idclientes = ?";
                     PreparedStatement agregarDatos = conectar.prepareStatement(query);
                     agregarDatos.setString(1, cliente.cuenta.getNombreTitular());
@@ -1436,10 +1427,8 @@ public class ControladorCliente {
                     agregarDatos.setString(3, cliente.cuenta.getMes());
                     agregarDatos.setString(4, cliente.cuenta.getAno());
                     agregarDatos.setInt(5, idCliente);
-                    agregarDatos.executeUpdate();
-                    
-                }else{
-                    
+                    agregarDatos.executeUpdate();                  
+                }else{                 
                     String query = "INSERT INTO datosbancariosclientes (clientes_idclientes, nombreTitular, tarjeta, mes, ano) VALUES (?,?,?,?,?)";
                     PreparedStatement agregarDatos = conectar.prepareStatement(query);
                     agregarDatos.setInt(1, idCliente);
@@ -1448,21 +1437,20 @@ public class ControladorCliente {
                     agregarDatos.setString(4, cliente.cuenta.getMes());
                     agregarDatos.setString(5, cliente.cuenta.getAno());
                     agregarDatos.execute();
-
                 }
-
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Datos acutalizados exitosamente.");
             } catch (SQLException ex) {
-
                 ex.printStackTrace();
-
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD");
             }
-
         } else {
-
-            System.out.println("Error en la conexión guardarCuentaBancaria.");
-
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD");
         }
-
+        
+        return respuesta;
     }//Fin método guardarCuentaBancaria.
 
     public void nuevaEvaluacion(JSONObject jsonEvaluacionCliente) {

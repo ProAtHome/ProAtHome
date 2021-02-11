@@ -4,11 +4,19 @@ import java.sql.Date;
 
 public class Sesion {
     
-    private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion, tiempo, idSeccion, idNivel, idBloque;
+    private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion, tiempo, idSeccion, idNivel, idBloque, personas;
     private String tipoPlan, horario, lugar, extras, tipoClase, profesor, actualizado, fotoProfesor, correoProfesor, descripcionProfesor;
     private double latitud, longitud;
     private String fecha;
     private boolean sumar, finalizado;
+
+    public int getPersonas() {
+        return personas;
+    }
+
+    public void setPersonas(int personas) {
+        this.personas = personas;
+    }
 
     public String getTipoPlan() {
         return tipoPlan;

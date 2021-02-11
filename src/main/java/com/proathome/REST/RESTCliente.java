@@ -185,21 +185,10 @@ public class RESTCliente {
     
     @GET
     @Path("/obtenerDatosBancarios/{idCliente}")
-    public String obtenerDatosBancarios(@PathParam("idCliente") int idCliente) {
-        Gson gson = new Gson();
-        String jsonDatos = gson.toJson(cliente.obtenerCuentaBancaria(idCliente));
-
-        return jsonDatos;
+    public JSONObject obtenerDatosBancarios(@PathParam("idCliente") int idCliente) {
+        return cliente.obtenerCuentaBancaria(idCliente);
     }//Fin método obtenerDatosBancarios.
     
-    @GET
-    @Path("/obtenerDatosBancariosWeb/{idCliente}")
-    public String obtenerDatosBancariosWeb(@PathParam("idCliente") int idCliente) {
-        Gson gson = new Gson();
-        String jsonDatos = gson.toJson(cliente.obtenerCuentaBancaria(idCliente));
-
-        return jsonDatos;
-    }//Fin método obtenerDatosBancarios.
 
     @GET
     @Path("/detallesSesion/{idSesion}")
@@ -607,35 +596,20 @@ public class RESTCliente {
         return Response.ok("Sesión actualizada correctamente", MediaType.APPLICATION_JSON).build();
         
     }
-
-    @PUT
-    @Path("/actualizarCuentaClienteWeb")
-    public void actualizarCuentaClienteWeb(String datos) {
-
-        try {
-
-            JSONObject jsonCuentaBancaria = (JSONObject) parser.parse(datos);
-            cliente.nuevaCuentaBancaria(jsonCuentaBancaria);
-            cliente.actualizarCuentaBancaria(Integer.parseInt(String.valueOf(jsonCuentaBancaria.get("idCliente"))));
-
-        } catch (ParseException ex) {
-
-            ex.printStackTrace();
-
-        }
-
-    }//Fin método agregarCuentaBancariaWeb.
     
     @PUT
     @Path("/actualizarCuentaCliente")
-    public Response actualizarCuentaCliente(JSONObject jsonDatos) {
-
-        System.out.println(jsonDatos);
-        cliente.nuevaCuentaBancaria(jsonDatos);
-        cliente.actualizarCuentaBancaria(Integer.parseInt(jsonDatos.get("idCliente").toString()));
-
-        return Response.ok("Actualización exitosa.", MediaType.APPLICATION_JSON).build();
-
+    public JSONObject actualizarCuentaCliente(String datos) {
+        JSONObject respuesta = new JSONObject();
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            cliente.nuevaCuentaBancaria(jsonDatos);
+            respuesta = cliente.actualizarCuentaBancaria(Integer.parseInt(jsonDatos.get("idCliente").toString()));
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
     }//Fin método agregarCuentaBancaria.
     
     @PUT

@@ -36,6 +36,12 @@ public class RESTProfesor {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/getDatosFiscales/{idProfesor}")
+    public JSONObject getDatosFiscales(@PathParam("idProfesor") int idProfesor){
+        return profesor.getDatosFiscales(idProfesor);
+    }
+    
+    @GET
     @Path("/getReportes/{idProfesor}")
     public JSONObject getReportes(@PathParam("idProfesor") int idProfesor){
         return profesor.getReportes(idProfesor);
@@ -151,6 +157,21 @@ public class RESTProfesor {
     @Path("informacionSesionMatch/{idSesion}")
     public JSONObject informacionSesionMatch(@PathParam("idSesion") int idSesion){  
         return profesor.informacionSesionMatch(idSesion);     
+    }
+    
+    @POST
+    @Path("/guardarDatosFiscales")
+    public JSONObject guardarDatosFiscales(String datos){
+        JSONObject respuesta = null;
+        
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = profesor.guardarDatosFiscales(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
     }
     
     @POST
