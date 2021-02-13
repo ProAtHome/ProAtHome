@@ -11,6 +11,9 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import com.proathome.mysql.ConexionMySQL;
+import java.sql.Date;
+import java.text.ParseException;
+import java.util.Calendar;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -27,6 +30,152 @@ public class ControladorProfesor {
     private JSONObject jsonSesionesMatchProfesor = new JSONObject();
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
+    
+    public JSONObject cancelarSesion(JSONObject jsonDatos){
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement cancelar = conectar.prepareStatement("UPDATE sesiones SET profesores_idprofesores = ? WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                cancelar.setNull(1, 0);
+                cancelar.setInt(2, Integer.parseInt(jsonDatos.get("idClase").toString()));
+                cancelar.setInt(3, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                cancelar.execute();
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Sesión cancelada exitosamente.");
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+        
+        return respuesta;
+    }
+    
+    public String getFechaString(String fecha, String horario){
+        String text = null;
+
+        if(horario.equals("08:00 HRS")){
+            text = fecha + " 08:00";
+        }else if(horario.equals("09:00 HRS")){
+            text = fecha + " 09:00";
+        }else if(horario.equals("10:00 HRS")){
+            text = fecha + " 10:00";
+        }else if(horario.equals("11:00 HRS")){
+            text = fecha + " 11:00";
+        }else if(horario.equals("12:00 HRS")){
+            text = fecha + " 12:00";
+        }else if(horario.equals("13:00 HRS")){
+            text = fecha + " 13:00";
+        }else if(horario.equals("14:00 HRS")){
+            text = fecha + " 14:00";
+        }else if(horario.equals("15:00 HRS")){
+            text = fecha + " 15:00";
+        }else if(horario.equals("16:00 HRS")){
+            text = fecha + " 16:00";
+        }else if(horario.equals("17:00 HRS")){
+            text = fecha + " 17:00";
+        }else if(horario.equals("18:00 HRS")){
+            text = fecha + " 18:00";
+        }
+        
+        return text;
+    }
+    
+    public boolean fechaHoy(String hoy, String fechaClase){
+        boolean resp = false;
+        try{
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            java.util.Date fechaClaseDate =  sdf.parse(fechaClase);
+            java.util.Date fechaHoyDate =  sdf.parse(hoy);
+            
+            if(fechaClaseDate.equals(fechaHoyDate)){
+                resp = true;
+            }else
+                resp = false;
+            
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return resp;
+    }
+    
+    public JSONObject solicitudEliminarSesion(int idSesion, int idProfesor){
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject eliminar = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                //Consultamos la fecha y el horario;
+                PreparedStatement consulta = conectar.prepareStatement("SELECT fecha, horario FROM sesiones WHERE idsesiones = ? AND profesores_idprofesores = ?");
+                consulta.setInt(1, idSesion);
+                consulta.setInt(2, idProfesor);
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(resultado.next()){
+                    SimpleDateFormat sdfNormal = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    //Hoy
+                    Calendar calendarHoy = Calendar.getInstance();
+                    String fechaHoy = sdfNormal.format(calendarHoy.getTime());
+                    java.util.Date hoy = sdfNormal.parse(fechaHoy);
+                    
+                    if(fechaHoy(fechaHoy ,resultado.getDate("fecha").toString())){
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                        java.util.Date fechaClase =  sdf.parse(getFechaString(resultado.getDate("fecha").toString(), resultado.getString("horario")));
+
+                        String fechaClaseS = sdf.format(fechaClase.getTime());
+                        //obtienes la diferencia de las fechas
+                        long difference = Math.abs(fechaClase.getTime() - hoy.getTime());
+                        //obtienes la diferencia en horas ya que la diferencia anterior esta en milisegundos
+                        difference = difference / (60 * 60 * 1000);
+                        System.out.println(difference);
+                        if(difference >= 3){
+                            //Multa
+                            eliminar.put("multa", false);
+                            eliminar.put("diferencia", "3+ HRS");
+                            eliminar.put("eliminar", true);
+                        }else if(difference < 3){
+                            eliminar.put("multa", true);
+                            eliminar.put("diferencia", "-3 HRS");
+                            eliminar.put("eliminar", true);
+                        }
+                    }else{
+                        eliminar.put("multa", false);
+                        eliminar.put("diferencia", "24 HRS");
+                        eliminar.put("eliminar", true);
+                    }
+                    
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", eliminar);
+                   
+                }else{
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", "Error en la conexión a BD.");
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }catch(ParseException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", ex.getMessage());
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+        
+        return respuesta;
+    }
     
     public JSONObject guardarDatosFiscales(JSONObject jsonDatos){
         JSONObject respuesta = new JSONObject();
@@ -590,9 +739,11 @@ public class ControladorProfesor {
                     
                     JSONObject jsonSesionesMatchProfesor = new JSONObject();
                     jsonSesionesMatchProfesor.put("idsesiones", resultado.getInt("idsesiones"));
-                    jsonSesionesMatchProfesor.put("nombreEstudiante", resultado.getString("nombre"));
+                    jsonSesionesMatchProfesor.put("nombreEstudiante", resultado.getString("nombre") + " " + resultado.getString("apellidoPaterno") + " " + resultado.getString("apellidoMaterno"));
                     jsonSesionesMatchProfesor.put("idEstudiante", resultado.getInt("clientes_idclientes"));
                     jsonSesionesMatchProfesor.put("descripcion", resultado.getString("descripcion"));
+                    jsonSesionesMatchProfesor.put("actualizado", resultado.getDate("actualizado"));
+                    jsonSesionesMatchProfesor.put("fecha", resultado.getDate("fecha"));
                     jsonSesionesMatchProfesor.put("correo", resultado.getString("correo"));
                     jsonSesionesMatchProfesor.put("latitud", resultado.getDouble("latitud"));
                     jsonSesionesMatchProfesor.put("longitud", resultado.getDouble("longitud"));
@@ -602,24 +753,23 @@ public class ControladorProfesor {
                     jsonSesionesMatchProfesor.put("idSeccion", resultado.getInt("idSeccion"));
                     jsonSesionesMatchProfesor.put("idNivel", resultado.getInt("idNivel"));
                     jsonSesionesMatchProfesor.put("idBloque", resultado.getInt("idBloque"));
-                    jsonSesionesMatchProfesor.put("tipoClase", resultado.getString("tipoClase"));
+                    jsonSesionesMatchProfesor.put("tipoClase", resultado.getString("tipoClase") + ": " + resultado.getString("personas") + " Personas");
                     jsonSesionesMatchProfesor.put("extras", resultado.getString("extras"));
                     jsonSesionesMatchProfesor.put("horario", resultado.getString("horario")); 
+                    jsonSesionesMatchProfesor.put("tipoPlan", resultado.getString("tipoPlan"));
                     jsonArrayMatch.add(jsonSesionesMatchProfesor);
                     
                 }
-                
-                
-                
+ 
             }catch(SQLException ex){
                 ex.printStackTrace();
             }
             
-        }else{
-            
-            System.out.println("Error en sesionesMatchProfesor.");
-            
+        }else{     
+            System.out.println("Error en sesionesMatchProfesor.");     
         }
+        
+        System.out.println(jsonArrayMatch);
         
         return jsonArrayMatch;
         
@@ -645,6 +795,7 @@ public class ControladorProfesor {
                     jsonMatch.put("longitud", resultado.getDouble("longitud"));
                     jsonMatch.put("foto", resultado.getString("foto"));
                     jsonMatch.put("lugar", resultado.getString("lugar"));
+                    jsonMatch.put("fecha", resultado.getDate("fecha").toString());
                     jsonMatch.put("tiempo", resultado.getInt("tiempo"));
                     jsonMatch.put("idSeccion", resultado.getInt("idSeccion"));
                     jsonMatch.put("idNivel", resultado.getInt("idNivel"));
@@ -652,6 +803,7 @@ public class ControladorProfesor {
                     jsonMatch.put("tipoClase", resultado.getString("tipoClase"));
                     jsonMatch.put("extras", resultado.getString("extras"));
                     jsonMatch.put("horario", resultado.getString("horario"));     
+                    jsonMatch.put("finalizado", resultado.getBoolean("finalizado"));
                 }
             
             }catch(SQLException ex){

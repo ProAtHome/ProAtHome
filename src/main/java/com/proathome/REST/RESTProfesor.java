@@ -36,6 +36,12 @@ public class RESTProfesor {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/solicitudEliminarSesion/{idSesion}/{idProfesor}")
+    public JSONObject solicitudEliminarSesion(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
+        return profesor.solicitudEliminarSesion(idSesion, idProfesor);
+    }
+    
+    @GET
     @Path("/getDatosFiscales/{idProfesor}")
     public JSONObject getDatosFiscales(@PathParam("idProfesor") int idProfesor){
         return profesor.getDatosFiscales(idProfesor);
@@ -237,6 +243,20 @@ public class RESTProfesor {
         }
         return respuesta;
     }//Fin método agregarCuentaBancaria.
+    
+    @PUT
+    @Path("/cancelarClase")
+    public JSONObject cancelarSesion(String datos){
+        JSONObject respuesta = null;
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = profesor.cancelarSesion(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+    }
     
     @PUT
     @Path("/agendarCita")
