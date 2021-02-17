@@ -418,6 +418,20 @@ public class RESTCliente {
     }//Fin método examenDiagnostico.
     
     @PUT
+    @Path("/sumarMonedero")
+    public JSONObject sumarMonedero(String datos){
+        JSONObject respuesta = null;
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = cliente.sumarMonedero(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+    }
+    
+    @PUT
     @Path("/saldarDeuda")
     public void saldarDeuda(String datos){
         try{

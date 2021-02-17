@@ -30,6 +30,58 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public JSONObject sumarMonedero(JSONObject jsonDatos){
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                //Obtenemos las horas actuales del plan actual.
+               PreparedStatement consulta = conectar.prepareStatement("SELECT monedero, tipoPlan FROM planes WHERE clientes_idclientes = ?");
+               consulta.setInt(1, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+               ResultSet resultado = consulta.executeQuery();
+               
+               if(resultado.next()){
+                   int monedero = resultado.getInt("monedero");
+                   int nuevoMonedero = monedero + Integer.parseInt(jsonDatos.get("tiempoMonedero").toString());
+                   //agregamos
+                   String query = null;
+                   if(resultado.getString("tipoPlan").equals("PARTICULAR"))
+                       query = "UPDATE planes SET tipoPlan = ?, monedero = ? WHERE clientes_idclientes = ?";
+                   else
+                       query = "UPDATE planes SET monedero = ? WHERE clientes_idclientes = ?";
+                   PreparedStatement agregar = conectar.prepareStatement(query);
+                   if(resultado.getString("tipoPlan").equals("PARTICULAR")){
+                       agregar.setString(1, "PARTICULAR_PLAN");
+                       agregar.setInt(2, nuevoMonedero);
+                       agregar.setInt(3, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                   }else{
+                       agregar.setInt(1, nuevoMonedero);
+                       agregar.setInt(2, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                   }
+                   
+                   agregar.execute();
+                   
+                   respuesta.put("respuesta", true);
+                   respuesta.put("mensaje", "Tiempo agregago con éxito a el PLAN ACTUAL.");
+               }else{
+                   respuesta.put("respuesta", false);
+                   respuesta.put("mensaje", "Error en la conexión a BD.");
+               }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }
+           
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject getDatosFiscales(int idEstudiante){
         JSONObject respuesta = new JSONObject();
         JSONObject datos = new JSONObject();
@@ -150,17 +202,19 @@ public class ControladorCliente {
                         descripcion.setInt(1, idEstudiante);
                         descripcion.setString(2, "ESTUDIANTE");
                         ResultSet resultadoDesc = descripcion.executeQuery();
-                        if(resultadoDesc.next()){
-                            String desText = resultadoDesc.getString("descripcion");
-                            JSONObject mensaje = new JSONObject();
-                            mensaje.put("reportes", numReportes);
-                            mensaje.put("aviso", desText);
-                            respuesta.put("respuesta", true);
-                            respuesta.put("mensaje", mensaje);
-                        }else{
-                            respuesta.put("respuesta", false);
-                            respuesta.put("mensaje", "Error en la conexión a BD");
+  
+                        String desText = null;
+
+                        while(resultadoDesc.next()){
+                            desText = resultadoDesc.getString("descripcion");
                         }
+
+                        JSONObject mensaje = new JSONObject();
+                        mensaje.put("reportes", numReportes);
+                        mensaje.put("aviso", desText);
+                        respuesta.put("respuesta", true);
+                        respuesta.put("mensaje", mensaje);
+  
                     }
                     
                 }else{
@@ -503,7 +557,6 @@ public class ControladorCliente {
                 }
                 
                 if(finalizar){
-                    System.out.println("Plan finalizado");
                     PreparedStatement finalizar2 = conectar.prepareStatement("UPDATE planes SET tipoPlan = ?, fechaInicio = ?, fechaFin = ?, monedero = ? WHERE clientes_idclientes = ?");
                     finalizar2.setString(1, "PARTICULAR");
                     finalizar2.setDate(2, null);
@@ -539,7 +592,7 @@ public class ControladorCliente {
                 
                 if(resultadoPlanActivo.next()){
                     //¿Hay plan activo?
-                    if(!resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR")){
+                    if(!resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR") || !resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR_PLAN")){
                          
                         //¿Hay horas en el monedero en el PLAN activo?
                         if(resultadoPlanActivo.getInt("monedero") != 0){
@@ -573,6 +626,7 @@ public class ControladorCliente {
         
     }
     
+    
     public JSONObject verificarPlan(int idEstudiante){
     
         Connection conectar = ConexionMySQL.connection();
@@ -587,29 +641,32 @@ public class ControladorCliente {
                 if(resultadoPlanActivo.next()){
                     //¿Hay plan activo?
                     if(resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR")){
-                         jsonPlan.put("tipoPlan", resultadoPlanActivo.getString("tipoPlan"));
-                         jsonPlan.put("monedero", resultadoPlanActivo.getInt("monedero"));
-                         jsonPlan.put("fechaInicio", resultadoPlanActivo.getDate("fechaInicio"));
-                         jsonPlan.put("fechaFin", resultadoPlanActivo.getDate("fechaFin"));
+                        jsonPlan.put("tipoPlan", resultadoPlanActivo.getString("tipoPlan"));
+                        jsonPlan.put("monedero", resultadoPlanActivo.getInt("monedero"));
+                        jsonPlan.put("fechaInicio", resultadoPlanActivo.getDate("fechaInicio"));
+                        jsonPlan.put("fechaFin", resultadoPlanActivo.getDate("fechaFin"));
                     }else{//Si
                         //¿Hay horas en el monedero en el PLAN activo?
                         if(resultadoPlanActivo.getInt("monedero") != 0){
-                            //¿El plan ya expiró?
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                            Calendar calendar = Calendar.getInstance();
-                            String fechaHoy = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
-                            
-                            Date fechaActual = sdf.parse(fechaHoy);
-                            Date fechaFin = sdf.parse(resultadoPlanActivo.getDate("fechaFin").toString());
-                            if(fechaFin.equals(fechaActual) || fechaActual.after(fechaFin)){
-                                //Finalizar plan activo y pasarlo a PARTICULAR
-                                finalizarPlan(idEstudiante);
-                            }else{
-                                jsonPlan.put("tipoPlan", resultadoPlanActivo.getString("tipoPlan"));
-                                jsonPlan.put("monedero", resultadoPlanActivo.getInt("monedero"));
-                                jsonPlan.put("fechaInicio", resultadoPlanActivo.getDate("fechaInicio"));
-                                jsonPlan.put("fechaFin", resultadoPlanActivo.getDate("fechaFin"));
+                            if(!resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR_PLAN")){
+                                //¿El plan ya expiró?
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                                Calendar calendar = Calendar.getInstance();
+                                String fechaHoy = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
+
+                                Date fechaActual = sdf.parse(fechaHoy);
+                                Date fechaFin = sdf.parse(resultadoPlanActivo.getDate("fechaFin").toString());
+                                if(fechaFin.equals(fechaActual) || fechaActual.after(fechaFin)){
+                                    //Finalizar plan activo y pasarlo a PARTICULAR
+                                    finalizarPlan(idEstudiante);
+                                }else{
+                                    jsonPlan.put("tipoPlan", resultadoPlanActivo.getString("tipoPlan"));
+                                    jsonPlan.put("monedero", resultadoPlanActivo.getInt("monedero"));
+                                    jsonPlan.put("fechaInicio", resultadoPlanActivo.getDate("fechaInicio"));
+                                    jsonPlan.put("fechaFin", resultadoPlanActivo.getDate("fechaFin"));
+                                }
                             }
+                            
                         }else{
                             //Finalizar plan activo y pasarlo a PARTICULAR
                             finalizarPlan(idEstudiante);
@@ -643,7 +700,7 @@ public class ControladorCliente {
         }else{
             System.out.println("Error en verificarPlan.");
         }
-        System.out.println("Va: " + jsonPlan);
+
         return jsonPlan;
     
     }
@@ -653,7 +710,6 @@ public class ControladorCliente {
         if(conectar != null){
             try{
                 //Actualizar plan en el perfil.
-                System.out.println("Etnro generar");
                 PreparedStatement actualizarPlan = conectar.prepareStatement("UPDATE planes SET tipoPlan = ?, fechaInicio = ?, fechaFin = ?, monedero = ? WHERE clientes_idclientes = ?");
                 actualizarPlan.setString(1, jsonPlan.get("tipoPlan").toString());
                 actualizarPlan.setDate(2, java.sql.Date.valueOf(jsonPlan.get("fechaInicio").toString()));
@@ -704,6 +760,7 @@ public class ControladorCliente {
 
                         while(resultado.next()){
                             if(!resultado.getBoolean("finalizado")){
+                    System.out.println(resultadoContador.getInt("numero"));
                                 sesiones_pagadas_finalizadas = false;
                             }
                         }
@@ -736,6 +793,7 @@ public class ControladorCliente {
             System.out.println("Error en verificarSesionesPagadas.");
         }
         
+        System.out.println(jsonDatos);
         return jsonDatos;
         
     }
@@ -1130,6 +1188,8 @@ public class ControladorCliente {
             respuesta.put("mensaje", "Error en la conexión a BD.");      
         }
         
+        
+        System.out.println(respuesta);
         return respuesta;
         
     }//Fin método obtenerCuentaBancaria.
@@ -1276,22 +1336,15 @@ public class ControladorCliente {
                     clienteRegistrado = true;
 
                 } else {
-
                     clienteRegistrado = false;
-          
-
                 }
 
             } catch (SQLException ex) {
-
                 System.out.println(ex.getMessage());
-
             }
 
         } else {
-
             System.out.println("Error en la conexión iniciarSesion.");
-
         }
 
     }//Fin método perfilCliente.

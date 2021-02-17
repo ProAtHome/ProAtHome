@@ -297,21 +297,18 @@ public class ControladorProfesor {
                         descripcion.setInt(1, idProfesor);
                         descripcion.setString(2, "PROFESOR");
                         ResultSet resultadoDesc = descripcion.executeQuery();
-                        if(resultadoDesc.next()){
-                            String desText = null;
-                            while(resultadoDesc.next()){
-                                desText = resultadoDesc.getString("descripcion");
-                            }
-
-                            JSONObject mensaje = new JSONObject();
-                            mensaje.put("reportes", numReportes);
-                            mensaje.put("aviso", desText);
-                            respuesta.put("respuesta", true);
-                            respuesta.put("mensaje", mensaje);
-                        }else{
-                            respuesta.put("respuesta", false);
-                            respuesta.put("mensaje", "Error en la conexión a BD");
+              
+                        String desText = null;
+                        while(resultadoDesc.next()){
+                            desText = resultadoDesc.getString("descripcion");
                         }
+
+                        JSONObject mensaje = new JSONObject();
+                        mensaje.put("reportes", numReportes);
+                        mensaje.put("aviso", desText);
+                        respuesta.put("respuesta", true);
+                        respuesta.put("mensaje", mensaje);
+        
                     }
                     
                 }else{
@@ -757,6 +754,7 @@ public class ControladorProfesor {
                     jsonSesionesMatchProfesor.put("extras", resultado.getString("extras"));
                     jsonSesionesMatchProfesor.put("horario", resultado.getString("horario")); 
                     jsonSesionesMatchProfesor.put("tipoPlan", resultado.getString("tipoPlan"));
+                    jsonSesionesMatchProfesor.put("finalizado", resultado.getBoolean("finalizado"));
                     jsonArrayMatch.add(jsonSesionesMatchProfesor);
                     
                 }
@@ -1082,10 +1080,10 @@ public class ControladorProfesor {
                     agregarDatos.executeUpdate();
                 }else{                 
                     PreparedStatement insert = conectar.prepareStatement("INSERT INTO datosbancariosprofesores (nombreTitular, banco, clabe, profesores_idprofesores) VALUES (?,?,?,?)");
-                    insert.setInt(1 , Integer.parseInt(jsonDatos.get("idProfesor").toString()));
-                    insert.setString(2, jsonDatos.get("nombreTitular").toString());
-                    insert.setString(3, jsonDatos.get("banco").toString());
-                    insert.setString(4, jsonDatos.get("clabe").toString());
+                    insert.setString(1, jsonDatos.get("nombreTitular").toString());
+                    insert.setString(2, jsonDatos.get("banco").toString());
+                    insert.setString(3, jsonDatos.get("clabe").toString());
+                    insert.setInt(4 , Integer.parseInt(jsonDatos.get("idProfesor").toString()));
                     insert.execute();                   
                 }     
                 respuesta.put("respuesta", true);

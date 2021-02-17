@@ -713,10 +713,11 @@ public class ControladorAdmin {
         
         if(conectar != null){
             try{
-                PreparedStatement activar = conectar.prepareStatement("UPDATE profesores SET estado = ?, rangoClase = ? WHERE idprofesores = ?");
-                activar.setString(1, "ACTIVO");
-                activar.setInt(2, Integer.parseInt(jsonDatos.get("rango").toString()));
-                activar.setInt(3, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                PreparedStatement activar = conectar.prepareStatement("UPDATE profesores SET foto = ?, estado = ?, rangoClase = ? WHERE idprofesores = ?");
+                activar.setString(1, jsonDatos.get("foto").toString());
+                activar.setString(2, "ACTIVO");
+                activar.setInt(3, Integer.parseInt(jsonDatos.get("rango").toString()));
+                activar.setInt(4, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
                 activar.execute();
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -746,6 +747,13 @@ public class ControladorAdmin {
                     datos.put("tipoCita", resultado.getString("tipoCita"));
                     datos.put("datosAdicionales", resultado.getString("datosAdicionales"));
                     datos.put("idProfesor", resultado.getInt("idprofesores"));
+                    
+                    PreparedStatement consultaFoto = conectar.prepareStatement("SELECT foto FROM documentacionprofesor WHERE profesores_idprofesores = ?");
+                    consultaFoto.setInt(1, resultado.getInt("idprofesores"));
+                    ResultSet resultadoFoto = consultaFoto.executeQuery();
+                    
+                    if(resultadoFoto.next())
+                        datos.put("foto", resultadoFoto.getString("foto"));
                     fecha.add(datos);
                 }
             }catch(SQLException ex){
@@ -1135,18 +1143,19 @@ public class ControladorAdmin {
         if(conectar != null){
             try{
                 String query = "";
+                String tipo = "";
                 if(tipoUsuario == Constantes.TIPO_USUARIO_ESTUDIANTE)
-                    query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
+                    tipo = "ESTUDIANTE";//query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
                 else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESOR)
-                    query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idprofesores = msg_tickets.idUsuario_Operador";
+                    tipo = "PROFESOR";//query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idprofesores = msg_tickets.idUsuario_Operador";
              
-                PreparedStatement mensajesConsulta = conectar.prepareStatement(query);
+                PreparedStatement mensajesConsulta = conectar.prepareStatement("SELECT * FROM msg_tickets WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ?");
                 mensajesConsulta.setInt(1, idTicket);
                 ResultSet resultado = mensajesConsulta.executeQuery();
                 
                 while(resultado.next()){
                     JSONObject mensaje = new JSONObject();
-                    mensaje.put("nombreUsuario", resultado.getString("nombre"));
+                    mensaje.put("nombreUsuario", tipo);
                     mensaje.put("mensaje", resultado.getString("mensaje"));
                     mensaje.put("idUsuario", resultado.getInt("idUsuario_Operador"));
                     mensaje.put("operadorBool", resultado.getBoolean("operadorBool"));
@@ -1352,12 +1361,13 @@ public class ControladorAdmin {
                 
                 /*Consulta de mensajes Ticket*/
                 String query = "";
+                String tipo = "";
                 if(tipoUsuario == Constantes.TIPO_USUARIO_ESTUDIANTE)
-                    query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
+                    tipo = "ESTUDIANTE";//query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
                 else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESOR)
-                    query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idprofesores = msg_tickets.idUsuario_Operador";
+                    tipo = "PROFESOR";//query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idprofesores = msg_tickets.idUsuario_Operador";
                 
-                PreparedStatement mensajes = conectar.prepareStatement(query);
+                PreparedStatement mensajes = conectar.prepareStatement("SELECT * FROM msg_tickets WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ?");
                 mensajes.setInt(1, idTicket);
                 ResultSet msgRes = mensajes.executeQuery();
                 JSONArray jsonMensajesTicket = new JSONArray();
@@ -1366,7 +1376,7 @@ public class ControladorAdmin {
                 while(msgRes.next()){
                     JSONObject msgJSON = new JSONObject();
                     if(msgRes.getBoolean("operadorBool"))
-                        msgJSON.put("nombreUsuario", msgRes.getString("nombre"));
+                        msgJSON.put("nombreUsuario", tipo);
                     else
                         msgJSON.put("nombreUsuario", "Yo");
                     msgJSON.put("msg", msgRes.getString("mensaje"));
@@ -1387,6 +1397,7 @@ public class ControladorAdmin {
         }else{
             System.out.println("Error en obtenerMsgTicket");
         }
+        System.out.println(mensajesArray);
         
         return mensajesArray;
     }
