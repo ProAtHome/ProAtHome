@@ -376,23 +376,18 @@ public class RESTProfesor {
     }//Fin método matchSesion.
     
     @PUT
-    @Path("/informacionPerfil")
-    public Response actualizaDatosPerfil(String datos){
-        
-        try{
-            
-            JSONObject datosJSON = (JSONObject)parser.parse(datos);
+    @Path("/actualizarPerfil")
+    public JSONObject actualizaDatosPerfil(String datos) {
+        JSONObject respuesta = null;
+        try {
+            JSONObject datosJSON = (JSONObject) parser.parse(datos);
             profesor.datosActualizarPerfil(datosJSON);
-            profesor.actualizarDatosPerfil();
-            
-        }catch(ParseException ex){
-            
+            respuesta = profesor.actualizarDatosPerfil();
+        } catch (ParseException ex) {
             ex.printStackTrace();
-            
         }
         
-        return Response.ok("Actualización exitosa", MediaType.APPLICATION_JSON).build();
-        
+        return respuesta;
     }//Fin método actualizarInfoPerfil.
     
     @PUT

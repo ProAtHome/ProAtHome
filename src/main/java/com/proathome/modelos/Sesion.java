@@ -7,8 +7,16 @@ public class Sesion {
     private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion, tiempo, idSeccion, idNivel, idBloque, personas;
     private String tipoPlan, horario, lugar, extras, tipoClase, profesor, actualizado, fotoProfesor, correoProfesor, descripcionProfesor;
     private double latitud, longitud;
-    private String fecha;
+    private String fecha, token;
     private boolean sumar, finalizado;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public int getPersonas() {
         return personas;

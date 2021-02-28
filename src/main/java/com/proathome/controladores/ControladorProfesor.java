@@ -137,19 +137,19 @@ public class ControladorProfesor {
                         //obtienes la diferencia en horas ya que la diferencia anterior esta en milisegundos
                         difference = difference / (60 * 60 * 1000);
                         System.out.println(difference);
-                        if(difference >= 3){
+                        if(difference >= 24){
                             //Multa
                             eliminar.put("multa", false);
-                            eliminar.put("diferencia", "3+ HRS");
+                            eliminar.put("diferencia", "24+ HRS");
                             eliminar.put("eliminar", true);
-                        }else if(difference < 3){
-                            eliminar.put("multa", true);
-                            eliminar.put("diferencia", "-3 HRS");
-                            eliminar.put("eliminar", true);
+                        }else if(difference < 24){
+                            eliminar.put("multa", false);
+                            eliminar.put("diferencia", "-24 HRS");
+                            eliminar.put("eliminar", false);
                         }
                     }else{
                         eliminar.put("multa", false);
-                        eliminar.put("diferencia", "24 HRS");
+                        eliminar.put("diferencia", "24+ HRS");
                         eliminar.put("eliminar", true);
                     }
                     
@@ -661,8 +661,9 @@ public class ControladorProfesor {
     public void datosActualizarPerfil(JSONObject datos) {
 
         profesor.setIdProfesor(Integer.parseInt(String.valueOf(datos.get("idProfesor"))));
-        profesor.setNombre(String.valueOf(datos.get("nombre")));
-        profesor.setCorreo(String.valueOf(datos.get("correo")));
+        profesor.setCelular(datos.get("celular").toString());
+        profesor.setTelefonoLocal(datos.get("telefonoLocal").toString());
+        profesor.setDireccion(datos.get("direccion").toString());
         profesor.setDescripcion(String.valueOf(datos.get("descripcion")));
 
     }//Fin método datosActualizarPerfil.
@@ -864,24 +865,33 @@ public class ControladorProfesor {
         
     }
 
-    public void actualizarDatosPerfil() {
-        conectar = ConexionMySQL.connection();
-
-        if (conectar != null) {
-            try {
-                String query = "UPDATE profesores SET nombre = ?, correo = ?, descripcion = ? WHERE idprofesores = ?";
+    public JSONObject actualizarDatosPerfil(){
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{               
+                String query = "UPDATE profesores SET celular = ?, telefonoLocal = ?, direccion = ?, descripcion = ? WHERE idprofesores = ?";
                 PreparedStatement actualizar = conectar.prepareStatement(query);
-                actualizar.setString(1, profesor.getNombre());
-                actualizar.setString(2, profesor.getCorreo());
-                actualizar.setString(3, profesor.getDescripcion());
-                actualizar.setInt(4, profesor.getIdProfesor());
-                actualizar.executeUpdate();               
-            } catch (SQLException ex) {
-                System.out.println(ex.getMessage());
-            }
-        } else {
-            System.out.println("Error en la conexión en actualizarDatosPerfil.");
+                actualizar.setString(1, profesor.getCelular());
+                actualizar.setString(2, profesor.getTelefonoLocal());
+                actualizar.setString(3, profesor.getDireccion());
+                actualizar.setString(4, profesor.getDescripcion());
+                actualizar.setInt(5, profesor.getIdProfesor());
+                actualizar.executeUpdate();
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Datos actualizados exitosamente.");                
+            }catch(SQLException ex){             
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }          
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
         }
+        
+        return respuesta;
     }//Fin método actualizarDatosPerfil.
 
     public void actualizarFoto(JSONObject foto) {

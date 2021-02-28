@@ -277,6 +277,20 @@ public class RESTProAtHome {
     }
     
     @PUT
+    @Path("/bloquearPerfil")
+    public JSONObject bloquearPerfil(String datos){
+        JSONObject respuesta = null;
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = admin.bloquearPerfil(jsonDatos);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+    }
+    
+    @PUT
     @Path("/desbloquearPerfil")
     public JSONObject desbloquearPerfil(String datos){
         JSONObject respuesta = new JSONObject();

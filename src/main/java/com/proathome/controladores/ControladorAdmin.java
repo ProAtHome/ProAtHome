@@ -22,6 +22,54 @@ public class ControladorAdmin {
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
     
+    public JSONObject bloquearPerfil(JSONObject jsonDatos){
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                String query = null;
+                if(jsonDatos.get("perfil").equals("ESTUDIANTE"))
+                    query = "UPDATE clientes SET estado = ? WHERE idclientes = ?";
+                else if(jsonDatos.get("perfil").equals("PROFESOR"))
+                    query = "UPDATE profesores SET estado = ? WHERE idprofesores = ?";
+
+                PreparedStatement bloquear = conectar.prepareStatement(query);
+                bloquear.setString(1, "BLOQUEADO");
+                bloquear.setInt(2, Integer.parseInt(jsonDatos.get("idPerfil").toString()));
+                bloquear.execute();
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", "Perfil bloqueado.");
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }
+            
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+        
+        return respuesta;
+    }
+    
+    public void borrarReportes(JSONObject jsonDatos, Connection conectar){
+        try{
+            PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+            eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
+            if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_ESTUDIANTE)
+                eliminar.setString(2, "ESTUDIANTE");
+            else if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_PROFESOR)
+                eliminar.setString(2, "PROFESOR");
+            
+            eliminar.execute();
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+    }
+    
     public JSONObject desbloquearPerfil(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
@@ -37,6 +85,8 @@ public class ControladorAdmin {
                 desbloquear.setString(1, "ACTIVO");
                 desbloquear.setInt(2, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
                 desbloquear.execute();
+                
+                borrarReportes(jsonDatos, conectar);
                 
                 respuesta.put("respuesta", true);
                 respuesta.put("mensaje", "Perfil desbloqueado correctamente.");
@@ -98,6 +148,20 @@ public class ControladorAdmin {
         }
     }
     
+    public void guardarHistorialReportes(JSONObject jsonDatos, Connection conectar){
+        try{
+            PreparedStatement guardar = conectar.prepareStatement("INSERT INTO historial_reportes (descripcion, idUsuario, tipoUsuario, fecha, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?,?)");
+            guardar.setString(1, jsonDatos.get("descripcionReporte").toString());
+            guardar.setInt(2, Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()));
+            guardar.setString(3, jsonDatos.get("tipoUsuarioReportado").toString());
+            guardar.setDate(4, java.sql.Date.valueOf("2020-02-21"));
+            guardar.setInt(5, Integer.parseInt(jsonDatos.get("idTicket").toString()));
+            guardar.execute();
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+    }
+    
     public JSONObject crearReporte(JSONObject jsonDatos){
         JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
@@ -110,6 +174,8 @@ public class ControladorAdmin {
                 guardar.setString(3, jsonDatos.get("tipoUsuarioReportado").toString());
                 guardar.setInt(4, Integer.parseInt(jsonDatos.get("idTicket").toString()));
                 guardar.execute();
+                
+                guardarHistorialReportes(jsonDatos, conectar);
                 
                 //Validar bloqueo de perfil
                 if(jsonDatos.get("tipoUsuarioReportado").toString().equals("ESTUDIANTE"))
@@ -936,7 +1002,8 @@ public class ControladorAdmin {
                         jsonProf.put("telefono", resultado.getString("telefonoLocal"));
                         jsonProf.put("fechaNacimiento", resultado.getDate("fechaNacimiento"));
                         jsonProf.put("foto", resultado.getString("foto"));
-                        jsonProf.put("ine", resultado.getString("ine"));
+                        jsonProf.put("ineFrontal", resultado.getString("ineFrontal"));
+                        jsonProf.put("ineTrasera", resultado.getString("ineTrasera"));
                         jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
                         jsonProf.put("idEstudiante", resultado.getInt("clientes_idclientes"));
                         jsonAsignados.add(jsonProf);
@@ -980,6 +1047,11 @@ public class ControladorAdmin {
                         jsonProf.put("certificado1", resultado.getString("certificado1"));
                         jsonProf.put("certificado2", resultado.getString("certificado2"));
                         jsonProf.put("certificado3", resultado.getString("certificado3"));
+                        jsonProf.put("certificado4", resultado.getString("certificado4"));
+                        jsonProf.put("certificado5", resultado.getString("certificado5"));
+                        jsonProf.put("certificado6", resultado.getString("certificado6"));
+                        jsonProf.put("certificado7", resultado.getString("certificado7"));
+                        jsonProf.put("certificado8", resultado.getString("certificado8"));
                         jsonProf.put("ine", resultado.getString("ine"));
                         jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
                         jsonProf.put("idProfesor", resultado.getInt("profesores_idprofesores"));
@@ -1043,7 +1115,8 @@ public class ControladorAdmin {
                     jsonProf.put("correo", resultado.getString("correo"));
                     jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
                     jsonProf.put("foto", resultado.getString("foto"));
-                    jsonProf.put("ine", resultado.getString("ine"));
+                    jsonProf.put("ineFrontal", resultado.getString("ineFrontal"));
+                     jsonProf.put("ineTrasera", resultado.getString("ineTrasera"));
                     jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
                     jsonSolicitudes.add(jsonProf);
                 }

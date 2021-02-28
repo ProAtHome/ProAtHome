@@ -384,14 +384,17 @@ public class RESTCliente {
 
     @POST
     @Path("/agregarSesion")
-    public void agregarSesion(String datos) {
+    public JSONObject agregarSesion(String datos) {
+        JSONObject respuesta = null;
         try {
             JSONObject datosJSON = (JSONObject)parser.parse(datos);
             cliente.nuevaSesion(datosJSON);
-            cliente.guardarSesion(); 
+            respuesta = cliente.guardarSesion(); 
         }catch(ParseException ex){ 
             ex.printStackTrace();  
         }
+        
+        return respuesta;
     }//Fin método agregarSesion.
     
     @POST
@@ -468,16 +471,17 @@ public class RESTCliente {
     }
     
     @PUT
-    @Path("/actualizarToken")
-    public void guardarToken(String datos){
-    
+    @Path("/guardarTokenPagoClase")
+    public JSONObject guardarToken(String datos){
+        JSONObject respuesta  = null;
         try{
             JSONObject jsonToken = (JSONObject) parser.parse(datos);
-            cliente.actualizarToken(jsonToken);
+            respuesta = cliente.guardarTokenPagoClase(jsonToken);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
-    
+        
+        return respuesta;
     }
     
     @PUT
@@ -625,43 +629,20 @@ public class RESTCliente {
         
         return respuesta;
     }//Fin método agregarCuentaBancaria.
-    
-    @PUT
-    @Path("/informacionPerfilWeb")
-    public void actualizaDatosPerfilWeb(String datos) {
-
-        try {
-
-            JSONObject datosJSON = (JSONObject) parser.parse(datos);
-            cliente.datosActualizarPerfil(datosJSON);
-            cliente.actualizarDatosPerfil();
-
-        } catch (ParseException ex) {
-
-            ex.printStackTrace();
-
-        }
-
-    }//Fin método informacionPerfilWeb.
 
     @PUT
-    @Path("/informacionPerfil")
-    public Response actualizaDatosPerfil(String datos) {
-
+    @Path("/actualizarPerfil")
+    public JSONObject actualizaDatosPerfil(String datos) {
+        JSONObject respuesta = null;
         try {
-
             JSONObject datosJSON = (JSONObject) parser.parse(datos);
             cliente.datosActualizarPerfil(datosJSON);
-            cliente.actualizarDatosPerfil();
-
+            respuesta = cliente.actualizarDatosPerfil();
         } catch (ParseException ex) {
-
             ex.printStackTrace();
-
         }
         
-        return Response.ok("Actualización exitosa", MediaType.APPLICATION_JSON).build();
-
+        return respuesta;
     }//Fin método actualizarInfoPerfil.
 
 }
