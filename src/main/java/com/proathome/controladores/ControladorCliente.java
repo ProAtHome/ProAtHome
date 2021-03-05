@@ -30,6 +30,40 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public JSONObject actualizarPagoTE(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement pago = conectar.prepareStatement("SELECT pagos_idpagos FROM sesiones WHERE idsesiones = ?");
+                pago.setInt(1, Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                ResultSet resultado = pago.executeQuery();
+                
+                if(resultado.next()){
+                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET costoTE = ? WHERE idpagos = ?");
+                    actualizar.setDouble(1, Double.parseDouble(jsonDatos.get("cobro").toString()));
+                    actualizar.setInt(2, resultado.getInt("pagos_idpagos"));
+                    actualizar.execute();
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", "Pago de TE actualziado exitosamente.");
+                }else{
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", "Error la consultar el pago.");
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión en BD.");
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión en BD.");
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject sumarMonedero(JSONObject jsonDatos){
         JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();

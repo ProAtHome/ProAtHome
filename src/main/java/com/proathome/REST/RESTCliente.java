@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -477,6 +478,20 @@ public class RESTCliente {
         try{
             JSONObject jsonToken = (JSONObject) parser.parse(datos);
             respuesta = cliente.guardarTokenPagoClase(jsonToken);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+    }
+    
+    @PUT
+    @Path("/actualizarPagoTE")
+    public JSONObject actualizarPagoTE(String datos){
+        JSONObject respuesta = null;
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = cliente.actualizarPagoTE(jsonDatos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
