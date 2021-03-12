@@ -937,7 +937,7 @@ public class ControladorAdmin {
             try{
                 //Cambiar estatus a registro.
                 PreparedStatement registro = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
-                registro.setString(1, "registro");
+                registro.setString(1, "REGISTRO");
                 registro.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
                 registro.execute();
                 //Eliminamos la documentación.
