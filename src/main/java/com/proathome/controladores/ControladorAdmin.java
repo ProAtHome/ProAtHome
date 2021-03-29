@@ -286,8 +286,8 @@ public class ControladorAdmin {
                     datosSesion.put("tipoPlan", resultado.getString("tipoPlan"));
                     
                     //Consultar pago
-                    PreparedStatement consultaPago = conectar.prepareStatement("SELECT * FROM pagos WHERE idSesion = ?");
-                    consultaPago.setInt(1, idSesion);
+                    PreparedStatement consultaPago = conectar.prepareStatement("SELECT * FROM pagos WHERE idpagos = ?");
+                    consultaPago.setInt(1, resultado.getInt("pagos_idpagos"));
                     ResultSet resultadoPago = consultaPago.executeQuery();
                     
                     if(resultadoPago.next()){

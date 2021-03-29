@@ -40,6 +40,12 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/getDisponibilidadClase/{idEstudiante}")
+    public JSONObject getDisponibilidadClases(@PathParam("idEstudiante") int idEstudiante){
+        return cliente.getDisponibilidadClase(idEstudiante);
+    }
+    
+    @GET
     @Path("/getDatosFiscales/{idEstudiante}")
     public JSONObject getDatosFiscales(@PathParam("idEstudiante") int idEstudiante){
         return cliente.getDatosFiscales(idEstudiante);
@@ -341,22 +347,12 @@ public class RESTCliente {
     }//Fin método agregarCliente.
     
     @POST
-    @Path("eliminarSesionWeb")
-    public void eliminarSesionWeb(String datos){
-        try{
-            JSONObject eliminar = (JSONObject) parser.parse(datos);
-            sesiones.eliminarSesion(eliminar);
-        }catch(ParseException ex){
-            ex.printStackTrace();
-        }
-    }
-    
-    @POST
-    @Path("eliminarSesion")
-    public Response eliminarSesion(JSONObject jsonDatos){
-        sesiones.eliminarSesion(jsonDatos);
+    @Path("/eliminarSesion")
+    public JSONObject eliminarSesion(JSONObject jsonDatos){
+        JSONObject respuesta = null;
+        respuesta = sesiones.eliminarSesion(jsonDatos);
         
-        return Response.ok("Sesión eliminada exitosamente.", MediaType.APPLICATION_JSON).build();
+        return respuesta;
     }
     
     @POST

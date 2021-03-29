@@ -30,6 +30,77 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public JSONObject getDisponibilidadClase(int idEstudiante){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+                try{
+                    //Obtenemos el nivel actual
+                    PreparedStatement nivelActual = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND enruta = ?)");
+                    nivelActual.setInt(1, idEstudiante);
+                    nivelActual.setBoolean(2, true);
+                    ResultSet resultadoNivel = nivelActual.executeQuery();
+                    
+                    if(resultadoNivel.next()){
+                        int idNivel = resultadoNivel.getInt("idNivel");
+                        int idBloque = resultadoNivel.getInt("idBloque");
+                        int idSeccion = resultadoNivel.getInt("idSeccion");
+                        int horasFinalizadas = resultadoNivel.getInt("horas");
+                        int horasBloque = Constantes.obtenerHorasBloque(idSeccion, idNivel, idBloque);
+                        
+                        //Obtenemos las horas de las sesiones creadas en este nivel sin finalizar ni sumar.
+                        PreparedStatement sesionesCreadas = conectar.prepareStatement("SELECT * FROM sesiones WHERE idSeccion = ? AND idNivel = ? AND idBloque = ? AND finalizado = ? AND sumar = ?");
+                        sesionesCreadas.setInt(1, idSeccion);
+                        sesionesCreadas.setInt(2, idNivel);
+                        sesionesCreadas.setInt(3, idBloque);
+                        sesionesCreadas.setBoolean(4, false);
+                        sesionesCreadas.setBoolean(5, true);
+                        ResultSet resultadoSesiones = sesionesCreadas.executeQuery();
+                        
+                        int horasEspera = 0;
+                        while(resultadoSesiones.next()){
+                            horasEspera += resultadoSesiones.getInt("tiempo");
+                        }
+                        
+                        int horasRestantes = horasBloque-horasFinalizadas;
+                        int horasDisponibles = horasRestantes-horasEspera;
+                        
+                        if(horasDisponibles >= 1){
+                            respuesta.put("disponibilidad", true);
+                            respuesta.put("horasDisponibles", horasDisponibles);
+                            respuesta.put("respuesta", true);
+                        }else{
+                            respuesta.put("disponibilidad", false);
+                            respuesta.put("horasDisponibles", horasDisponibles);
+                            respuesta.put("respuesta", true);
+                        }
+                        /*
+                        respuesta.put("idNivel", resultadoNivel.getInt("idNivel"));
+                        respuesta.put("idSeccion", resultadoNivel.getInt("idSeccion"));
+                        respuesta.put("idBloque", resultadoNivel.getInt("idBloque"));
+                        respuesta.put("horas", resultadoNivel.getInt("horas"));
+                        respuesta.put("horasBloque", horasBloque);
+                        respuesta.put("horasEspera", horasEspera);
+                        respuesta.put("horasRestantes", horasRestantes);
+                        respuesta.put("horasDisponibles", horasDisponibles);*/
+                    }else{
+                        respuesta.put("mensaje", "Error en la consulta a BD.");
+                        respuesta.put("respuesta", false);
+                    }
+                }catch(SQLException ex){
+                    ex.printStackTrace();
+                    respuesta.put("mensaje", "Error en la consulta a BD.");
+                    respuesta.put("respuesta", false);
+                }
+        }else{
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+            respuesta.put("respuesta", false);
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject actualizarPagoTE(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
@@ -783,7 +854,7 @@ public class ControladorCliente {
                 ResultSet resultadoContador = contador.executeQuery();
                 
                 if(resultadoContador.next()){
-                    if(resultadoContador.getInt("numero") < 1){
+                    if(resultadoContador.getInt("numero") < 3){
                         plan_activo = false;
                         sesiones_pagadas_finalizadas = false;
                     }else{

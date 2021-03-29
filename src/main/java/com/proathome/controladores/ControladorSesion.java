@@ -485,8 +485,8 @@ public class ControladorSesion {
 
     }//Fin método obtenerSesiones.
     
-    public void eliminarSesion(JSONObject jsonDatos){
-        
+    public JSONObject eliminarSesion(JSONObject jsonDatos){
+        JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
@@ -494,9 +494,36 @@ public class ControladorSesion {
                 //Verificar el tipo de plan 
                 if(jsonDatos.get("tipoPlan").toString().equalsIgnoreCase("PARTICULAR")){
                     
+                    //Regresamos las horas a su lugar.
+                    System.out.println(jsonDatos);
+                    PreparedStatement consultarMonedero = conectar.prepareStatement("SELECT monedero FROM planes WHERE clientes_idclientes = ?");
+                    consultarMonedero.setInt(1, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                    ResultSet monedero = consultarMonedero.executeQuery();
+                    if(monedero.next()){
+                        //Actualizar monedero
+                        
+                        int monederoAct = monedero.getInt("monedero") + Integer.parseInt(jsonDatos.get("horas").toString());
+                        PreparedStatement actualizar = conectar.prepareStatement("UPDATE planes SET monedero = ?, tipoPlan = ? WHERE clientes_idclientes = ?");
+                        actualizar.setInt(1, monederoAct);
+                        actualizar.setString(2, "PARTICULAR_PLAN");
+                        actualizar.setInt(3, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                        actualizar.execute();
+                        
+                        PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM sesiones WHERE idsesiones = ?");
+                        eliminar.setInt(1 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                        eliminar.execute();
+                        
+                        respuesta.put("respuesta", true);
+                        respuesta.put("mensaje", "Sesión eliminada, horas añadidas al monedero.");
+                    }else{
+                        respuesta.put("respuesta", false);
+                        respuesta.put("mensaje", "Error en al obtener información de PLAN.");
+                    }
+                    
+                    /*
                     PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM sesiones WHERE idsesiones = ?");
                     eliminar.setInt(1 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
-                    eliminar.execute();
+                    eliminar.execute();*/
                 }else{
                     //Regresamos las horas a su lugar.
                     System.out.println(jsonDatos);
@@ -515,16 +542,27 @@ public class ControladorSesion {
                         PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM sesiones WHERE idsesiones = ?");
                         eliminar.setInt(1 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
                         eliminar.execute();
+                        
+                        respuesta.put("respuesta", true);
+                        respuesta.put("mensaje", "Sesión eliminada, horas añadidas al monedero.");
+                    }else{
+                        respuesta.put("respuesta", false);
+                        respuesta.put("mensaje", "Error al obtener información de PLAN.");
                     }
                 }
                
             }catch(SQLException ex){
                 ex.printStackTrace(); 
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "No se puede eliminar la clase.");
             }
             
         }else{
-            System.out.println("Error en eliminarSesion."); 
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
         }
+        
+        return respuesta;
         
     }//Fin método eliminarSesion.
     
