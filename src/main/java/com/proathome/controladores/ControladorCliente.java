@@ -30,6 +30,54 @@ public class ControladorCliente {
     private Sesion sesion = new Sesion();
     private boolean clienteRegistrado = false;
     
+    public JSONObject actualizarPass(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                //Consultar si el pass anterior es correcto.
+                PreparedStatement passAnterior = conectar.prepareStatement("SELECT contrasena FROM clientes WHERE idclientes = ?");
+                passAnterior.setInt(1, Integer.parseInt(jsonDatos.get("idCliente").toString()));
+                ResultSet resultPassAnt = passAnterior.executeQuery();
+                
+                if(resultPassAnt.next()){
+                    String passAntBD = resultPassAnt.getString("contrasena");
+                    MD5 md5 = new MD5();
+                    String passAnt = md5.getMD5(jsonDatos.get("actual").toString());
+                    System.out.println(passAnt);
+                    System.out.println(passAnt);
+                    //Validamos si son iguales.
+                    if(passAnt.equals(passAntBD)){
+                        //Guardamos la nueva contrasena.
+                        String nuevaPass = md5.getMD5(jsonDatos.get("nueva").toString());
+                        PreparedStatement guardarPass = conectar.prepareStatement("UPDATE clientes SET contrasena = ? WHERE idclientes = ?");
+                        guardarPass.setString(1, nuevaPass);
+                        guardarPass.setInt(2, Integer.parseInt(jsonDatos.get("idCliente").toString()));
+                        guardarPass.execute();
+                        
+                        respuesta.put("mensaje", "Contraseña actualizada correctamente.");
+                        respuesta.put("respuesta", true);
+                        
+                    }else{
+                        respuesta.put("mensaje", "La contraseña anterior es incorrecta.");
+                        respuesta.put("respuesta", false);
+                    }
+                }else{
+                    respuesta.put("mensaje", "Error en la consulta a BD.");
+                    respuesta.put("respuesta", false);
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+            respuesta.put("respuesta", false);
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject getDisponibilidadClase(int idEstudiante){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
@@ -1376,11 +1424,16 @@ public class ControladorCliente {
          Connection conectar = ConexionMySQL.connection();
         if (conectar != null) {
             try {
+                
+                MD5 md5 = new MD5();
+                String pass = md5.getMD5(contrasena);
                 String query = "SELECT * FROM clientes WHERE BINARY correo = ? AND BINARY contrasena = ?";
                 PreparedStatement obtenerDatos = conectar.prepareStatement(query);
                 obtenerDatos.setString(1, correo);
-                obtenerDatos.setString(2, contrasena);
+                obtenerDatos.setString(2, pass);
                 ResultSet resultado = obtenerDatos.executeQuery();
+                
+                System.out.println(pass);
 
                 if (resultado.next()) {
                     cliente.setIdCliente(resultado.getInt("idclientes"));
@@ -1528,6 +1581,8 @@ public class ControladorCliente {
          
         if (conectar != null) {
             try {
+                MD5 md5 = new MD5();
+                String pass = md5.getMD5(cliente.getContrasena());
                 String query = "INSERT INTO clientes (nombre, apellidoPaterno, apellidoMaterno, correo, celular, telefonoLocal, direccion, fechaNacimiento, genero, fechaDeRegistro, contrasena, estado) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setString(1, cliente.getNombre());
@@ -1540,7 +1595,7 @@ public class ControladorCliente {
                 agregarDatos.setDate(8, cliente.getFechaNacimiento());
                 agregarDatos.setString(9, cliente.getGenero());
                 agregarDatos.setDate(10, cliente.getFechaRegistro());
-                agregarDatos.setString(11, cliente.getContrasena());
+                agregarDatos.setString(11, pass);
                 agregarDatos.setString(12, cliente.getEstado());
                 agregarDatos.execute();
                 

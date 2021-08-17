@@ -245,6 +245,21 @@ public class RESTProfesor {
     }//Fin método agregarCuentaBancaria.
     
     @PUT
+    @Path("/actualizarPass")
+    public JSONObject actualizarPass(String datos){
+        JSONObject respuesta = null;
+        try{
+            JSONObject jsonDatos = (JSONObject) parser.parse(datos);
+            respuesta = profesor.actualizarPass(jsonDatos);
+        }catch(ParseException ex){          
+            ex.printStackTrace();
+        }
+        
+        return respuesta;
+        
+    }
+    
+    @PUT
     @Path("/cancelarClase")
     public JSONObject cancelarSesion(String datos){
         JSONObject respuesta = null;

@@ -22,6 +22,57 @@ public class ControladorAdmin {
     public static final int ESTUDIANTE = 1;
     public static final int PROFESOR = 2;
     
+    public void latidoSQL(){
+        Connection conectar = ConexionMySQL.connection();
+        
+        if(conectar != null){
+            try{
+                PreparedStatement latido = conectar.prepareStatement("SELECT * FROM clientes");
+                ResultSet resultado = latido.executeQuery();
+                while(resultado.next()){
+                    System.out.println("Latido SQL");
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }
+    }
+    
+    public JSONObject historialReportes(String tipoUsuario, int idUsuario){
+        JSONObject respuesta = new JSONObject();
+        Connection conectar = ConexionMySQL.connection();
+        System.out.println(idUsuario);
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+                consulta.setInt(1, idUsuario);
+                consulta.setString(2, tipoUsuario);
+                ResultSet resultado = consulta.executeQuery();
+                JSONArray reportes = new JSONArray();
+                int num = 1;
+                while(resultado.next()){
+                    JSONObject mensaje = new JSONObject();
+                    mensaje.put("descripcion", resultado.getString("descripcion"));
+                    mensaje.put("num", num);
+                    num++;
+                    reportes.add(mensaje);
+                }
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", reportes);
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");                
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject bloquearPerfil(JSONObject jsonDatos){
         JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();

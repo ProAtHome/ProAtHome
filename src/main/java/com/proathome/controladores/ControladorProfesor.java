@@ -31,6 +31,54 @@ public class ControladorProfesor {
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
     
+    public JSONObject actualizarPass(JSONObject jsonDatos){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+            try{
+                //Consultar si el pass anterior es correcto.
+                PreparedStatement passAnterior = conectar.prepareStatement("SELECT contrasena FROM profesores WHERE idprofesores = ?");
+                passAnterior.setInt(1, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                ResultSet resultPassAnt = passAnterior.executeQuery();
+                
+                if(resultPassAnt.next()){
+                    String passAntBD = resultPassAnt.getString("contrasena");
+                    MD5 md5 = new MD5();
+                    String passAnt = md5.getMD5(jsonDatos.get("actual").toString());
+                    System.out.println("ActualBD " + passAntBD);
+                    System.out.println(passAnt);
+                    //Validamos si son iguales.
+                    if(passAnt.equals(passAntBD)){
+                        //Guardamos la nueva contrasena.
+                        String nuevaPass = md5.getMD5(jsonDatos.get("nueva").toString());
+                        PreparedStatement guardarPass = conectar.prepareStatement("UPDATE profesores SET contrasena = ? WHERE idprofesores = ?");
+                        guardarPass.setString(1, nuevaPass);
+                        guardarPass.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                        guardarPass.execute();
+                        
+                        respuesta.put("mensaje", "Contraseña actualizada correctamente.");
+                        respuesta.put("respuesta", true);
+                        
+                    }else{
+                        respuesta.put("mensaje", "La contraseña anterior es incorrecta.");
+                        respuesta.put("respuesta", false);
+                    }
+                }else{
+                    respuesta.put("mensaje", "Error en la consulta a BD.");
+                    respuesta.put("respuesta", false);
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else{
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+            respuesta.put("respuesta", false);
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject cancelarSesion(JSONObject jsonDatos){
         JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
@@ -634,10 +682,12 @@ public class ControladorProfesor {
         conectar = ConexionMySQL.connection();
         if (conectar != null) {
             try {
+                MD5 md5 = new MD5();
+                String pass = md5.getMD5(contrasena);
                 String query = "SELECT * FROM profesores WHERE BINARY correo = ? AND BINARY contrasena = ?";
                 PreparedStatement obtenerDatos = conectar.prepareStatement(query);
                 obtenerDatos.setString(1, correo);
-                obtenerDatos.setString(2, contrasena);
+                obtenerDatos.setString(2, pass);
                 ResultSet resultado = obtenerDatos.executeQuery();
 
                 if (resultado.next()) {
@@ -822,16 +872,17 @@ public class ControladorProfesor {
         String query = null;
         
         if(rango == Constantes.BASICO)
-            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.idSeccion = ? AND sesiones.clientes_idclientes = clientes.idclientes";
+            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.profesores_idprofesores IS NULL AND sesiones.idSeccion = ? AND sesiones.clientes_idclientes = clientes.idclientes ";
         else if(rango == Constantes.INTERMEDIO)
-            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE (sesiones.idSeccion = ? OR sesiones.idSeccion = ?) AND sesiones.clientes_idclientes = clientes.idclientes";
+            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.profesores_idprofesores IS NULL AND (sesiones.idSeccion = ? OR sesiones.idSeccion = ?) AND sesiones.clientes_idclientes = clientes.idclientes";
         else if(rango == Constantes.AVANZADO)
-            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE (sesiones.idSeccion = ? OR sesiones.idSeccion = ? OR sesiones.idSeccion = ?) AND sesiones.clientes_idclientes = clientes.idclientes";
+            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.profesores_idprofesores IS NULL AND (sesiones.idSeccion = ? OR sesiones.idSeccion = ? OR sesiones.idSeccion = ?) AND sesiones.clientes_idclientes = clientes.idclientes";
         
         if(conectar != null){ 
             try{   
                 PreparedStatement sesiones = conectar.prepareStatement(query);
                 sesiones.setInt(1, 1);
+                
                 if(rango == Constantes.INTERMEDIO){
                     sesiones.setInt(2, 2);
                 }else if(rango == Constantes.AVANZADO){
@@ -976,12 +1027,14 @@ public class ControladorProfesor {
         
         if (conectar != null) {
             try {
+                MD5 md5 = new MD5();
+                String pass = md5.getMD5(profesor.getContrasena());
                 String query = "INSERT INTO profesores (nombre, correo, contrasena, fechaNacimiento, fechaDeRegistro, apellidoPaterno, apellidoMaterno,"
                         + " celular, telefonoLocal, direccion, genero) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setString(1, profesor.getNombre());
                 agregarDatos.setString(2, profesor.getCorreo());
-                agregarDatos.setString(3, profesor.getContrasena());
+                agregarDatos.setString(3, pass);
                 agregarDatos.setDate(4, profesor.getFechaNacimiento());
                 agregarDatos.setDate(5, profesor.getFechaRegistro());
                 agregarDatos.setString(6, profesor.getApellidoPaterno());

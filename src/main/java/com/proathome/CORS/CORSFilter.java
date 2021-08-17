@@ -38,7 +38,7 @@ public class CORSFilter implements Filter {
         conta++;
  
         // Authorize (allow) all domains to consume the content
-        ((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Origin", "http://localhost");
+        ((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
         ((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Credentials", "true");
         ((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Headers","origin, content-type, accept, authorization");
         ((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Methods","GET, OPTIONS, HEAD, PUT, POST, DELETE");
