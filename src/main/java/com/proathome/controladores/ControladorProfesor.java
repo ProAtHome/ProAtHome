@@ -31,6 +31,52 @@ public class ControladorProfesor {
     private JSONArray arrayJson = new JSONArray();
     private boolean profesorRegistrado = false;
     
+    public JSONObject getVerificacion(String token, String correo){
+        Connection conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){
+            //Obtenemos token de correo.
+            try{
+                PreparedStatement consultar = conectar.prepareStatement("SELECT token_verificacion, verificado FROM profesores WHERE correo = ?");
+                consultar.setString(1, correo);
+                ResultSet resultado = consultar.executeQuery();
+                
+                if(resultado.next()){
+                    String token_bd = resultado.getString("token_verificacion");
+                    boolean verificado = resultado.getBoolean("verificado");
+                    
+                    if(token_bd.equalsIgnoreCase(token)){
+                        //Verificamos el correo.
+                        PreparedStatement verificar = conectar.prepareStatement("UPDATE profesores SET verificado = ? WHERE correo = ?");
+                        verificar.setBoolean(1, true);
+                        verificar.setString(2, correo);
+                        verificar.execute();
+                        
+                        respuesta.put("mensaje", "Cuenta verificada, inicia sesión.");
+                        respuesta.put("respuesta", true);
+                        respuesta.put("verificado", verificado);
+                    }else{
+                        respuesta.put("mensaje", "Token de confirmación inválido.");
+                        respuesta.put("respuesta", false);
+                    }
+                }else{
+                    respuesta.put("mensaje", "No se encontró la información.");
+                    respuesta.put("respuesta", false);
+                }
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+                respuesta.put("respuesta", false);
+            }
+        }else{
+            respuesta.put("mensaje", "Error en la Peticion");
+            respuesta.put("respuesta", false);
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject actualizarPass(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
@@ -694,6 +740,7 @@ public class ControladorProfesor {
                     profesor.setIdProfesor(resultado.getInt("idprofesores"));
                     profesor.setNombre(resultado.getString("nombre"));
                     profesor.setEstado(resultado.getString("estado"));
+                    profesor.setVerificado(resultado.getBoolean("verificado"));
                     profesor.setRangoClase(resultado.getInt("rangoClase"));
                     profesorRegistrado = true;
                 } else 
@@ -1027,26 +1074,42 @@ public class ControladorProfesor {
         
         if (conectar != null) {
             try {
-                MD5 md5 = new MD5();
-                String pass = md5.getMD5(profesor.getContrasena());
-                String query = "INSERT INTO profesores (nombre, correo, contrasena, fechaNacimiento, fechaDeRegistro, apellidoPaterno, apellidoMaterno,"
-                        + " celular, telefonoLocal, direccion, genero) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-                PreparedStatement agregarDatos = conectar.prepareStatement(query);
-                agregarDatos.setString(1, profesor.getNombre());
-                agregarDatos.setString(2, profesor.getCorreo());
-                agregarDatos.setString(3, pass);
-                agregarDatos.setDate(4, profesor.getFechaNacimiento());
-                agregarDatos.setDate(5, profesor.getFechaRegistro());
-                agregarDatos.setString(6, profesor.getApellidoPaterno());
-                agregarDatos.setString(7, profesor.getApellidMaterno());
-                agregarDatos.setString(8, profesor.getCelular());
-                agregarDatos.setString(9, profesor.getTelefonoLocal());
-                agregarDatos.setString(10, profesor.getDireccion());
-                agregarDatos.setString(11, profesor.getGenero());
-                agregarDatos.execute();
                 
-                respuesta.put("respuesta", true);
-                respuesta.put("mensaje", "Profesor registrado exitosamente.");
+                //VALIDAMOS QUE NO EXISTA EL CORREO
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM profesores WHERE correo = ?");
+                consulta.setString(1, profesor.getCorreo());
+                ResultSet resultadoCorreo = consulta.executeQuery();
+                
+                if(resultadoCorreo.next()){
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", "Correo electronico ya registrado.");
+                }else{
+                    //CREAMOS TOKEN
+                    MD5 md5 = new MD5();
+                    String token = md5.getMD5(profesor.getCorreo() + profesor.getNombre());
+                    String pass = md5.getMD5(profesor.getContrasena());
+                    String query = "INSERT INTO profesores (nombre, correo, contrasena, fechaNacimiento, fechaDeRegistro, apellidoPaterno, apellidoMaterno,"
+                            + " celular, telefonoLocal, direccion, genero, token_verificacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    PreparedStatement agregarDatos = conectar.prepareStatement(query);
+                    agregarDatos.setString(1, profesor.getNombre());
+                    agregarDatos.setString(2, profesor.getCorreo());
+                    agregarDatos.setString(3, pass);
+                    agregarDatos.setDate(4, profesor.getFechaNacimiento());
+                    agregarDatos.setDate(5, profesor.getFechaRegistro());
+                    agregarDatos.setString(6, profesor.getApellidoPaterno());
+                    agregarDatos.setString(7, profesor.getApellidMaterno());
+                    agregarDatos.setString(8, profesor.getCelular());
+                    agregarDatos.setString(9, profesor.getTelefonoLocal());
+                    agregarDatos.setString(10, profesor.getDireccion());
+                    agregarDatos.setString(11, profesor.getGenero());
+                    agregarDatos.setString(12, token);
+                    agregarDatos.execute();
+
+                    respuesta.put("token", token);
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", "Profesor registrado exitosamente.");
+                }
+            
             } catch (SQLException ex) {
                 ex.printStackTrace();
                 respuesta.put("respuesta", false);

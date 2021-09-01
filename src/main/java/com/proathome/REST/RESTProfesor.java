@@ -35,6 +35,13 @@ public class RESTProfesor {
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
     
+    
+    @GET
+    @Path("/getVerificacion/{token}/{correo}")
+    public JSONObject getVerificacion(@PathParam("token") String token, @PathParam("correo") String correo){
+        return profesor.getVerificacion(token, correo);
+    }
+    
     @GET
     @Path("/solicitudEliminarSesion/{idSesion}/{idProfesor}")
     public JSONObject solicitudEliminarSesion(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){

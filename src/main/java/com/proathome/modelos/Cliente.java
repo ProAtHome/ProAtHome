@@ -17,9 +17,18 @@ public class Cliente {
     public static CuentaBancaria cuenta;
     public static EvaluacionCliente evaluacion;
     public static Ubicacion ubicacion;
+    private boolean verificado;
     
     public Cliente(){
         
+    }
+
+    public boolean isVerificado() {
+        return verificado;
+    }
+
+    public void setVerificado(boolean verificado) {
+        this.verificado = verificado;
     }
 
     public String getApellidoPaterno() {

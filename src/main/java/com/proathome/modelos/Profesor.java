@@ -16,9 +16,18 @@ public class Profesor {
     public static CuentaBancaria cuenta;
     public static EvaluacionProfesor evaluacion;
     public static Ubicacion ubicacion;
+    private boolean verificado;
 
     public Profesor() {
         
+    }
+
+    public boolean isVerificado() {
+        return verificado;
+    }
+
+    public void setVerificado(boolean verificado) {
+        this.verificado = verificado;
     }
 
     public String getEstado() {

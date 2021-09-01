@@ -40,6 +40,12 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/getVerificacion/{token}/{correo}")
+    public JSONObject getVerificacion(@PathParam("token") String token, @PathParam("correo") String correo){
+        return cliente.getVerificacion(token, correo);
+    }
+    
+    @GET
     @Path("/getDisponibilidadClase/{idEstudiante}")
     public JSONObject getDisponibilidadClases(@PathParam("idEstudiante") int idEstudiante){
         return cliente.getDisponibilidadClase(idEstudiante);
