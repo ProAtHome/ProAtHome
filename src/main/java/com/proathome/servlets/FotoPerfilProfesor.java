@@ -34,7 +34,8 @@ public class FotoPerfilProfesor extends HttpServlet{
             
             System.out.println("Cargado...");
             
-            response.sendRedirect("http://ec2-52-32-182-154.us-west-2.compute.amazonaws.com/ProAtHome/perfil/profesor");
+            response.sendRedirect("http://localhost/ProAtHome/perfil/profesor");
+            //response.sendRedirect("https://www.proathome.com.mx/perfil/profesor");
             
         }catch(ServletException ex){
             

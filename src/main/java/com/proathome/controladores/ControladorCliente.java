@@ -510,7 +510,7 @@ public class ControladorCliente {
                     jsonTicket.put("tipoUsuario", resultado.getInt("tipoUsuario"));
                     jsonTicket.put("topico", resultado.getString("topico"));
                     jsonTicket.put("descripcion", resultado.getString("descripcion"));
-                    jsonTicket.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    jsonTicket.put("fechaCreacion", resultado.getDate("fechaCreacion").toString());
                     jsonTicket.put("estatus", resultado.getInt("estatus"));
                     jsonTicket.put("idUsuario", resultado.getInt("idUsuario"));
                     jsonTicket.put("idOperador", resultado.getInt("operadores_idoperadores"));
