@@ -2,7 +2,7 @@ package com.proathome.modelos;
 
 /*
  *
- * Clase Modelo Ubicación.
+ * Servicio Modelo Ubicación.
  * 
 */
 

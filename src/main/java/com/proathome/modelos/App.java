@@ -6,7 +6,7 @@ import javax.ws.rs.core.Application;
 
 /*
 *
-*  Clase prueba Path "/".
+*  Servicio prueba Path "/".
 *
 */
 

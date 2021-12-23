@@ -31,7 +31,7 @@ public class ControladorRutaAprendizaje {
         if(conectar != null){
             try{
                 PreparedStatement nueva = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
-                nueva.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                nueva.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                 nueva.setInt(2, Integer.parseInt(json.get("idBloque").toString()));
                 nueva.setInt(3, Integer.parseInt(json.get("idNivel").toString()));
                 nueva.setInt(4, Integer.parseInt(json.get("idSeccion").toString()));
@@ -48,7 +48,7 @@ public class ControladorRutaAprendizaje {
         
     }
     
-    public void sumarClaseRuta(JSONObject json){
+    public void sumarServicioRuta(JSONObject json){
         conectar = ConexionMySQL.connection();
         rutaSumar.clear();
         
@@ -56,13 +56,13 @@ public class ControladorRutaAprendizaje {
             try{
                  //CHECAREMOS PRIMERO EL NIVEL 3
                 PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
-                estado.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                estado.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                 estado.setInt(2, 3);
                 estado.setBoolean(3, true);
                 ResultSet resultado = estado.executeQuery();
                 
                 if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 3 ENTONCES...
-                    rutaSumar.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                    rutaSumar.put("idCliente", resultado.getInt("clientes_idclientes"));
                     rutaSumar.put("idBloque", resultado.getInt("idBloque"));
                     rutaSumar.put("idNivel", resultado.getInt("idNivel"));
                     rutaSumar.put("idSeccion", resultado.getInt("idSeccion"));
@@ -71,13 +71,13 @@ public class ControladorRutaAprendizaje {
                     estado = null;
                     resultado = null;
                     estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
-                    estado.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                    estado.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                     estado.setInt(2, 2);
                     estado.setBoolean(3, true);
                     resultado = estado.executeQuery();
                     
                     if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 2 ENTONCES...
-                        rutaSumar.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                        rutaSumar.put("idCliente", resultado.getInt("clientes_idclientes"));
                         rutaSumar.put("idBloque", resultado.getInt("idBloque"));
                         rutaSumar.put("idNivel", resultado.getInt("idNivel"));
                         rutaSumar.put("idSeccion", resultado.getInt("idSeccion"));
@@ -86,13 +86,13 @@ public class ControladorRutaAprendizaje {
                         estado = null;
                         resultado = null;
                         estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
-                        estado.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                        estado.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                         estado.setInt(2, 1);
                         estado.setBoolean(3, true);
                         resultado = estado.executeQuery();
                         
                         if(resultado.next()){//SI TENEMOS ALGÚN REGISTRO ENTONCES...
-                            rutaSumar.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                            rutaSumar.put("idCliente", resultado.getInt("clientes_idclientes"));
                             rutaSumar.put("idBloque", resultado.getInt("idBloque"));
                             rutaSumar.put("idNivel", resultado.getInt("idNivel"));
                             rutaSumar.put("idSeccion", resultado.getInt("idSeccion"));
@@ -115,7 +115,7 @@ public class ControladorRutaAprendizaje {
                         //Registro normal
                         System.out.println("Entro :P");
                         PreparedStatement enCurso = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
-                        enCurso.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                        enCurso.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                         enCurso.setInt(2, Integer.parseInt(json.get("idBloque").toString()));
                         enCurso.setInt(3, Integer.parseInt(json.get("idNivel").toString()));
                         enCurso.setInt(4, Integer.parseInt(json.get("idSeccion").toString()));
@@ -128,7 +128,7 @@ public class ControladorRutaAprendizaje {
                         //Registro de un nuevo bloque.
                         JSONObject nuevoRegistro = Constantes.nuevoRegistro(Integer.parseInt(json.get("idSeccion").toString()), Integer.parseInt(json.get("idNivel").toString()), Integer.parseInt(json.get("idBloque").toString()));
                         PreparedStatement enCurso = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
-                        enCurso.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                        enCurso.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                         enCurso.setInt(2, Integer.parseInt(nuevoRegistro.get("idBloque").toString()));
                         enCurso.setInt(3, Integer.parseInt(nuevoRegistro.get("idNivel").toString()));
                         enCurso.setInt(4, Integer.parseInt(nuevoRegistro.get("idSeccion").toString()));
@@ -140,7 +140,7 @@ public class ControladorRutaAprendizaje {
                 }else{//Registro sin sumar
                     System.out.println("Registro sin sumar.");
                         PreparedStatement enCurso = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro) VALUES (?,?,?,?,?,?)");
-                        enCurso.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                        enCurso.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                         enCurso.setInt(2, Integer.parseInt(json.get("idBloque").toString()));
                         enCurso.setInt(3, Integer.parseInt(json.get("idNivel").toString()));
                         enCurso.setInt(4, Integer.parseInt(json.get("idSeccion").toString()));
@@ -153,11 +153,11 @@ public class ControladorRutaAprendizaje {
                 ex.printStackTrace();
             }
         }else{
-            System.out.println("Error en sumarClaseRuta.");
+            System.out.println("Error en sumarServicioRuta.");
         }
     }
     
-    public JSONObject obtenerSesionActual(int idEstudiante){
+    public JSONObject obtenerSesionActual(int idCliente){
         conectar = ConexionMySQL.connection();
         ruta.clear();
         
@@ -166,13 +166,13 @@ public class ControladorRutaAprendizaje {
             try{
                 //CHECAREMOS PRIMERO EL NIVEL 3
                 PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
-                estado.setInt(1, idEstudiante);
+                estado.setInt(1, idCliente);
                 estado.setInt(2, 3);
                 estado.setBoolean(3, true);
                 ResultSet resultado = estado.executeQuery();
                 
                 if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 3 ENTONCES...
-                    ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                    ruta.put("idCliente", resultado.getInt("clientes_idclientes"));
                     ruta.put("idBloque", resultado.getInt("idBloque"));
                     ruta.put("idNivel", resultado.getInt("idNivel"));
                     ruta.put("idSeccion", resultado.getInt("idSeccion"));
@@ -181,13 +181,13 @@ public class ControladorRutaAprendizaje {
                     estado = null;
                     resultado = null;
                     estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
-                    estado.setInt(1, idEstudiante);
+                    estado.setInt(1, idCliente);
                     estado.setInt(2, 2);
                     estado.setBoolean(3, true);
                     resultado = estado.executeQuery();
                     
                     if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 2 ENTONCES...
-                        ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                        ruta.put("idCliente", resultado.getInt("clientes_idclientes"));
                         ruta.put("idBloque", resultado.getInt("idBloque"));
                         ruta.put("idNivel", resultado.getInt("idNivel"));
                         ruta.put("idSeccion", resultado.getInt("idSeccion"));
@@ -196,19 +196,19 @@ public class ControladorRutaAprendizaje {
                         estado = null;
                         resultado = null;
                         estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
-                        estado.setInt(1, idEstudiante);
+                        estado.setInt(1, idCliente);
                         estado.setInt(2, 1);
                         estado.setBoolean(3, true);
                         resultado = estado.executeQuery();
                         
                         if(resultado.next()){//SI TENEMOS ALGÚN REGISTRO ENTONCES...
-                            ruta.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                            ruta.put("idCliente", resultado.getInt("clientes_idclientes"));
                             ruta.put("idBloque", resultado.getInt("idBloque"));
                             ruta.put("idNivel", resultado.getInt("idNivel"));
                             ruta.put("idSeccion", resultado.getInt("idSeccion"));
                             ruta.put("horas", resultado.getInt("horas"));
                         }else{//SI NO, ES DESDE 0 ESTE PEDO.
-                            ruta.put("idEstudiante", idEstudiante);
+                            ruta.put("idCliente", idCliente);
                             ruta.put("idBloque", 1);
                             ruta.put("idNivel", 1);
                             ruta.put("idSeccion", 1);
@@ -234,7 +234,7 @@ public class ControladorRutaAprendizaje {
         if(conectar != null){
             try{
                 PreparedStatement enCurso = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro) VALUES (?,?,?,?,?,?)");
-                enCurso.setInt(1, Integer.parseInt(datos.get("idEstudiante").toString()));
+                enCurso.setInt(1, Integer.parseInt(datos.get("idCliente").toString()));
                 enCurso.setInt(2, Integer.parseInt(datos.get("idBloque").toString()));
                 enCurso.setInt(3, Integer.parseInt(datos.get("idNivel").toString()));
                 enCurso.setInt(4, Integer.parseInt(datos.get("idSeccion").toString()));
@@ -250,7 +250,7 @@ public class ControladorRutaAprendizaje {
         
     }
     
-    public JSONObject estadoRutaAprendizaje(int idEstudiante, int tipo){
+    public JSONObject estadoRutaAprendizaje(int idCliente, int tipo){
         
         rutaAprendizaje.clear();
         conectar = ConexionMySQL.connection();
@@ -259,14 +259,14 @@ public class ControladorRutaAprendizaje {
             try{
                 //CHECAREMOS PRIMERO EL NIVEL 3
                 PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
-                estado.setInt(1, idEstudiante);
+                estado.setInt(1, idCliente);
                 estado.setInt(2, 3);
                 estado.setBoolean(3, true);
                 ResultSet resultado = estado.executeQuery();
                 
                 if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 3 ENTONCES...
                     rutaAprendizaje.put("estado", ControladorRutaAprendizaje.RUTA_ENCURSO);
-                    rutaAprendizaje.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                    rutaAprendizaje.put("idCliente", resultado.getInt("clientes_idclientes"));
                     rutaAprendizaje.put("idBloque", resultado.getInt("idBloque"));
                     rutaAprendizaje.put("idNivel", resultado.getInt("idNivel"));
                     rutaAprendizaje.put("idSeccion", resultado.getInt("idSeccion"));
@@ -276,14 +276,14 @@ public class ControladorRutaAprendizaje {
                     estado = null;
                     resultado = null;
                     estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
-                    estado.setInt(1, idEstudiante);
+                    estado.setInt(1, idCliente);
                     estado.setInt(2, 2);
                     estado.setBoolean(3, true);
                     resultado = estado.executeQuery();
                     
                     if(resultado.next()){//SI TENEMOS EN CURSO EL NIVEL 2 ENTONCES...
                         rutaAprendizaje.put("estado", ControladorRutaAprendizaje.RUTA_ENCURSO);
-                        rutaAprendizaje.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                        rutaAprendizaje.put("idCliente", resultado.getInt("clientes_idclientes"));
                         rutaAprendizaje.put("idBloque", resultado.getInt("idBloque"));
                         rutaAprendizaje.put("idNivel", resultado.getInt("idNivel"));
                         rutaAprendizaje.put("idSeccion", resultado.getInt("idSeccion"));
@@ -293,14 +293,14 @@ public class ControladorRutaAprendizaje {
                         estado = null;
                         resultado = null;
                         estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
-                        estado.setInt(1, idEstudiante);
+                        estado.setInt(1, idCliente);
                         estado.setInt(2, 1);
                         estado.setBoolean(3, true);
                         resultado = estado.executeQuery();
                         
                         if(resultado.next()){//SI TENEMOS ALGÚN REGISTRO ENTONCES...
                             rutaAprendizaje.put("estado", ControladorRutaAprendizaje.RUTA_ENCURSO);
-                            rutaAprendizaje.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                            rutaAprendizaje.put("idCliente", resultado.getInt("clientes_idclientes"));
                             rutaAprendizaje.put("idBloque", resultado.getInt("idBloque"));
                             rutaAprendizaje.put("idNivel", resultado.getInt("idNivel"));
                             rutaAprendizaje.put("idSeccion", resultado.getInt("idSeccion"));

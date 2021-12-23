@@ -4,8 +4,8 @@ import java.sql.Date;
 
 public class Sesion {
     
-    private int idsesiones, profesores_idprofesores, clientes_idclientes, ubicacion_idubicacion, tiempo, idSeccion, idNivel, idBloque, personas;
-    private String tipoPlan, horario, lugar, extras, tipoClase, profesor, actualizado, fotoProfesor, correoProfesor, descripcionProfesor;
+    private int idsesiones, profesionales_idprofesionales, clientes_idclientes, ubicacion_idubicacion, tiempo, idSeccion, idNivel, idBloque, personas;
+    private String tipoPlan, horario, lugar, extras, tipoServicio, profesional, actualizado, fotoProfesional, correoProfesional, descripcionProfesional;
     private double latitud, longitud;
     private String fecha, token;
     private boolean sumar, finalizado;
@@ -50,28 +50,28 @@ public class Sesion {
         this.sumar = sumar;
     }
     
-    public String getFotoProfesor() {
-        return fotoProfesor;
+    public String getFotoProfesional() {
+        return fotoProfesional;
     }
 
-    public void setFotoProfesor(String fotoProfesor) {
-        this.fotoProfesor = fotoProfesor;
+    public void setFotoProfesional(String fotoProfesional) {
+        this.fotoProfesional = fotoProfesional;
     }
 
-    public String getCorreoProfesor() {
-        return correoProfesor;
+    public String getCorreoProfesional() {
+        return correoProfesional;
     }
 
-    public void setCorreoProfesor(String correoProfesor) {
-        this.correoProfesor = correoProfesor;
+    public void setCorreoProfesional(String correoProfesional) {
+        this.correoProfesional = correoProfesional;
     }
 
-    public String getDescripcionProfesor() {
-        return descripcionProfesor;
+    public String getDescripcionProfesional() {
+        return descripcionProfesional;
     }
 
-    public void setDescripcionProfesor(String descripcionProfesor) {
-        this.descripcionProfesor = descripcionProfesor;
+    public void setDescripcionProfesional(String descripcionProfesional) {
+        this.descripcionProfesional = descripcionProfesional;
     }
 
     public String getActualizado() {
@@ -86,12 +86,12 @@ public class Sesion {
         return idsesiones;
     }
 
-    public String getProfesor() {
-        return profesor;
+    public String getProfesional() {
+        return profesional;
     }
 
-    public void setProfesor(String profesor) {
-        this.profesor = profesor;
+    public void setProfesional(String profesional) {
+        this.profesional = profesional;
     }
 
     public int getUbicacion_idubicacion() {
@@ -122,12 +122,12 @@ public class Sesion {
         this.idsesiones = idsesiones;
     }
 
-    public int getProfesores_idprofesores() {
-        return profesores_idprofesores;
+    public int getProfesionales_idprofesionales() {
+        return profesionales_idprofesionales;
     }
 
-    public void setProfesores_idprofesores(int profesores_idprofesores) {
-        this.profesores_idprofesores = profesores_idprofesores;
+    public void setProfesionales_idprofesionales(int profesionales_idprofesionales) {
+        this.profesionales_idprofesionales = profesionales_idprofesionales;
     }
 
     public int getClientes_idclientes() {
@@ -194,12 +194,12 @@ public class Sesion {
         this.extras = extras;
     }
 
-    public String getTipoClase() {
-        return tipoClase;
+    public String getTipoServicio() {
+        return tipoServicio;
     }
 
-    public void setTipoClase(String tipoClase) {
-        this.tipoClase = tipoClase;
+    public void setTipoServicio(String tipoServicio) {
+        this.tipoServicio = tipoServicio;
     }
 
     public String getFecha() {

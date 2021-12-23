@@ -58,13 +58,13 @@ public class ObjetoUbicacion {
             
         }else{
             
-            System.out.println("Error en la conexión en obtenerSesionesEstudiantes.");
+            System.out.println("Error en la conexión en obtenerSesionesClientes.");
             
         }
         
     }//Fin método obtenerSesionesMaps.
     
-    public void obtenerSesionesEstudiantes(){
+    public void obtenerSesionesClientes(){
         
         ConexionMySQL mysql = new ConexionMySQL();
         Connection conectar;
@@ -120,10 +120,10 @@ public class ObjetoUbicacion {
             
         }else{
             
-            System.out.println("Error en la conexión en obtenerSesionesEstudiantes.");
+            System.out.println("Error en la conexión en obtenerSesionesClientes.");
             
         }
         
-    }//Fin método obtenerSesionesEstudiantes.
+    }//Fin método obtenerSesionesClientes.
     
 }

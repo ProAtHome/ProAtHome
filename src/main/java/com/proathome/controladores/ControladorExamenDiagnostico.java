@@ -30,7 +30,7 @@ public class ControladorExamenDiagnostico {
         if(conectar != null){
             try{            
                 PreparedStatement reiniciar = conectar.prepareStatement("DELETE FROM diagnostico WHERE clientes_idclientes = ?");
-                reiniciar.setInt(1, Integer.parseInt(examen.get("idEstudiante").toString()));
+                reiniciar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                 reiniciar.execute();
                 estatus.put("estatus", ControladorExamenDiagnostico.REINICIAR_EXAMEN);
             }catch(SQLException ex){
@@ -56,7 +56,7 @@ public class ControladorExamenDiagnostico {
                 ResultSet resultado = info.executeQuery();
                 
                 if(resultado.next()){
-                    examen.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                    examen.put("idCliente", resultado.getInt("clientes_idclientes"));
                     examen.put("aciertos", resultado.getInt("aciertos"));
                     examen.put("preguntaActual", resultado.getInt("preguntaActual"));
                     examen.put("estatus", ControladorExamenDiagnostico.CONTINUAR_EXAMEN);
@@ -87,7 +87,7 @@ public class ControladorExamenDiagnostico {
                 ResultSet resultado = info.executeQuery();
                 
                 if(resultado.next()){
-                    examen.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                    examen.put("idCliente", resultado.getInt("clientes_idclientes"));
                     examen.put("aciertos", resultado.getInt("aciertos"));
                     examen.put("preguntaActual", resultado.getInt("preguntaActual"));
                     examen.put("estatus", ControladorExamenDiagnostico.INFO_EXAMEN_FINAL);
@@ -111,12 +111,12 @@ public class ControladorExamenDiagnostico {
         if(conectar != null){
             try{
                 PreparedStatement validar = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
-                validar.setInt(1, Integer.parseInt(examen.get("idEstudiante").toString()));
+                validar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                 ResultSet resultado = validar.executeQuery();
                 
                 if(!resultado.next()){
                     PreparedStatement iniciar = conectar.prepareStatement("INSERT INTO diagnostico (clientes_idclientes, aciertos, preguntaActual, estatus) VALUES (?,?,?,?)");
-                    iniciar.setInt(1, Integer.parseInt(examen.get("idEstudiante").toString()));
+                    iniciar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                     iniciar.setInt(2, Integer.parseInt(examen.get("aciertos").toString()));
                     iniciar.setInt(3, Integer.parseInt(examen.get("preguntaActual").toString()));
                     iniciar.setInt(4, ControladorExamenDiagnostico.ENCURSO);
@@ -138,12 +138,12 @@ public class ControladorExamenDiagnostico {
         if(conectar != null){
             try{
                 PreparedStatement validar = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
-                validar.setInt(1, Integer.parseInt(examen.get("idEstudiante").toString()));
+                validar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                 ResultSet resultado = validar.executeQuery();
                 
                 if(!resultado.next()){
                     PreparedStatement cancelar = conectar.prepareStatement("INSERT INTO diagnostico (clientes_idclientes, aciertos, preguntaActual, estatus) VALUES (?,?,?,?)");
-                    cancelar.setInt(1, Integer.parseInt(examen.get("idEstudiante").toString()));
+                    cancelar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                     cancelar.setInt(2, Integer.parseInt(examen.get("aciertos").toString()));
                     cancelar.setInt(3, Integer.parseInt(examen.get("preguntaActual").toString()));
                     cancelar.setInt(4, ControladorExamenDiagnostico.CANCELADO);
@@ -165,7 +165,7 @@ public class ControladorExamenDiagnostico {
         if(conectar != null){
             try{
                 PreparedStatement aciertos = conectar.prepareStatement("SELECT aciertos FROM diagnostico WHERE clientes_idclientes = ?");
-                aciertos.setInt(1, Integer.parseInt(examen.get("idEstudiante").toString()));
+                aciertos.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                 ResultSet resultadoAciertos = aciertos.executeQuery();
                 
                 if(resultadoAciertos.next()){
@@ -175,7 +175,7 @@ public class ControladorExamenDiagnostico {
                     encurso.setInt(1, aciertosNuevos);
                     encurso.setInt(2, Integer.parseInt(examen.get("preguntaActual").toString()));
                     encurso.setInt(3, Integer.parseInt(examen.get("estatus").toString()));
-                    encurso.setInt(4, Integer.parseInt(examen.get("idEstudiante").toString()));
+                    encurso.setInt(4, Integer.parseInt(examen.get("idCliente").toString()));
                     encurso.execute();
                 }
             }catch(SQLException ex){

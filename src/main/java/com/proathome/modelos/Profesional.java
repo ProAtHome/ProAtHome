@@ -4,21 +4,21 @@ import java.sql.Date;
 
 /*
  *
- * Clase Modelo Profesor.
+ * Servicio Modelo Profesional.
  * 
 */
 
-public class Profesor {
+public class Profesional {
 
     private String nombre, apellidoPaterno, apellidMaterno, celular, telefonoLocal, direccion, genero, correo, contrasena, clv, foto, descripcion, estado;
     private java.sql.Date fechaNacimiento, fechaRegistro;
-    private int idProfesor, rangoClase;
+    private int idProfesional, rangoServicio;
     public static CuentaBancaria cuenta;
-    public static EvaluacionProfesor evaluacion;
+    public static EvaluacionProfesional evaluacion;
     public static Ubicacion ubicacion;
     private boolean verificado;
 
-    public Profesor() {
+    public Profesional() {
         
     }
 
@@ -54,12 +54,12 @@ public class Profesor {
         this.foto = foto;
     }
     
-    public int getIdProfesor() {
-        return idProfesor;
+    public int getIdProfesional() {
+        return idProfesional;
     }
 
-    public void setIdProfesor(int idProfesor) {
-        this.idProfesor = idProfesor;
+    public void setIdProfesional(int idProfesional) {
+        this.idProfesional = idProfesional;
     }
 
     public static CuentaBancaria getCuenta() {
@@ -67,15 +67,15 @@ public class Profesor {
     }
 
     public static void setCuenta(CuentaBancaria cuenta) {
-        Profesor.cuenta = cuenta;
+        Profesional.cuenta = cuenta;
     }
 
-    public static EvaluacionProfesor getEvaluacion() {
+    public static EvaluacionProfesional getEvaluacion() {
         return evaluacion;
     }
 
-    public static void setEvaluacion(EvaluacionProfesor evaluacion) {
-        Profesor.evaluacion = evaluacion;
+    public static void setEvaluacion(EvaluacionProfesional evaluacion) {
+        Profesional.evaluacion = evaluacion;
     }
 
     public static Ubicacion getUbicacion() {
@@ -83,7 +83,7 @@ public class Profesor {
     }
 
     public static void setUbicacion(Ubicacion ubicacion) {
-        Profesor.ubicacion = ubicacion;
+        Profesional.ubicacion = ubicacion;
     }
 
     public String getNombre() {
@@ -182,12 +182,12 @@ public class Profesor {
         this.genero = genero;
     }
 
-    public int getRangoClase() {
-        return rangoClase;
+    public int getRangoServicio() {
+        return rangoServicio;
     }
 
-    public void setRangoClase(int rangoClase) {
-        this.rangoClase = rangoClase;
+    public void setRangoServicio(int rangoServicio) {
+        this.rangoServicio = rangoServicio;
     }
 
     

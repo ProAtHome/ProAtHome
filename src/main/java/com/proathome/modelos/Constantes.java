@@ -11,8 +11,8 @@ import org.json.simple.JSONObject;
 public class Constantes {
     
     /*Tipos de usuarios*/
-    public static final int TIPO_USUARIO_ESTUDIANTE = 1;
-    public static final int TIPO_USUARIO_PROFESOR = 2;
+    public static final int TIPO_USUARIO_CLIENTE = 1;
+    public static final int TIPO_USUARIO_PROFESIONAL = 2;
     
     /*Estatus tickets ayuda*/
     public static final int ESTATUS_SIN_OPERADOR = 1;

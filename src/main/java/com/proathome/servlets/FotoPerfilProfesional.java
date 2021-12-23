@@ -12,7 +12,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-public class FotoPerfilProfesor extends HttpServlet{
+public class FotoPerfilProfesional extends HttpServlet{
     
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response){
@@ -34,8 +34,8 @@ public class FotoPerfilProfesor extends HttpServlet{
             
             System.out.println("Cargado...");
             
-            response.sendRedirect("http://localhost/ProAtHome/perfil/profesor");
-            //response.sendRedirect("https://www.proathome.com.mx/perfil/profesor");
+            //response.sendRedirect("http://localhost/ProAtHome/perfil/profesional");
+            response.sendRedirect("https://www.proathome.com.mx/perfil/profesional");
             
         }catch(ServletException ex){
             

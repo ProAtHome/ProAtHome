@@ -22,11 +22,11 @@
         <url-pattern>/FotoPerfil</url-pattern>
     </servlet-mapping>
     <servlet>
-        <servlet-name>FotoPerfilProfesor</servlet-name>
-        <servlet-class>com.proathome.servlets.FotoPerfilProfesor</servlet-class>
+        <servlet-name>FotoPerfilProfesional</servlet-name>
+        <servlet-class>com.proathome.servlets.FotoPerfilProfesional</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>FotoPerfilProfesor</servlet-name>
-        <url-pattern>/FotoPerfilProfesor</url-pattern>
+        <servlet-name>FotoPerfilProfesional</servlet-name>
+        <url-pattern>/FotoPerfilProfesional</url-pattern>
     </servlet-mapping>
 </web-app>

@@ -3,7 +3,7 @@ package com.proathome.controladores;
 import com.google.gson.Gson;
 import com.proathome.modelos.Admin;
 import com.proathome.modelos.Constantes;
-import com.proathome.modelos.Profesor;
+import com.proathome.modelos.Profesional;
 import com.proathome.mysql.ConexionMySQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,8 +19,8 @@ import org.json.simple.JSONObject;
 public class ControladorAdmin {
     
     private Connection conectar;
-    public static final int ESTUDIANTE = 1;
-    public static final int PROFESOR = 2;
+    public static final int CLIENTE = 1;
+    public static final int PROFESIONAL = 2;
     
     public void latidoSQL(){
         Connection conectar = ConexionMySQL.connection();
@@ -80,10 +80,10 @@ public class ControladorAdmin {
         if(conectar != null){
             try{
                 String query = null;
-                if(jsonDatos.get("perfil").equals("ESTUDIANTE"))
+                if(jsonDatos.get("perfil").equals("CLIENTE"))
                     query = "UPDATE clientes SET estado = ? WHERE idclientes = ?";
-                else if(jsonDatos.get("perfil").equals("PROFESOR"))
-                    query = "UPDATE profesores SET estado = ? WHERE idprofesores = ?";
+                else if(jsonDatos.get("perfil").equals("PROFESIONAL"))
+                    query = "UPDATE profesionales SET estado = ? WHERE idprofesionales = ?";
 
                 PreparedStatement bloquear = conectar.prepareStatement(query);
                 bloquear.setString(1, "BLOQUEADO");
@@ -110,10 +110,10 @@ public class ControladorAdmin {
         try{
             PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
             eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
-            if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_ESTUDIANTE)
-                eliminar.setString(2, "ESTUDIANTE");
-            else if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_PROFESOR)
-                eliminar.setString(2, "PROFESOR");
+            if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_CLIENTE)
+                eliminar.setString(2, "CLIENTE");
+            else if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_PROFESIONAL)
+                eliminar.setString(2, "PROFESIONAL");
             
             eliminar.execute();
         }catch(SQLException ex){
@@ -128,10 +128,10 @@ public class ControladorAdmin {
         if(conectar != null){
             try{
                 PreparedStatement desbloquear = null;
-                if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_ESTUDIANTE)
+                if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_CLIENTE)
                     desbloquear = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
-                else if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_PROFESOR)
-                    desbloquear = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
+                else if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_PROFESIONAL)
+                    desbloquear = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                 
                 desbloquear.setString(1, "ACTIVO");
                 desbloquear.setInt(2, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
@@ -155,11 +155,11 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public void bloqueoPerfilEstudiante(int idEstudiante, Connection conectar){
+    public void bloqueoPerfilCliente(int idCliente, Connection conectar){
         try{
             PreparedStatement consulta = conectar.prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
-            consulta.setInt(1, idEstudiante);
-            consulta.setString(2, "ESTUDIANTE");
+            consulta.setInt(1, idCliente);
+            consulta.setString(2, "CLIENTE");
             ResultSet resultado = consulta.executeQuery();
             
             if(resultado.next()){
@@ -168,7 +168,7 @@ public class ControladorAdmin {
                     //Bloqueado
                     PreparedStatement bloquear = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
                     bloquear.setString(1, "BLOQUEADO");
-                    bloquear.setInt(2, idEstudiante);
+                    bloquear.setInt(2, idCliente);
                     bloquear.execute();
                 }
             }
@@ -177,20 +177,20 @@ public class ControladorAdmin {
         }
     }
     
-    public void bloqueoPerfilProfesor(int idProfesor, Connection conectar){
+    public void bloqueoPerfilProfesional(int idProfesional, Connection conectar){
         try{
             PreparedStatement consulta = conectar.prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
-            consulta.setInt(1, idProfesor);
-            consulta.setString(2, "PROFESOR");
+            consulta.setInt(1, idProfesional);
+            consulta.setString(2, "PROFESIONAL");
             ResultSet resultado = consulta.executeQuery();
             
             if(resultado.next()){
                 int numReportes = resultado.getInt("num");
                 if(numReportes >= 3){
                     //Bloqueado
-                    PreparedStatement bloquear = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
+                    PreparedStatement bloquear = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                     bloquear.setString(1, "BLOQUEADO");
-                    bloquear.setInt(2, idProfesor);
+                    bloquear.setInt(2, idProfesional);
                     bloquear.execute();
                 }
             }
@@ -229,10 +229,10 @@ public class ControladorAdmin {
                 guardarHistorialReportes(jsonDatos, conectar);
                 
                 //Validar bloqueo de perfil
-                if(jsonDatos.get("tipoUsuarioReportado").toString().equals("ESTUDIANTE"))
-                    bloqueoPerfilEstudiante(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()), conectar);
-                else if(jsonDatos.get("tipoUsuarioReportado").toString().equals("PROFESOR"))
-                    bloqueoPerfilProfesor(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()), conectar);
+                if(jsonDatos.get("tipoUsuarioReportado").toString().equals("CLIENTE"))
+                    bloqueoPerfilCliente(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()), conectar);
+                else if(jsonDatos.get("tipoUsuarioReportado").toString().equals("PROFESIONAL"))
+                    bloqueoPerfilProfesional(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()), conectar);
                 
                 respuesta.put("respuesta", true);
                 respuesta.put("mensaje", "Reporte creado correctamente,");
@@ -249,53 +249,53 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public JSONObject getEstudiante(int idEstudiante, Connection conectar){
-        JSONObject estudiante = new JSONObject();
+    public JSONObject getCliente(int idCliente, Connection conectar){
+        JSONObject cliente = new JSONObject();
         try{
             PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
-            consulta.setInt(1, idEstudiante);
+            consulta.setInt(1, idCliente);
             ResultSet resultado = consulta.executeQuery();
             
             if(resultado.next()){
-                estudiante.put("idEstudiante", resultado.getInt("idclientes"));
-                estudiante.put("nombre", resultado.getString("nombre") + resultado.getString("apellidoPaterno") + resultado.getString("apellidoMaterno"));
-                estudiante.put("correo", resultado.getString("correo"));
+                cliente.put("idCliente", resultado.getInt("idclientes"));
+                cliente.put("nombre", resultado.getString("nombre") + resultado.getString("apellidoPaterno") + resultado.getString("apellidoMaterno"));
+                cliente.put("correo", resultado.getString("correo"));
             }else{
-                estudiante.put("idEstudiante", "Error al obtener estudiante.");
-                estudiante.put("nombre", "Error al obtener estudiante.");
-                estudiante.put("correo", "Error al obtener estudiante.");
+                cliente.put("idCliente", "Error al obtener cliente.");
+                cliente.put("nombre", "Error al obtener cliente.");
+                cliente.put("correo", "Error al obtener cliente.");
             }
         }catch(SQLException ex){
             ex.printStackTrace();
         }
         
-        return estudiante;
+        return cliente;
     }
     
-    public JSONObject getProfesor(int idProfesor, Connection conectar){
-        JSONObject profesor = new JSONObject();
+    public JSONObject getProfesional(int idProfesional, Connection conectar){
+        JSONObject profesional = new JSONObject();
         try{
-            PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM profesores WHERE idprofesores = ?");
-            consulta.setInt(1, idProfesor);
+            PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM profesionales WHERE idprofesionales = ?");
+            consulta.setInt(1, idProfesional);
             ResultSet resultado = consulta.executeQuery();
             
             if(resultado.next()){
-                profesor.put("nombre", resultado.getString("nombre"));
-                profesor.put("correo", resultado.getString("correo"));
+                profesional.put("nombre", resultado.getString("nombre"));
+                profesional.put("correo", resultado.getString("correo"));
             }else{
-                profesor.put("nombre", "Error al obtener nombre de profesor.");
-                profesor.put("correo", "Error al obtener correo de profesor.");
+                profesional.put("nombre", "Error al obtener nombre de profesional.");
+                profesional.put("correo", "Error al obtener correo de profesional.");
             }
         }catch(SQLException ex){
             ex.printStackTrace();
-            profesor.put("nombre", "Error al obtener nombre de profesor.");
-            profesor.put("correo", "Error al obtener correo de profesor.");
+            profesional.put("nombre", "Error al obtener nombre de profesional.");
+            profesional.put("correo", "Error al obtener correo de profesional.");
         }
         
-        return profesor;
+        return profesional;
     }
     
-    public JSONObject verClase(int idSesion){
+    public JSONObject verServicio(int idSesion){
         JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
         
@@ -307,19 +307,19 @@ public class ControladorAdmin {
                 
                 if(resultado.next()){
                     JSONObject datosSesion = new JSONObject();
-                    JSONObject profesor = getProfesor(resultado.getInt("profesores_idprofesores"), conectar);
-                    JSONObject estudiante = getEstudiante(resultado.getInt("clientes_idclientes"), conectar);
-                    datosSesion.put("profesor", resultado.getInt("profesores_idprofesores") == 0 ? "Sin profesor asignado" : profesor.get("nombre").toString());
-                    datosSesion.put("correo",  resultado.getInt("profesores_idprofesores") == 0 ? "Sin profesor asignado" : profesor.get("correo").toString());
-                    datosSesion.put("idProfesor", resultado.getInt("profesores_idprofesores"));
-                    datosSesion.put("idEstudiante", estudiante.get("idEstudiante"));
-                    datosSesion.put("estudiante", estudiante.get("nombre"));
-                    datosSesion.put("correoEstudiante", estudiante.get("correo"));
+                    JSONObject profesional = getProfesional(resultado.getInt("profesionales_idprofesionales"), conectar);
+                    JSONObject cliente = getCliente(resultado.getInt("clientes_idclientes"), conectar);
+                    datosSesion.put("profesional", resultado.getInt("profesionales_idprofesionales") == 0 ? "Sin profesional asignado" : profesional.get("nombre").toString());
+                    datosSesion.put("correo",  resultado.getInt("profesionales_idprofesionales") == 0 ? "Sin profesional asignado" : profesional.get("correo").toString());
+                    datosSesion.put("idProfesional", resultado.getInt("profesionales_idprofesionales"));
+                    datosSesion.put("idCliente", cliente.get("idCliente"));
+                    datosSesion.put("cliente", cliente.get("nombre"));
+                    datosSesion.put("correoCliente", cliente.get("correo"));
                     datosSesion.put("horario", resultado.getString("horario"));
                     datosSesion.put("lugar", resultado.getString("lugar"));
                     datosSesion.put("tiempo", resultado.getInt("tiempo"));
                     datosSesion.put("extras", resultado.getString("extras"));
-                    datosSesion.put("tipoClase", resultado.getString("tipoClase"));
+                    datosSesion.put("tipoServicio", resultado.getString("tipoServicio"));
                     datosSesion.put("latitud", resultado.getDouble("latitud"));
                     datosSesion.put("longitud", resultado.getDouble("longitud"));
                     datosSesion.put("idSeccion", resultado.getInt("idSeccion"));
@@ -344,7 +344,7 @@ public class ControladorAdmin {
                     if(resultadoPago.next()){
                         JSONObject pago = new JSONObject();
                         pago.put("token", resultadoPago.getString("token"));
-                        pago.put("costoClase", resultadoPago.getDouble("costoClase"));
+                        pago.put("costoServicio", resultadoPago.getDouble("costoServicio"));
                         pago.put("costoTE", resultadoPago.getDouble("costoTE"));
                         pago.put("estatusPago", resultadoPago.getString("estatusPago"));
                         datosSesion.put("pago", true);
@@ -372,7 +372,7 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public JSONObject activarEstudiante(JSONObject jsonDatos){
+    public JSONObject activarCliente(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
@@ -383,7 +383,7 @@ public class ControladorAdmin {
                 PreparedStatement actualizar = conectar.prepareStatement("UPDATE clientes SET foto = ?, estado = ? WHERE idclientes = ?");
                 actualizar.setString(1, jsonDatos.get("foto").toString());
                 actualizar.setString(2, "ACTIVO");
-                actualizar.setInt(3, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                actualizar.setInt(3, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                 actualizar.execute();
                 respuesta.put("respuesta", true);
                 respuesta.put("mensaje", "Perfil activado correctamente.");
@@ -401,7 +401,7 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public JSONObject getPerfilProfesor(int idProfesor){
+    public JSONObject getPerfilProfesional(int idProfesional){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         JSONArray sesionesArray = new JSONArray();
@@ -409,33 +409,33 @@ public class ControladorAdmin {
         if(conectar != null){
             //Obtener perfil
             try{
-               PreparedStatement perfil = conectar.prepareStatement("SELECT * FROM profesores WHERE profesores.idprofesores = ?");
-               perfil.setInt(1, idProfesor);
+               PreparedStatement perfil = conectar.prepareStatement("SELECT * FROM profesionales WHERE profesionales.idprofesionales = ?");
+               perfil.setInt(1, idProfesional);
                ResultSet resPerfil = perfil.executeQuery();
                
                if(resPerfil.next()){
                    JSONObject jsonPerfil = new JSONObject();
                    jsonPerfil.put("nombre", resPerfil.getString("nombre"));
                    jsonPerfil.put("correo", resPerfil.getString("correo"));
-                   jsonPerfil.put("rango", resPerfil.getString("rangoClase"));
-                   jsonPerfil.put("fechaNacimiento", resPerfil.getDate("fechaNacimiento"));
+                   jsonPerfil.put("rango", resPerfil.getString("rangoServicio"));
+                   jsonPerfil.put("fechaNacimiento", resPerfil.getDate("fechaNacimiento").toString());
                    jsonPerfil.put("estatus", resPerfil.getString("estado"));
                    respuesta.put("perfil", jsonPerfil);
                    
                    //Historial Sesiones.
-                  PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM sesiones WHERE profesores_idprofesores = ?");
-                  sesiones.setInt(1, idProfesor);
+                  PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM sesiones WHERE profesionales_idprofesionales = ?");
+                  sesiones.setInt(1, idProfesional);
                   ResultSet resSesiones = sesiones.executeQuery();
                   
                   while(resSesiones.next()){
                       JSONObject sesionJSON = new JSONObject();
                       sesionJSON.put("idSesion", resSesiones.getInt("idsesiones"));
-                      sesionJSON.put("idEstudiante", resSesiones.getInt("clientes_idclientes"));
+                      sesionJSON.put("idCliente", resSesiones.getInt("clientes_idclientes"));
                       sesionJSON.put("horario", resSesiones.getString("horario"));
                       sesionJSON.put("lugar", resSesiones.getString("lugar"));
                       sesionJSON.put("tiempo", resSesiones.getInt("tiempo"));
                       sesionJSON.put("extras", resSesiones.getString("extras"));
-                      sesionJSON.put("tipoClase", resSesiones.getString("tipoClase"));
+                      sesionJSON.put("tipoServicio", resSesiones.getString("tipoServicio"));
                       sesionJSON.put("idSeccion", resSesiones.getInt("idSeccion"));
                       sesionJSON.put("idNivel", resSesiones.getInt("idNivel"));
                       sesionJSON.put("idBloque", resSesiones.getInt("idBloque"));
@@ -462,7 +462,7 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public JSONObject getPerfilEstudiante(int idEstudiante){
+    public JSONObject getPerfilCliente(int idCliente){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         JSONArray sesionesArray = new JSONArray();
@@ -472,7 +472,7 @@ public class ControladorAdmin {
             //Obtener perfil
             try{
                PreparedStatement perfil = conectar.prepareStatement("SELECT * FROM clientes INNER JOIN planes WHERE clientes.idclientes = ? AND planes.clientes_idclientes = clientes.idclientes");
-               perfil.setInt(1, idEstudiante);
+               perfil.setInt(1, idCliente);
                ResultSet resPerfil = perfil.executeQuery();
                
                if(resPerfil.next()){
@@ -482,23 +482,23 @@ public class ControladorAdmin {
                    jsonPerfil.put("estado", resPerfil.getString("estado"));
                    jsonPerfil.put("tipoPlan", resPerfil.getString("tipoPlan"));
                    jsonPerfil.put("monedero", resPerfil.getInt("monedero"));
-                   jsonPerfil.put("fechaNacimiento", resPerfil.getDate("fechaNacimiento"));
+                   jsonPerfil.put("fechaNacimiento", resPerfil.getDate("fechaNacimiento").toString());
                    respuesta.put("perfil", jsonPerfil);
                    
                    //Historial Sesiones.
                   PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM sesiones WHERE clientes_idclientes = ?");
-                  sesiones.setInt(1, idEstudiante);
+                  sesiones.setInt(1, idCliente);
                   ResultSet resSesiones = sesiones.executeQuery();
                   
                   while(resSesiones.next()){
                       JSONObject sesionJSON = new JSONObject();
                       sesionJSON.put("idSesion", resSesiones.getInt("idsesiones"));
-                      sesionJSON.put("idProfesor", resSesiones.getInt("profesores_idprofesores"));
+                      sesionJSON.put("idProfesional", resSesiones.getInt("profesionales_idprofesionales"));
                       sesionJSON.put("horario", resSesiones.getString("horario"));
                       sesionJSON.put("lugar", resSesiones.getString("lugar"));
                       sesionJSON.put("tiempo", resSesiones.getInt("tiempo"));
                       sesionJSON.put("extras", resSesiones.getString("extras"));
-                      sesionJSON.put("tipoClase", resSesiones.getString("tipoClase"));
+                      sesionJSON.put("tipoServicio", resSesiones.getString("tipoServicio"));
                       sesionJSON.put("idSeccion", resSesiones.getInt("idSeccion"));
                       sesionJSON.put("idNivel", resSesiones.getInt("idNivel"));
                       sesionJSON.put("idBloque", resSesiones.getInt("idBloque"));
@@ -509,7 +509,7 @@ public class ControladorAdmin {
                   
                   //Historial de planes
                   PreparedStatement planes = conectar.prepareStatement("SELECT * FROM historialplanes WHERE clientes_idclientes = ?");
-                  planes.setInt(1, idEstudiante);
+                  planes.setInt(1, idCliente);
                   ResultSet resPlanes = planes.executeQuery();
                   
                   while(resPlanes.next()){
@@ -542,25 +542,25 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public JSONObject getProfesoresRegistrados(){
+    public JSONObject getProfesionalesRegistrados(){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
-        JSONArray profesores = new JSONArray();
+        JSONArray profesionales = new JSONArray();
         
         if(conectar != null){
             try{
-                PreparedStatement registros = conectar.prepareStatement("SELECT * FROM profesores");
+                PreparedStatement registros = conectar.prepareStatement("SELECT * FROM profesionales");
                 ResultSet resultado = registros.executeQuery();
                 while(resultado.next()){
-                    JSONObject profesor = new JSONObject();
-                    profesor.put("idProfesor", resultado.getInt("idprofesores"));
-                    profesor.put("nombre", resultado.getString("nombre"));
-                    profesor.put("correo", resultado.getString("correo"));
-                    profesor.put("estado", resultado.getString("estado"));
-                    profesores.add(profesor);
+                    JSONObject profesional = new JSONObject();
+                    profesional.put("idProfesional", resultado.getInt("idprofesionales"));
+                    profesional.put("nombre", resultado.getString("nombre"));
+                    profesional.put("correo", resultado.getString("correo"));
+                    profesional.put("estado", resultado.getString("estado"));
+                    profesionales.add(profesional);
                 }
                 
-                respuesta.put("mensaje", profesores);
+                respuesta.put("mensaje", profesionales);
                 respuesta.put("respuesta", true);
             }catch(SQLException ex){
                 respuesta.put("mensaje", "Error en la conexión a BD.");
@@ -575,26 +575,26 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public JSONObject getEstudiantesRegistrados(){
+    public JSONObject getClientesRegistrados(){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
-        JSONArray estudiantes = new JSONArray();
+        JSONArray clientes = new JSONArray();
         
         if(conectar != null){
             try{
                 PreparedStatement registros = conectar.prepareStatement("SELECT * FROM clientes INNER JOIN planes WHERE planes.clientes_idclientes = clientes.idclientes");
                 ResultSet resultado = registros.executeQuery();
                 while(resultado.next()){
-                    JSONObject estudiante = new JSONObject();
-                    estudiante.put("idEstudiante", resultado.getInt("idclientes"));
-                    estudiante.put("nombre", resultado.getString("nombre"));
-                    estudiante.put("correo", resultado.getString("correo"));
-                    estudiante.put("tipoPlan", resultado.getString("tipoPlan"));
-                    estudiante.put("monedero", resultado.getInt("monedero"));
-                    estudiantes.add(estudiante);
+                    JSONObject cliente = new JSONObject();
+                    cliente.put("idCliente", resultado.getInt("idclientes"));
+                    cliente.put("nombre", resultado.getString("nombre"));
+                    cliente.put("correo", resultado.getString("correo"));
+                    cliente.put("tipoPlan", resultado.getString("tipoPlan"));
+                    cliente.put("monedero", resultado.getInt("monedero"));
+                    clientes.add(cliente);
                 }
                 
-                respuesta.put("mensaje", estudiantes);
+                respuesta.put("mensaje", clientes);
             respuesta.put("respuesta", true);
             }catch(SQLException ex){
                 respuesta.put("mensaje", "Error en la conexión a BD.");
@@ -652,7 +652,7 @@ public class ControladorAdmin {
                     respuesta.put("mensaje", "Operador eliminado exitosamente.");
             }catch(SQLException ex){
                 respuesta.put("respuesta", false);
-                respuesta.put("mensaje", "Error, revisa si el operador está asigando a un Ewstudiante/Profesor.");
+                respuesta.put("mensaje", "Error, revisa si el operador está asigando a un Ewstudiante/Profesional.");
                 ex.printStackTrace();
             }
         }else{
@@ -739,17 +739,30 @@ public class ControladorAdmin {
         
         if(conectar != null){
             try{
-                PreparedStatement guardar = conectar.prepareStatement("INSERT INTO operadores (nombres, apellidoPaterno, apellidoMaterno, rango, usuario, contrasena)"
+                
+                //VERIFICAR SI NO EXISTE OPERADOR EN EL MISMO RANGO.
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM operadores WHERE usuario = ?");
+                consulta.setString(1, jsonDatos.get("usuario").toString());
+                consulta.setInt(2, Integer.parseInt(jsonDatos.get("rango").toString()));
+                ResultSet resultado = consulta.executeQuery();
+                
+                if(!resultado.next()){
+                    PreparedStatement guardar = conectar.prepareStatement("INSERT INTO operadores (nombres, apellidoPaterno, apellidoMaterno, rango, usuario, contrasena)"
                                                                         + " VALUES(?,?,?,?,?,?)");
-                guardar.setString(1, jsonDatos.get("nombre").toString());
-                guardar.setString(2, jsonDatos.get("paterno").toString());
-                guardar.setString(3, jsonDatos.get("materno").toString());
-                guardar.setInt(4, Integer.parseInt(jsonDatos.get("rango").toString()));
-                guardar.setString(5, jsonDatos.get("usuario").toString());
-                guardar.setString(6, jsonDatos.get("contrasena").toString());
-                guardar.execute();
-                respuesta.put("respuesta", true);
-                respuesta.put("mensaje", "Operador registrado correctamente.");
+                    guardar.setString(1, jsonDatos.get("nombre").toString());
+                    guardar.setString(2, jsonDatos.get("paterno").toString());
+                    guardar.setString(3, jsonDatos.get("materno").toString());
+                    guardar.setInt(4, Integer.parseInt(jsonDatos.get("rango").toString()));
+                    guardar.setString(5, jsonDatos.get("usuario").toString());
+                    guardar.setString(6, jsonDatos.get("contrasena").toString());
+                    guardar.execute();
+                    System.out.println("ok");
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", "Operador registrado correctamente.");
+                }else{
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", "Usuario ya registrado.");
+                }
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -791,25 +804,25 @@ public class ControladorAdmin {
                         respuesta.put("mensaje", "El horario de la FECHA 2 ya tiene una posible cita agendada.");
                     }else{
                         //Eliminar previa cita.
-                        PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM citas WHERE profesores_idprofesores = ?");
-                        eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                        PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM citas WHERE profesionales_idprofesionales = ?");
+                        eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                         eliminar.execute();
                         //Guardar cita
                         PreparedStatement guardar = conectar.prepareStatement("INSERT INTO citas (fecha1, fecha2, horario1, horario2,"
-                                + " tipoCita, profesores_idprofesores, operadores_idoperadores, datosAdicionales) VALUES (?,?,?,?,?,?,?,?)");
+                                + " tipoCita, profesionales_idprofesionales, operadores_idoperadores, datosAdicionales) VALUES (?,?,?,?,?,?,?,?)");
                         guardar.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha1").toString()));
                         guardar.setDate(2, java.sql.Date.valueOf(jsonDatos.get("fecha2").toString()));
                         guardar.setString(3, jsonDatos.get("horario1").toString());
                         guardar.setString(4, jsonDatos.get("horario2").toString());
                         guardar.setString(5, jsonDatos.get("tipoCita").toString());
-                        guardar.setInt(6, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                        guardar.setInt(6, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                         guardar.setInt(7, Integer.parseInt(jsonDatos.get("idOperador").toString()));
                         guardar.setString(8, jsonDatos.get("datosAdicionales").toString());
                         guardar.execute();
                         //Cambiar estatus
-                        PreparedStatement estatus = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
+                        PreparedStatement estatus = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                         estatus.setString(1, "CITA");
-                        estatus.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                        estatus.setInt(2, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                         estatus.execute();
                         respuesta.put("respuesta", true);
                         respuesta.put("mensaje", "Hay disponibilidad.");
@@ -830,11 +843,11 @@ public class ControladorAdmin {
         
         if(conectar != null){
             try{
-                PreparedStatement activar = conectar.prepareStatement("UPDATE profesores SET foto = ?, estado = ?, rangoClase = ? WHERE idprofesores = ?");
+                PreparedStatement activar = conectar.prepareStatement("UPDATE profesionales SET foto = ?, estado = ?, rangoServicio = ? WHERE idprofesionales = ?");
                 activar.setString(1, jsonDatos.get("foto").toString());
                 activar.setString(2, "ACTIVO");
                 activar.setInt(3, Integer.parseInt(jsonDatos.get("rango").toString()));
-                activar.setInt(4, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                activar.setInt(4, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                 activar.execute();
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -850,7 +863,7 @@ public class ControladorAdmin {
         
         if(conectar != null){
             try{
-                PreparedStatement fechas = conectar.prepareStatement("SELECT * FROM citas INNER JOIN profesores WHERE citas.fechaAcordada = ? AND citas.operadores_idoperadores = ? AND profesores.idprofesores = citas.profesores_idprofesores");
+                PreparedStatement fechas = conectar.prepareStatement("SELECT * FROM citas INNER JOIN profesionales WHERE citas.fechaAcordada = ? AND citas.operadores_idoperadores = ? AND profesionales.idprofesionales = citas.profesionales_idprofesionales");
                 fechas.setDate(1, java.sql.Date.valueOf(date));
                 fechas.setInt(2, idOperador);
                 ResultSet resultado = fechas.executeQuery();
@@ -859,14 +872,14 @@ public class ControladorAdmin {
                     JSONObject datos = new JSONObject();
                     datos.put("fechaAcordada", resultado.getDate("fechaAcordada"));
                     datos.put("horarioAcordado", resultado.getString("horarioAcordado"));
-                    datos.put("profesor", resultado.getString("nombre"));
+                    datos.put("profesional", resultado.getString("nombre"));
                     datos.put("correo", resultado.getString("correo"));
                     datos.put("tipoCita", resultado.getString("tipoCita"));
                     datos.put("datosAdicionales", resultado.getString("datosAdicionales"));
-                    datos.put("idProfesor", resultado.getInt("idprofesores"));
+                    datos.put("idProfesional", resultado.getInt("idprofesionales"));
                     
-                    PreparedStatement consultaFoto = conectar.prepareStatement("SELECT foto FROM documentacionprofesor WHERE profesores_idprofesores = ?");
-                    consultaFoto.setInt(1, resultado.getInt("idprofesores"));
+                    PreparedStatement consultaFoto = conectar.prepareStatement("SELECT foto FROM documentacionprofesional WHERE profesionales_idprofesionales = ?");
+                    consultaFoto.setInt(1, resultado.getInt("idprofesionales"));
                     ResultSet resultadoFoto = consultaFoto.executeQuery();
                     
                     if(resultadoFoto.next())
@@ -898,7 +911,7 @@ public class ControladorAdmin {
         /*
         if(conectar != null){
             try{
-                PreparedStatement fechas = conectar.prepareStatement("SELECT * FROM citas INNER JOIN profesores WHERE citas.fechaAcordada >= ? AND citas.operadores_idoperadores = ? AND profesores.idprofesores = citas.profesores_idprofesores");
+                PreparedStatement fechas = conectar.prepareStatement("SELECT * FROM citas INNER JOIN profesionales WHERE citas.fechaAcordada >= ? AND citas.operadores_idoperadores = ? AND profesionales.idprofesionales = citas.profesionales_idprofesionales");
                 fechas.setDate(1, java.sql.Date.valueOf(hoy));
                 fechas.setInt(2, idOperador);
                 ResultSet resultado = fechas.executeQuery();
@@ -907,7 +920,7 @@ public class ControladorAdmin {
                     JSONObject datos = new JSONObject();
                     datos.put("fechaAcordada", resultado.getDate("fechaAcordada"));
                     datos.put("horarioAcordado", resultado.getString("horarioAcordado"));
-                    datos.put("profesor", resultado.getString("nombre"));
+                    datos.put("profesional", resultado.getString("nombre"));
                     datos.put("correo", resultado.getString("correo"));
                     datos.put("tipoCita", resultado.getString("tipoCita"));
                     datos.put("datosAdicionales", resultado.getString("datosAdicionales"));
@@ -952,20 +965,20 @@ public class ControladorAdmin {
                     }else{
                         //Guardar cita
                         PreparedStatement guardar = conectar.prepareStatement("INSERT INTO citas (fecha1, fecha2, horario1, horario2,"
-                                + " tipoCita, profesores_idprofesores, operadores_idoperadores, datosAdicionales) VALUES (?,?,?,?,?,?,?,?)");
+                                + " tipoCita, profesionales_idprofesionales, operadores_idoperadores, datosAdicionales) VALUES (?,?,?,?,?,?,?,?)");
                         guardar.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha1").toString()));
                         guardar.setDate(2, java.sql.Date.valueOf(jsonDatos.get("fecha2").toString()));
                         guardar.setString(3, jsonDatos.get("horario1").toString());
                         guardar.setString(4, jsonDatos.get("horario2").toString());
                         guardar.setString(5, jsonDatos.get("tipoCita").toString());
-                        guardar.setInt(6, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                        guardar.setInt(6, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                         guardar.setInt(7, Integer.parseInt(jsonDatos.get("idOperador").toString()));
                         guardar.setString(8, jsonDatos.get("datosAdicionales").toString());
                         guardar.execute();
                         //Cambiar estatus
-                        PreparedStatement estatus = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
+                        PreparedStatement estatus = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                         estatus.setString(1, "CITA");
-                        estatus.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                        estatus.setInt(2, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                         estatus.execute();
                         respuesta.put("respuesta", true);
                         respuesta.put("mensaje", "Hay disponibilidad.");
@@ -987,14 +1000,14 @@ public class ControladorAdmin {
         if(conectar != null){
             try{
                 //Cambiar estatus a registro.
-                PreparedStatement registro = conectar.prepareStatement("UPDATE profesores SET estado = ? WHERE idprofesores = ?");
+                PreparedStatement registro = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                 registro.setString(1, "REGISTRO");
-                registro.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                registro.setInt(2, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                 registro.execute();
                 //Eliminamos la documentación.
-                PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM documentacionprofesor WHERE idDocumentacion = ? AND profesores_idprofesores = ?");
+                PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM documentacionprofesional WHERE idDocumentacion = ? AND profesionales_idprofesionales = ?");
                 eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idDocumentacion").toString()));
-                eliminar.setInt(2, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
+                eliminar.setInt(2, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                 eliminar.execute();
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -1004,7 +1017,7 @@ public class ControladorAdmin {
         }
     }
     
-    public void rechazarDocumentacionEstudiante(JSONObject jsonDatos){
+    public void rechazarDocumentacionCliente(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
@@ -1012,12 +1025,12 @@ public class ControladorAdmin {
                 //Cambiar estatus a registro.
                 PreparedStatement registro = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
                 registro.setString(1, "REGISTRO");
-                registro.setInt(2, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                registro.setInt(2, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                 registro.execute();
                 //Eliminamos la documentación.
                 PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM documentacioncliente WHERE idDocumentacion = ? AND clientes_idclientes= ?");
                 eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idDocumentacion").toString()));
-                eliminar.setInt(2, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                eliminar.setInt(2, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                 eliminar.execute();
             }catch(SQLException ex){
                 ex.printStackTrace();
@@ -1027,7 +1040,7 @@ public class ControladorAdmin {
         }
     }
     
-    public JSONArray getSolicitudesAsignadasEstudiantes(int idOperador){
+    public JSONArray getSolicitudesAsignadasClientes(int idOperador){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonAsignados = new JSONArray();
         
@@ -1047,16 +1060,16 @@ public class ControladorAdmin {
                         JSONObject jsonProf = new JSONObject();
                         jsonProf.put("nombre", resultado.getString("nombre") + " " + resultado.getString("apellidoPaterno") + " " + resultado.getString("apellidoMaterno"));
                         jsonProf.put("correo", resultado.getString("correo"));
-                        jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                        jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro").toString());
                         jsonProf.put("direccion", resultado.getString("direccion"));
                         jsonProf.put("celular", resultado.getString("celular"));
                         jsonProf.put("telefono", resultado.getString("telefonoLocal"));
-                        jsonProf.put("fechaNacimiento", resultado.getDate("fechaNacimiento"));
+                        jsonProf.put("fechaNacimiento", resultado.getDate("fechaNacimiento").toString());
                         jsonProf.put("foto", resultado.getString("foto"));
                         jsonProf.put("ineFrontal", resultado.getString("ineFrontal"));
                         jsonProf.put("ineTrasera", resultado.getString("ineTrasera"));
                         jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
-                        jsonProf.put("idEstudiante", resultado.getInt("clientes_idclientes"));
+                        jsonProf.put("idCliente", resultado.getInt("clientes_idclientes"));
                         jsonAsignados.add(jsonProf);
                     } 
                 }
@@ -1076,14 +1089,14 @@ public class ControladorAdmin {
         
         if(conectar != null){
             try{ 
-                PreparedStatement asigandos = conectar.prepareStatement("SELECT * FROM documentacionprofesor INNER JOIN profesores WHERE documentacionprofesor.operadores_idoperadores = ? AND profesores.idprofesores = documentacionprofesor.profesores_idprofesores");
+                PreparedStatement asigandos = conectar.prepareStatement("SELECT * FROM documentacionprofesional INNER JOIN profesionales WHERE documentacionprofesional.operadores_idoperadores = ? AND profesionales.idprofesionales = documentacionprofesional.profesionales_idprofesionales");
                 asigandos.setInt(1, idOperador);
                 ResultSet resultado = asigandos.executeQuery();
                 
                 while(resultado.next()){
                     //Consultar primero si ya hay cita
-                    PreparedStatement cita = conectar.prepareStatement("SELECT * FROM profesores WHERE idprofesores = ? AND (estado = ? OR estado = ?)");
-                    cita.setInt(1, resultado.getInt("profesores_idprofesores"));
+                    PreparedStatement cita = conectar.prepareStatement("SELECT * FROM profesionales WHERE idprofesionales = ? AND (estado = ? OR estado = ?)");
+                    cita.setInt(1, resultado.getInt("profesionales_idprofesionales"));
                     cita.setString(2, "cita");
                     cita.setString(3, "activo");
                     ResultSet resultadoCita = cita.executeQuery();
@@ -1091,7 +1104,7 @@ public class ControladorAdmin {
                         JSONObject jsonProf = new JSONObject();
                         jsonProf.put("nombre", resultado.getString("nombre"));
                         jsonProf.put("correo", resultado.getString("correo"));
-                        jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                        jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro").toString());
                         jsonProf.put("foto", resultado.getString("foto"));
                         jsonProf.put("acta", resultado.getString("acta"));
                         jsonProf.put("antecedentes", resultado.getString("antecedentes"));
@@ -1105,7 +1118,7 @@ public class ControladorAdmin {
                         jsonProf.put("certificado8", resultado.getString("certificado8"));
                         jsonProf.put("ine", resultado.getString("ine"));
                         jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
-                        jsonProf.put("idProfesor", resultado.getInt("profesores_idprofesores"));
+                        jsonProf.put("idProfesional", resultado.getInt("profesionales_idprofesionales"));
                         jsonAsignados.add(jsonProf);
                     } 
                 }
@@ -1119,7 +1132,7 @@ public class ControladorAdmin {
         return jsonAsignados;
     }
     
-    public void asociarSolicitudEstudiante(JSONObject jsonDatos){
+    public void asociarSolicitudCliente(JSONObject jsonDatos){
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
@@ -1139,7 +1152,7 @@ public class ControladorAdmin {
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
-                PreparedStatement asociar = conectar.prepareStatement("UPDATE documentacionprofesor SET operadores_idoperadores = ? WHERE idDocumentacion = ?");
+                PreparedStatement asociar = conectar.prepareStatement("UPDATE documentacionprofesional SET operadores_idoperadores = ? WHERE idDocumentacion = ?");
                 asociar.setInt(1, Integer.parseInt(jsonDatos.get("idOperador").toString()));
                 asociar.setInt(2, Integer.parseInt(jsonDatos.get("idDocumentacion").toString()));
                 asociar.execute();
@@ -1151,7 +1164,7 @@ public class ControladorAdmin {
         }
     }
     
-    public JSONArray obtenerSolicitudesEstudiantes(){
+    public JSONArray obtenerSolicitudesClientes(){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonSolicitudes = new JSONArray();
         
@@ -1164,7 +1177,7 @@ public class ControladorAdmin {
                     JSONObject jsonProf = new JSONObject();
                     jsonProf.put("nombre", resultado.getString("nombre"));
                     jsonProf.put("correo", resultado.getString("correo"));
-                    jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                    jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro").toString());
                     jsonProf.put("foto", resultado.getString("foto"));
                     jsonProf.put("ineFrontal", resultado.getString("ineFrontal"));
                      jsonProf.put("ineTrasera", resultado.getString("ineTrasera"));
@@ -1187,14 +1200,14 @@ public class ControladorAdmin {
         
         if(conectar != null){
             try{
-                PreparedStatement solicitudes = conectar.prepareStatement("SELECT * FROM profesores INNER JOIN documentacionprofesor WHERE documentacionprofesor.profesores_idprofesores = profesores.idprofesores AND profesores.estado = ? AND documentacionprofesor.operadores_idoperadores IS NULL");
+                PreparedStatement solicitudes = conectar.prepareStatement("SELECT * FROM profesionales INNER JOIN documentacionprofesional WHERE documentacionprofesional.profesionales_idprofesionales = profesionales.idprofesionales AND profesionales.estado = ? AND documentacionprofesional.operadores_idoperadores IS NULL");
                 solicitudes.setString(1, "DOCUMENTACION");
                 ResultSet resultado = solicitudes.executeQuery();
                 while(resultado.next()){
                     JSONObject jsonProf = new JSONObject();
                     jsonProf.put("nombre", resultado.getString("nombre"));
                     jsonProf.put("correo", resultado.getString("correo"));
-                    jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                    jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro").toString());
                     jsonProf.put("foto", resultado.getString("foto"));
                     jsonProf.put("acta", resultado.getString("acta"));
                     jsonProf.put("antecedentes", resultado.getString("antecedentes"));
@@ -1268,10 +1281,10 @@ public class ControladorAdmin {
             try{
                 String query = "";
                 String tipo = "";
-                if(tipoUsuario == Constantes.TIPO_USUARIO_ESTUDIANTE)
-                    tipo = "ESTUDIANTE";//query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
-                else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESOR)
-                    tipo = "PROFESOR";//query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idprofesores = msg_tickets.idUsuario_Operador";
+                if(tipoUsuario == Constantes.TIPO_USUARIO_CLIENTE)
+                    tipo = "CLIENTE";//query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
+                else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESIONAL)
+                    tipo = "PROFESIONAL";//query = "SELECT * FROM msg_tickets INNER JOIN profesionales WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesionales.idprofesionales = msg_tickets.idUsuario_Operador";
              
                 PreparedStatement mensajesConsulta = conectar.prepareStatement("SELECT * FROM msg_tickets WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ?");
                 mensajesConsulta.setInt(1, idTicket);
@@ -1389,10 +1402,10 @@ public class ControladorAdmin {
         if(conectar != null){
             try{
                 String consulta = "";
-                if(tipoUsuario == Constantes.TIPO_USUARIO_ESTUDIANTE)
+                if(tipoUsuario == Constantes.TIPO_USUARIO_CLIENTE)
                     consulta = "SELECT * FROM tickets_ayuda INNER JOIN clientes WHERE tickets_ayuda.idtickets_ayuda = ? AND clientes.idclientes = tickets_ayuda.idUsuario";
-                else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESOR)
-                    consulta = "SELECT * FROM tickets_ayuda INNER JOIN profesores WHERE tickets_ayuda.idtickets_ayuda = ? AND profesores.idprofesores = tickets_ayuda.idUsuario";
+                else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESIONAL)
+                    consulta = "SELECT * FROM tickets_ayuda INNER JOIN profesionales WHERE tickets_ayuda.idtickets_ayuda = ? AND profesionales.idprofesionales = tickets_ayuda.idUsuario";
                 
                 
                 PreparedStatement ticket = conectar.prepareStatement(consulta);
@@ -1486,10 +1499,10 @@ public class ControladorAdmin {
                 /*Consulta de mensajes Ticket*/
                 String query = "";
                 String tipo = "";
-                if(tipoUsuario == Constantes.TIPO_USUARIO_ESTUDIANTE)
-                    tipo = "ESTUDIANTE";//query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
-                else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESOR)
-                    tipo = "PROFESOR";//query = "SELECT * FROM msg_tickets INNER JOIN profesores WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesores.idprofesores = msg_tickets.idUsuario_Operador";
+                if(tipoUsuario == Constantes.TIPO_USUARIO_CLIENTE)
+                    tipo = "CLIENTE";//query = "SELECT * FROM msg_tickets INNER JOIN clientes WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND clientes.idclientes = msg_tickets.idUsuario_Operador";
+                else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESIONAL)
+                    tipo = "PROFESIONAL";//query = "SELECT * FROM msg_tickets INNER JOIN profesionales WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesionales.idprofesionales = msg_tickets.idUsuario_Operador";
                 
                 PreparedStatement mensajes = conectar.prepareStatement("SELECT * FROM msg_tickets WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ?");
                 mensajes.setInt(1, idTicket);

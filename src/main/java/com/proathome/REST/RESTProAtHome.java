@@ -2,7 +2,6 @@ package com.proathome.REST;
 
 import com.proathome.controladores.ControladorAdmin;
 import com.proathome.controladores.ControladorNivelIdioma;
-import java.sql.SQLException;
 import java.util.Calendar;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -48,33 +47,33 @@ public class RESTProAtHome {
     }
     
     @GET
-    @Path("/verClase/{idSesion}")
-    public JSONObject verClase(@PathParam("idSesion") int idSesion){
-        return admin.verClase(idSesion);
+    @Path("/verServicio/{idSesion}")
+    public JSONObject verServicio(@PathParam("idSesion") int idSesion){
+        return admin.verServicio(idSesion);
     }
     
     @GET
-    @Path("/getPerfilProfesor/{idProfesor}")
-    public JSONObject getPerfilProfesor(@PathParam("idProfesor") int idProfesor){
-        return admin.getPerfilProfesor(idProfesor);
+    @Path("/getPerfilProfesional/{idProfesional}")
+    public JSONObject getPerfilProfesional(@PathParam("idProfesional") int idProfesional){
+        return admin.getPerfilProfesional(idProfesional);
     }
     
     @GET
-    @Path("/getPerfilEstudiante/{idEstudiante}")
-    public JSONObject getPerfilEstudiante(@PathParam("idEstudiante") int idEstudiante){
-        return admin.getPerfilEstudiante(idEstudiante);
+    @Path("/getPerfilCliente/{idCliente}")
+    public JSONObject getPerfilCliente(@PathParam("idCliente") int idCliente){
+        return admin.getPerfilCliente(idCliente);
     }
     
     @GET
-    @Path("/getProfesoresRegistrados")
-    public JSONObject getProfesoresRegistrados(){
-        return admin.getProfesoresRegistrados();
+    @Path("/getProfesionalesRegistrados")
+    public JSONObject getProfesionalesRegistrados(){
+        return admin.getProfesionalesRegistrados();
     }
     
     @GET
-    @Path("/getEstudiantesRegistrados")
-    public JSONObject getEstudiantesRegistrados(){
-        return admin.getEstudiantesRegistrados();
+    @Path("/getClientesRegistrados")
+    public JSONObject getClientesRegistrados(){
+        return admin.getClientesRegistrados();
     }
     
     @GET
@@ -96,9 +95,9 @@ public class RESTProAtHome {
     }
     
     @GET
-    @Path("/getSolicitudesAsignadasEstudiantes/{idOperador}")
-    public JSONArray getSolicitudesAsignadasEstudiantes(@PathParam("idOperador") int idOperador){
-        return admin.getSolicitudesAsignadasEstudiantes(idOperador);
+    @Path("/getSolicitudesAsignadasClientes/{idOperador}")
+    public JSONArray getSolicitudesAsignadasClientes(@PathParam("idOperador") int idOperador){
+        return admin.getSolicitudesAsignadasClientes(idOperador);
     }
     
     @GET
@@ -108,9 +107,9 @@ public class RESTProAtHome {
     }
     
     @GET
-    @Path("/obtenerSolicitudesEstudiantes")
-    public JSONArray obtenerSolicitudesEstudiantes(){
-        return admin.obtenerSolicitudesEstudiantes();
+    @Path("/obtenerSolicitudesClientes")
+    public JSONArray obtenerSolicitudesClientes(){
+        return admin.obtenerSolicitudesClientes();
     }
     
     @GET
@@ -242,11 +241,11 @@ public class RESTProAtHome {
     }
     
     @POST
-    @Path("/asociarSolicitudEstudiante")
-    public void asociarSolicitudEstudiante(String datos){
+    @Path("/asociarSolicitudCliente")
+    public void asociarSolicitudCliente(String datos){
         try{
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
-            admin.asociarSolicitudEstudiante(jsonDatos);
+            admin.asociarSolicitudCliente(jsonDatos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
@@ -356,12 +355,12 @@ public class RESTProAtHome {
     }
     
     @PUT
-    @Path("/activarEstudiante")
-    public JSONObject activarEstudiante(String datos){
+    @Path("/activarCliente")
+    public JSONObject activarCliente(String datos){
         JSONObject respuesta = new JSONObject();
         try{
             JSONObject datosJSON = (JSONObject) parser.parse(datos);
-            respuesta = admin.activarEstudiante(datosJSON);
+            respuesta = admin.activarCliente(datosJSON);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
@@ -370,11 +369,11 @@ public class RESTProAtHome {
     }
     
     @PUT
-    @Path("/rechazarDocumentacionEstudiante")
-    public void rechazarDocumentacionEstudiante(String datos){
+    @Path("/rechazarDocumentacionCliente")
+    public void rechazarDocumentacionCliente(String datos){
         try{
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
-            admin.rechazarDocumentacionEstudiante(jsonDatos);
+            admin.rechazarDocumentacionCliente(jsonDatos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }

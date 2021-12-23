@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 /*
 *
-* Clase que crea la conexión a la Base Datos ProAtHome.
+* Servicio que crea la conexión a la Base Datos ProAtHome.
 *
 */
 

@@ -11,7 +11,7 @@ public class ControladorNivelIdioma {
     
     /*
     *
-    *Clase controladora del Nivel de Idioma.
+    *Servicio controladora del Nivel de Idioma.
     *
     */
     

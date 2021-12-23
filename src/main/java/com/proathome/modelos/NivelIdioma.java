@@ -5,7 +5,7 @@ public class NivelIdioma {
     
     /*
     *
-    * Clase Modelo NivelIdioma.
+    * Servicio Modelo NivelIdioma.
     * 
     */
     

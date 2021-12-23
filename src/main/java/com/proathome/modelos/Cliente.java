@@ -4,7 +4,7 @@ import java.sql.Date;
 
 /*
  *
- * Clase Modelo Cliente.
+ * Servicio Modelo Cliente.
  * 
 */
 

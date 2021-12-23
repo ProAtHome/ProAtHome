@@ -1,23 +1,23 @@
 package com.proathome.modelos;
 
-public class EvaluacionProfesor {
+public class EvaluacionProfesional {
     
     /*
     *
-    * Clase Modelo de Evaluacion Profesor.
+    * Servicio Modelo de Evaluacion Profesional.
     * 
     */
     
-    private String nivelClase;
+    private String nivelServicio;
     private int numeroValoraciones;
     private double valoracion;
 
-    public String getNivelClase() {
-        return nivelClase;
+    public String getNivelServicio() {
+        return nivelServicio;
     }
 
-    public void setNivelClase(String nivelClase) {
-        this.nivelClase = nivelClase;
+    public void setNivelServicio(String nivelServicio) {
+        this.nivelServicio = nivelServicio;
     }
 
     public int getNumeroValoraciones() {

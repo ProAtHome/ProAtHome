@@ -15,7 +15,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -46,21 +45,21 @@ public class RESTCliente {
     }
     
     @GET
-    @Path("/getDisponibilidadClase/{idEstudiante}")
-    public JSONObject getDisponibilidadClases(@PathParam("idEstudiante") int idEstudiante){
-        return cliente.getDisponibilidadClase(idEstudiante);
+    @Path("/getDisponibilidadServicio/{idCliente}")
+    public JSONObject getDisponibilidadServicios(@PathParam("idCliente") int idCliente){
+        return cliente.getDisponibilidadServicio(idCliente);
     }
     
     @GET
-    @Path("/getDatosFiscales/{idEstudiante}")
-    public JSONObject getDatosFiscales(@PathParam("idEstudiante") int idEstudiante){
-        return cliente.getDatosFiscales(idEstudiante);
+    @Path("/getDatosFiscales/{idCliente}")
+    public JSONObject getDatosFiscales(@PathParam("idCliente") int idCliente){
+        return cliente.getDatosFiscales(idCliente);
     }
     
     @GET
-    @Path("/getReportes/{idEstudiante}")
-    public JSONObject getReportes(@PathParam("idEstudiante") int idEstudiante){
-        return cliente.getReportes(idEstudiante);
+    @Path("/getReportes/{idCliente}")
+    public JSONObject getReportes(@PathParam("idCliente") int idCliente){
+        return cliente.getReportes(idCliente);
     }
     
     @GET
@@ -76,75 +75,75 @@ public class RESTCliente {
     }
     
     @GET
-    @Path("/obtenerTickets/{idEstudiante}")
-    public JSONArray obtenerTickets(@PathParam("idEstudiante") int idEstudiante){
-        return cliente.obtenerTickets(idEstudiante);
+    @Path("/obtenerTickets/{idCliente}")
+    public JSONArray obtenerTickets(@PathParam("idCliente") int idCliente){
+        return cliente.obtenerTickets(idCliente);
     }
     
     @GET
-    @Path("/bloquearPerfil/{idEstudiante}")
-    public JSONObject bloquearPerfil(@PathParam("idEstudiante") int idEstudiante){
-        return cliente.bloquearPerfil(idEstudiante);
+    @Path("/bloquearPerfil/{idCliente}")
+    public JSONObject bloquearPerfil(@PathParam("idCliente") int idCliente){
+        return cliente.bloquearPerfil(idCliente);
     }
     
     @GET
-    @Path("/validarValoracion/{idSesion}/{idProfesor}")
-    public JSONObject validarValoracion(@PathParam("idSesion") int idSesion, @PathParam("idProfesor") int idProfesor){
-        return cliente.validarValoracion(idSesion, idProfesor);
+    @Path("/validarValoracion/{idSesion}/{idProfesional}")
+    public JSONObject validarValoracion(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional){
+        return cliente.validarValoracion(idSesion, idProfesional);
     }
     
     @GET
-    @Path("/obtenerValoracion/{idProfesor}")
-    public JSONArray obtenerValoracion(@PathParam("idProfesor") int idProfesor){
-        return cliente.obtenerValoracion(idProfesor);
+    @Path("/obtenerValoracion/{idProfesional}")
+    public JSONArray obtenerValoracion(@PathParam("idProfesional") int idProfesional){
+        return cliente.obtenerValoracion(idProfesional);
     }
     
     @GET
-    @Path("/verificarPlan/{idEstudiante}")
-    public JSONObject verificarPlan(@PathParam("idEstudiante") int idEstudiante){
-        return cliente.verificarPlan(idEstudiante);        
+    @Path("/verificarPlan/{idCliente}")
+    public JSONObject verificarPlan(@PathParam("idCliente") int idCliente){
+        return cliente.verificarPlan(idCliente);        
     }
     
     @GET
-    @Path("/verificarSesionesPagadas/{idEstudiante}")
-    public JSONObject verificarSesionesPagadas(@PathParam("idEstudiante") int idEstudiante){  
-        return cliente.verificarSesionesPagadas(idEstudiante);     
+    @Path("/verificarSesionesPagadas/{idCliente}")
+    public JSONObject verificarSesionesPagadas(@PathParam("idCliente") int idCliente){  
+        return cliente.verificarSesionesPagadas(idCliente);     
     }
     
     @GET
-    @Path("/obtenerToken/{idSesion}/{idEstudiante}")
-    public JSONObject obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){  
-        return cliente.obtenerToken(idSesion, idEstudiante);
+    @Path("/obtenerToken/{idSesion}/{idCliente}")
+    public JSONObject obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){  
+        return cliente.obtenerToken(idSesion, idCliente);
     }
     
     @GET
-    @Path("/obtenerPreOrden/{idEstudiante}/{idSesion}")
-    public JSONObject obtenerPreOrden(@PathParam("idEstudiante") int idEstudiante, @PathParam("idSesion") int idSesion){       
-        return cliente.obtenerPreOrden(idEstudiante, idSesion); 
+    @Path("/obtenerPreOrden/{idCliente}/{idSesion}")
+    public JSONObject obtenerPreOrden(@PathParam("idCliente") int idCliente, @PathParam("idSesion") int idSesion){       
+        return cliente.obtenerPreOrden(idCliente, idSesion); 
     }
     
     @GET
-    @Path("/validarClaseFinalizada/{idSesion}/{idEstudiante}")
-    public JSONObject validarClaseFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){      
-        return sesiones.validarClaseFinalizadaEstudiante(idSesion, idEstudiante);     
+    @Path("/validarServicioFinalizada/{idSesion}/{idCliente}")
+    public JSONObject validarServicioFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){      
+        return sesiones.validarServicioFinalizadaCliente(idSesion, idCliente);     
     }
     
     @GET
-    @Path("/validarEstatusClase/{idSesion}/{idEstudiante}")
-    public JSONObject validarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
-        return sesiones.validarEstatusClaseEstudiante(idSesion, idEstudiante);      
+    @Path("/validarEstatusServicio/{idSesion}/{idCliente}")
+    public JSONObject validarEstatusServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){
+        return sesiones.validarEstatusServicioCliente(idSesion, idCliente);      
     }
     
     @GET
-    @Path("/sincronizarClase/{idSesion}/{idEstudiante}")
-    public JSONObject sincronizarClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){       
-       return sesiones.sincronizarClase(idSesion, idEstudiante);      
+    @Path("/sincronizarServicio/{idSesion}/{idCliente}")
+    public JSONObject sincronizarServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){       
+       return sesiones.sincronizarServicio(idSesion, idCliente);      
     }
     
     @GET
-    @Path("/obtenerSesionActual/{idEstudiante}")
-    public JSONObject obtenerRutaAprendizaje(@PathParam("idEstudiante") int idEstudiante){     
-        return ruta.obtenerSesionActual(idEstudiante);   
+    @Path("/obtenerSesionActual/{idCliente}")
+    public JSONObject obtenerRutaAprendizaje(@PathParam("idCliente") int idCliente){     
+        return ruta.obtenerSesionActual(idCliente);   
     }
     
     @GET
@@ -248,9 +247,9 @@ public class RESTCliente {
     }
     
     @POST
-    @Path("/valorarProfesor")
-    public void valorarProfesor(JSONObject jsonDatos){
-        cliente.valorarProfesor(jsonDatos);
+    @Path("/valorarProfesional")
+    public void valorarProfesional(JSONObject jsonDatos){
+        cliente.valorarProfesional(jsonDatos);
     }
     
     @POST
@@ -300,11 +299,11 @@ public class RESTCliente {
     }
     
     @POST
-    @Path("/sumarClaseRuta")
-    public void sumarClaseRuta(String datos){
+    @Path("/sumarServicioRuta")
+    public void sumarServicioRuta(String datos){
         try{
             JSONObject json = (JSONObject) parser.parse(datos);
-            ruta.sumarClaseRuta(json);
+            ruta.sumarServicioRuta(json);
         }catch(ParseException ex){
             ex.printStackTrace();
         }  
@@ -489,12 +488,12 @@ public class RESTCliente {
     }
     
     @PUT
-    @Path("/guardarTokenPagoClase")
+    @Path("/guardarTokenPagoServicio")
     public JSONObject guardarToken(String datos){
         JSONObject respuesta  = null;
         try{
             JSONObject jsonToken = (JSONObject) parser.parse(datos);
-            respuesta = cliente.guardarTokenPagoClase(jsonToken);
+            respuesta = cliente.guardarTokenPagoServicio(jsonToken);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
@@ -517,10 +516,10 @@ public class RESTCliente {
     }
     
     @PUT
-    @Path("/activarTE/{idSesion}/{idEstudiante}/{progresoTotal}")
-    public void activarTE(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante, @PathParam("progresoTotal") int progresoTotal){
+    @Path("/activarTE/{idSesion}/{idCliente}/{progresoTotal}")
+    public void activarTE(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente, @PathParam("progresoTotal") int progresoTotal){
         
-        sesiones.activarTE(idSesion, idEstudiante, progresoTotal);
+        sesiones.activarTE(idSesion, idCliente, progresoTotal);
         
     }
     
@@ -530,7 +529,7 @@ public class RESTCliente {
         
         try{
             JSONObject json = (JSONObject) parser.parse(datos);
-            sesiones.activarTE(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idEstudiante").toString()), Integer.parseInt(json.get("progresoTotal").toString()));
+            sesiones.activarTE(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idCliente").toString()), Integer.parseInt(json.get("progresoTotal").toString()));
         }catch(ParseException ex){
             ex.printStackTrace();
         }
@@ -538,20 +537,20 @@ public class RESTCliente {
     }
     
     @PUT
-    @Path("/finalizarClase/{idSesion}/{idEstudiante}")
-    public void finalizarClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante){
+    @Path("/finalizarServicio/{idSesion}/{idCliente}")
+    public void finalizarServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){
         
-        sesiones.finalizarClase(idSesion, idEstudiante);
+        sesiones.finalizarServicio(idSesion, idCliente);
         
     }
     
     @PUT
-    @Path("/finalizarClaseWeb")
-    public void finalizarClaseWeb(String datos){
+    @Path("/finalizarServicioWeb")
+    public void finalizarServicioWeb(String datos){
         
         try{
             JSONObject json = (JSONObject)parser.parse(datos);
-            sesiones.finalizarClase(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idEstudiante").toString()));
+            sesiones.finalizarServicio(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idCliente").toString()));
         }catch(ParseException ex){
             ex.printStackTrace();
         }
@@ -559,28 +558,28 @@ public class RESTCliente {
     }
     
     @PUT
-    @Path("/cambiarEstatusClase/{idSesion}/{idEstudiante}/{estatus}")
-    public void cambiarEstatusClase(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante, @PathParam("estatus") int estatus){
+    @Path("/cambiarEstatusServicio/{idSesion}/{idCliente}/{estatus}")
+    public void cambiarEstatusServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente, @PathParam("estatus") int estatus){
         
-        sesiones.cambiarEstatusClaseEstudiante(idSesion, idEstudiante, estatus);
-        
-    }
-    
-    @PUT
-    @Path("/claseDisponible/{idSesion}/{idEstudiante}/{disponible}")
-    public void claseDsiponible(@PathParam("idSesion") int idSesion, @PathParam("idEstudiante") int idEstudiante, @PathParam("disponible") boolean dsiponible){
-        
-        sesiones.claseDisponible(idSesion, idEstudiante, dsiponible);
+        sesiones.cambiarEstatusServicioCliente(idSesion, idCliente, estatus);
         
     }
     
     @PUT
-    @Path("/claseDisponibleWeb")
-    public void claseDsiponibleWeb(String datos){
+    @Path("/servicioDisponible/{idSesion}/{idCliente}/{disponible}")
+    public void servicioDsiponible(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente, @PathParam("disponible") boolean dsiponible){
+        
+        sesiones.servicioDisponible(idSesion, idCliente, dsiponible);
+        
+    }
+    
+    @PUT
+    @Path("/servicioDisponibleWeb")
+    public void servicioDsiponibleWeb(String datos){
         
         try{
             JSONObject json = (JSONObject)parser.parse(datos);
-            sesiones.claseDisponible(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idEstudiante").toString()), Boolean.parseBoolean(json.get("disponible").toString()));
+            sesiones.servicioDisponible(Integer.parseInt(json.get("idSesion").toString()), Integer.parseInt(json.get("idCliente").toString()), Boolean.parseBoolean(json.get("disponible").toString()));
         }catch(ParseException ex){
             ex.printStackTrace();
         }

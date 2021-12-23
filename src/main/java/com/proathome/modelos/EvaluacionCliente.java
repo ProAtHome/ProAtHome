@@ -4,19 +4,19 @@ public class EvaluacionCliente {
 
     /*
     *
-    * Clase Modelo EvaluacionCliente.
+    * Servicio Modelo EvaluacionCliente.
     * 
     */
     
-    private String tipoClase, horario, tiempoClase, lugar;
+    private String tipoServicio, horario, tiempoServicio, lugar;
     private int nivelIdioma;
 
-    public String getTipoClase() {
-        return tipoClase;
+    public String getTipoServicio() {
+        return tipoServicio;
     }
 
-    public void setTipoClase(String tipoClase) {
-        this.tipoClase = tipoClase;
+    public void setTipoServicio(String tipoServicio) {
+        this.tipoServicio = tipoServicio;
     }
 
     public String getHorario() {
@@ -27,12 +27,12 @@ public class EvaluacionCliente {
         this.horario = horario;
     }
 
-    public String getTiempoClase() {
-        return tiempoClase;
+    public String getTiempoServicio() {
+        return tiempoServicio;
     }
 
-    public void setTiempoClase(String tiempoClase) {
-        this.tiempoClase = tiempoClase;
+    public void setTiempoServicio(String tiempoServicio) {
+        this.tiempoServicio = tiempoServicio;
     }
 
     public String getLugar() {

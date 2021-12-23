@@ -4,7 +4,7 @@ public class CuentaBancaria {
     
     /*
     *
-    * Clase Modelo de Cuenta Bancaria.
+    * Servicio Modelo de Cuenta Bancaria.
     * 
     */
     

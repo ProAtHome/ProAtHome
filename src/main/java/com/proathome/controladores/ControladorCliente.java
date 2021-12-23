@@ -23,7 +23,7 @@ public class ControladorCliente {
 
     /*
     *
-    *Clase controladora de Clientes.
+    *Servicio controladora de Clientes.
     *
      */
     private Cliente cliente = new Cliente();
@@ -122,7 +122,7 @@ public class ControladorCliente {
         return respuesta;
     }
     
-    public JSONObject getDisponibilidadClase(int idEstudiante){
+    public JSONObject getDisponibilidadServicio(int idCliente){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
@@ -130,7 +130,7 @@ public class ControladorCliente {
                 try{
                     //Obtenemos el nivel actual
                     PreparedStatement nivelActual = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND enruta = ?)");
-                    nivelActual.setInt(1, idEstudiante);
+                    nivelActual.setInt(1, idCliente);
                     nivelActual.setBoolean(2, true);
                     ResultSet resultadoNivel = nivelActual.executeQuery();
                     
@@ -235,7 +235,7 @@ public class ControladorCliente {
             try{
                 //Obtenemos las horas actuales del plan actual.
                PreparedStatement consulta = conectar.prepareStatement("SELECT monedero, tipoPlan FROM planes WHERE clientes_idclientes = ?");
-               consulta.setInt(1, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+               consulta.setInt(1, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                ResultSet resultado = consulta.executeQuery();
                
                if(resultado.next()){
@@ -251,10 +251,10 @@ public class ControladorCliente {
                    if(resultado.getString("tipoPlan").equals("PARTICULAR")){
                        agregar.setString(1, "PARTICULAR_PLAN");
                        agregar.setInt(2, nuevoMonedero);
-                       agregar.setInt(3, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                       agregar.setInt(3, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                    }else{
                        agregar.setInt(1, nuevoMonedero);
-                       agregar.setInt(2, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                       agregar.setInt(2, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                    }
                    
                    agregar.execute();
@@ -279,15 +279,15 @@ public class ControladorCliente {
         return respuesta;
     }
     
-    public JSONObject getDatosFiscales(int idEstudiante){
+    public JSONObject getDatosFiscales(int idCliente){
         JSONObject respuesta = new JSONObject();
         JSONObject datos = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             try{
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM datosfiscalesestudiantes WHERE clientes_idclientes = ?");
-                consulta.setInt(1, idEstudiante);
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM datosfiscalesclientes WHERE clientes_idclientes = ?");
+                consulta.setInt(1, idCliente);
                 ResultSet resultado = consulta.executeQuery();
                 
                 if(resultado.next()){
@@ -322,27 +322,27 @@ public class ControladorCliente {
         if(conectar != null){
             try{
                 //Consultar si hay registro.
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM datosfiscalesestudiantes WHERE clientes_idclientes = ?");
-                consulta.setInt(1, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM datosfiscalesclientes WHERE clientes_idclientes = ?");
+                consulta.setInt(1, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                 ResultSet resultado = consulta.executeQuery();
                 
                 if(resultado.next()){
                     //Actualizamos
-                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE datosfiscalesestudiantes SET tipoPersona = ?, razonSocial = ?, rfc = ?, cfdi = ? WHERE clientes_idclientes = ?");
+                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE datosfiscalesclientes SET tipoPersona = ?, razonSocial = ?, rfc = ?, cfdi = ? WHERE clientes_idclientes = ?");
                     actualizar.setString(1, jsonDatos.get("tipoPersona").toString());
                     actualizar.setString(2, jsonDatos.get("razonSocial").toString());
                     actualizar.setString(3, jsonDatos.get("rfc").toString());
                     actualizar.setString(4, jsonDatos.get("cfdi").toString());
-                    actualizar.setInt(5, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                    actualizar.setInt(5, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                     actualizar.execute();
                 }else{
                     //Guardamos
-                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO datosfiscalesestudiantes (tipoPersona, razonSocial, rfc, cfdi, clientes_idclientes) VALUES (?,?,?,?,?)");
+                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO datosfiscalesclientes (tipoPersona, razonSocial, rfc, cfdi, clientes_idclientes) VALUES (?,?,?,?,?)");
                     actualizar.setString(1, jsonDatos.get("tipoPersona").toString());
                     actualizar.setString(2, jsonDatos.get("razonSocial").toString());
                     actualizar.setString(3, jsonDatos.get("rfc").toString());
                     actualizar.setString(4, jsonDatos.get("cfdi").toString());
-                    actualizar.setInt(5, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                    actualizar.setInt(5, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                     actualizar.execute();
                 }
                 respuesta.put("respuesta", true);
@@ -360,26 +360,26 @@ public class ControladorCliente {
         return respuesta;
     }
     
-    public void bloquearPerfil(int idEstudiante, Connection conectar){
+    public void bloquearPerfil(int idCliente, Connection conectar){
         try{
             PreparedStatement bloquear = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
             bloquear.setString(1, "BLOQUEADO");
-            bloquear.setInt(2, idEstudiante);
+            bloquear.setInt(2, idCliente);
             bloquear.execute();
         }catch(SQLException ex){
             ex.printStackTrace();
         }
     }
     
-    public JSONObject getReportes(int idEstudiante){
+    public JSONObject getReportes(int idCliente){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
         if(conectar != null){
             try{
                 PreparedStatement reportes = conectar.prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
-                reportes.setInt(1, idEstudiante);
-                reportes.setString(2, "ESTUDIANTE");
+                reportes.setInt(1, idCliente);
+                reportes.setString(2, "CLIENTE");
                 ResultSet resultadoNum = reportes.executeQuery();
                 
                 if(resultadoNum.next()){
@@ -394,10 +394,10 @@ public class ControladorCliente {
                     }else{
                         /*Verificar bloqueo
                         if(numReportes >= 3)
-                            bloquearPerfil(idEstudiante, conectar);*/
+                            bloquearPerfil(idCliente, conectar);*/
                         PreparedStatement descripcion = conectar.prepareStatement("SELECT * FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
-                        descripcion.setInt(1, idEstudiante);
-                        descripcion.setString(2, "ESTUDIANTE");
+                        descripcion.setInt(1, idCliente);
+                        descripcion.setString(2, "CLIENTE");
                         ResultSet resultadoDesc = descripcion.executeQuery();
   
                         String desText = null;
@@ -490,7 +490,7 @@ public class ControladorCliente {
         }
     }
     
-    public JSONArray obtenerTickets(int idEstudiante){
+    public JSONArray obtenerTickets(int idCliente){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonTickets = new JSONArray();
         boolean vacio = true;
@@ -498,8 +498,8 @@ public class ControladorCliente {
         if(conectar != null){
             try{
                 PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE idUsuario = ? AND tipoUsuario = ? ORDER BY idtickets_ayuda DESC");
-                consulta.setInt(1, idEstudiante);
-                consulta.setInt(2, Constantes.TIPO_USUARIO_ESTUDIANTE);
+                consulta.setInt(1, idCliente);
+                consulta.setInt(2, Constantes.TIPO_USUARIO_CLIENTE);
                 ResultSet resultado = consulta.executeQuery();
                 
                 while(resultado.next()){
@@ -540,7 +540,7 @@ public class ControladorCliente {
         if(conectar != null){
             try{
                 PreparedStatement nuevoTicket;
-                //Validar si es tipo General o Clase
+                //Validar si es tipo General o Servicio
                 if(Integer.parseInt(jsonDatos.get("idSesion").toString()) == 0)
                     nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario, categoria) VALUES (?,?,?,?,?,?,?)");
                 else nuevoTicket = conectar.prepareStatement("INSERT INTO tickets_ayuda (tipoUsuario, topico, descripcion, fechaCreacion, estatus, idUsuario, categoria, sesiones_idsesiones) VALUES (?,?,?,?,?,?,?,?)");
@@ -580,7 +580,7 @@ public class ControladorCliente {
         
     }
     
-    public JSONObject bloquearPerfil(int idEstudiante){
+    public JSONObject bloquearPerfil(int idCliente){
         
         Connection conectar = ConexionMySQL.connection();
         JSONObject bloquearJSON = new JSONObject();
@@ -589,7 +589,7 @@ public class ControladorCliente {
             try{
                 //Recorrer cada sesion.
                 PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM pagos INNER JOIN sesiones WHERE sesiones.clientes_idclientes = ? AND sesiones.pagos_idpagos = pagos.idpagos");
-                sesiones.setInt(1, idEstudiante);
+                sesiones.setInt(1, idCliente);
                 ResultSet resultado = sesiones.executeQuery();
                 
                 while(resultado.next()){
@@ -597,7 +597,7 @@ public class ControladorCliente {
                         bloquear = true;
                         bloquearJSON.put("bloquear", bloquear);
                         bloquearJSON.put("idSesion", resultado.getInt("idSesion"));
-                        bloquearJSON.put("deuda", resultado.getDouble("costoClase") + resultado.getDouble("costoTE"));
+                        bloquearJSON.put("deuda", resultado.getDouble("costoServicio") + resultado.getDouble("costoTE"));
                         bloquearJSON.put("idSeccion", resultado.getInt("idSeccion"));
                         bloquearJSON.put("idNivel", resultado.getInt("idNivel"));
                         bloquearJSON.put("idBloque", resultado.getInt("idBloque"));
@@ -605,9 +605,9 @@ public class ControladorCliente {
                     }
                 }
                 
-                PreparedStatement estudiante = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
-                estudiante.setInt(1, idEstudiante);
-                ResultSet resultadoEst = estudiante.executeQuery();
+                PreparedStatement cliente = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
+                cliente.setInt(1, idCliente);
+                ResultSet resultadoEst = cliente.executeQuery();
                 
                 if(resultadoEst.next()){
                     bloquearJSON.put("nombre", resultadoEst.getString("nombre"));
@@ -625,15 +625,15 @@ public class ControladorCliente {
         return bloquearJSON;
     }
     
-    public JSONObject validarValoracion(int idSesion, int idProfesor){
+    public JSONObject validarValoracion(int idSesion, int idProfesional){
     
        Connection conectar = ConexionMySQL.connection();
        JSONObject jsonRespuesta = new JSONObject();
        if(conectar != null){
            try{
-               PreparedStatement validar = conectar.prepareStatement("SELECT * FROM valoracionprofesor WHERE sesiones_idsesiones = ? AND profesores_idprofesores = ?");
+               PreparedStatement validar = conectar.prepareStatement("SELECT * FROM valoracionprofesional WHERE sesiones_idsesiones = ? AND profesionales_idprofesionales = ?");
                validar.setInt(1, idSesion);
-               validar.setInt(2, idProfesor);
+               validar.setInt(2, idProfesional);
                ResultSet resultado = validar.executeQuery();
                
                if(resultado.next()){
@@ -652,14 +652,15 @@ public class ControladorCliente {
        
     }
     
-    public void valorarProfesor(JSONObject jsonDatos){
+    public void valorarProfesional(JSONObject jsonDatos){
         
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
-                PreparedStatement valorar = conectar.prepareStatement("INSERT INTO valoracionprofesor (profesores_idprofesores, clientes_idclientes, valoracion, comentario, sesiones_idsesiones) VALUES (?,?,?,?,?)");
-                valorar.setInt(1, Integer.parseInt(jsonDatos.get("idProfesor").toString()));
-                valorar.setInt(2, Integer.parseInt(jsonDatos.get("idEstudiante").toString()));
+                System.out.println(jsonDatos);
+                PreparedStatement valorar = conectar.prepareStatement("INSERT INTO valoracionprofesional (profesionales_idprofesionales, clientes_idclientes, valoracion, comentario, sesiones_idsesiones) VALUES (?,?,?,?,?)");
+                valorar.setInt(1, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
+                valorar.setInt(2, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                 valorar.setFloat(3, Float.parseFloat(jsonDatos.get("valoracion").toString()));
                 valorar.setString(4, jsonDatos.get("comentario").toString());
                 valorar.setInt(5, Integer.parseInt(jsonDatos.get("idSesion").toString()));
@@ -674,32 +675,32 @@ public class ControladorCliente {
     
     }
     
-    public JSONArray obtenerValoracion(int idProfesor){
+    public JSONArray obtenerValoracion(int idProfesional){
         
         Connection conectar = ConexionMySQL.connection();
-        JSONObject profesorJSON = new JSONObject();
+        JSONObject profesionalJSON = new JSONObject();
         JSONArray jsonArray = new JSONArray();
         if(conectar != null){
-            //Obtener la info del profesor.
+            //Obtener la info del profesional.
             try{
-                PreparedStatement profesor = conectar.prepareStatement("SELECT * FROM profesores WHERE idprofesores = ?");
-                profesor.setInt(1, idProfesor);
-                ResultSet resultado = profesor.executeQuery();
+                PreparedStatement profesional = conectar.prepareStatement("SELECT * FROM profesionales WHERE idprofesionales = ?");
+                profesional.setInt(1, idProfesional);
+                ResultSet resultado = profesional.executeQuery();
                 
                 if(resultado.next()){
                     //Obtener promedio
-                    profesorJSON.put("idProfesor", resultado.getInt("idprofesores"));
-                    profesorJSON.put("nombre", resultado.getString("nombre"));
-                    profesorJSON.put("correo", resultado.getString("correo"));
-                    profesorJSON.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
-                    profesorJSON.put("foto", resultado.getString("foto"));
-                    profesorJSON.put("descripcion", resultado.getString("descripcion"));
-                    profesorJSON.put("valoraciones", false);
-                    jsonArray.add(profesorJSON);
+                    profesionalJSON.put("idProfesional", resultado.getInt("idprofesionales"));
+                    profesionalJSON.put("nombre", resultado.getString("nombre"));
+                    profesionalJSON.put("correo", resultado.getString("correo"));
+                    profesionalJSON.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                    profesionalJSON.put("foto", resultado.getString("foto"));
+                    profesionalJSON.put("descripcion", resultado.getString("descripcion"));
+                    profesionalJSON.put("valoraciones", false);
+                    jsonArray.add(profesionalJSON);
                     
                     //Obtener Valoraciones
-                    PreparedStatement valoraciones = conectar.prepareStatement("SELECT * FROM valoracionprofesor WHERE profesores_idprofesores = ?");
-                    valoraciones.setInt(1, idProfesor);
+                    PreparedStatement valoraciones = conectar.prepareStatement("SELECT * FROM valoracionprofesional WHERE profesionales_idprofesionales = ?");
+                    valoraciones.setInt(1, idProfesional);
                     ResultSet resultadoVal = valoraciones.executeQuery();
                     
                     if(resultadoVal.next()){
@@ -737,7 +738,7 @@ public class ControladorCliente {
         
     }
     
-    public void finalizarPlan(int idEstudiante){
+    public void finalizarPlan(int idCliente){
     
         boolean finalizar = true;
         Connection conectar = ConexionMySQL.connection();
@@ -745,7 +746,7 @@ public class ControladorCliente {
             try{
                 PreparedStatement verificar = conectar.prepareStatement("SELECT * FROM sesiones WHERE NOT tipoPlan = ? AND clientes_idclientes = ?");
                 verificar.setString(1, "PARTICULAR");
-                verificar.setInt(2, idEstudiante);
+                verificar.setInt(2, idCliente);
                 ResultSet resultadoVerificar = verificar.executeQuery();
                 
                 while(resultadoVerificar.next()){
@@ -759,7 +760,7 @@ public class ControladorCliente {
                     finalizar2.setDate(2, null);
                     finalizar2.setDate(3, null);
                     finalizar2.setInt(4, 0);
-                    finalizar2.setInt(5, idEstudiante);
+                    finalizar2.setInt(5, idCliente);
                     finalizar2.execute();
                 }
                 
@@ -779,12 +780,12 @@ public class ControladorCliente {
             try{
                 PreparedStatement actualizar = conectar.prepareStatement("UPDATE planes SET monedero = ? WHERE clientes_idclientes = ?");
                 actualizar.setInt(1, Integer.parseInt(jsonMonedero.get("nuevoMonedero").toString()));
-                actualizar.setInt(2, Integer.parseInt(jsonMonedero.get("idEstudiante").toString()));
+                actualizar.setInt(2, Integer.parseInt(jsonMonedero.get("idCliente").toString()));
                 actualizar.execute();
                 
                 //Validar plan.
                 PreparedStatement planActivo = conectar.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
-                planActivo.setInt(1, Integer.parseInt(jsonMonedero.get("idEstudiante").toString()));
+                planActivo.setInt(1, Integer.parseInt(jsonMonedero.get("idCliente").toString()));
                 ResultSet resultadoPlanActivo = planActivo.executeQuery();
                 
                 if(resultadoPlanActivo.next()){
@@ -802,11 +803,11 @@ public class ControladorCliente {
                             Date fechaFin = sdf.parse(resultadoPlanActivo.getDate("fechaFin").toString());
                             if(fechaFin.equals(fechaActual) || fechaActual.after(fechaFin)){
                                 //Finalizar plan activo y pasarlo a PARTICULAR
-                                finalizarPlan(Integer.parseInt(jsonMonedero.get("idEstudiante").toString()));
+                                finalizarPlan(Integer.parseInt(jsonMonedero.get("idCliente").toString()));
                             }
                         }else{
                             //Finalizar plan activo y pasarlo a PARTICULAR
-                            finalizarPlan(Integer.parseInt(jsonMonedero.get("idEstudiante").toString()));
+                            finalizarPlan(Integer.parseInt(jsonMonedero.get("idCliente").toString()));
                         }
                     }
                     
@@ -824,7 +825,7 @@ public class ControladorCliente {
     }
     
     
-    public JSONObject verificarPlan(int idEstudiante){
+    public JSONObject verificarPlan(int idCliente){
     
         Connection conectar = ConexionMySQL.connection();
         JSONObject jsonPlan = new JSONObject();
@@ -832,7 +833,7 @@ public class ControladorCliente {
             try{
                 
                 PreparedStatement planActivo = conectar.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
-                planActivo.setInt(1, idEstudiante);
+                planActivo.setInt(1, idCliente);
                 ResultSet resultadoPlanActivo = planActivo.executeQuery();
                 
                 if(resultadoPlanActivo.next()){
@@ -855,7 +856,7 @@ public class ControladorCliente {
                                 Date fechaFin = sdf.parse(resultadoPlanActivo.getDate("fechaFin").toString());
                                 if(fechaFin.equals(fechaActual) || fechaActual.after(fechaFin)){
                                     //Finalizar plan activo y pasarlo a PARTICULAR
-                                    finalizarPlan(idEstudiante);
+                                    finalizarPlan(idCliente);
                                 }else{
                                     jsonPlan.put("tipoPlan", resultadoPlanActivo.getString("tipoPlan"));
                                     jsonPlan.put("monedero", resultadoPlanActivo.getInt("monedero"));
@@ -866,7 +867,7 @@ public class ControladorCliente {
                             
                         }else{
                             //Finalizar plan activo y pasarlo a PARTICULAR
-                            finalizarPlan(idEstudiante);
+                            finalizarPlan(idCliente);
                         }
                     }
                     
@@ -875,7 +876,7 @@ public class ControladorCliente {
                 Connection conectar2 = ConexionMySQL.connection();
                 if(conectar2 != null){
                     PreparedStatement planActivo2 = conectar2.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
-                    planActivo2.setInt(1, idEstudiante);
+                    planActivo2.setInt(1, idCliente);
                     ResultSet resultadoPlanActivo2 = planActivo2.executeQuery();
                     if(resultadoPlanActivo2.next()){
                         jsonPlan.put("tipoPlan", resultadoPlanActivo2.getString("tipoPlan"));
@@ -912,7 +913,7 @@ public class ControladorCliente {
                 actualizarPlan.setDate(2, java.sql.Date.valueOf(jsonPlan.get("fechaInicio").toString()));
                 actualizarPlan.setDate(3, java.sql.Date.valueOf(jsonPlan.get("fechaFin").toString()));
                 actualizarPlan.setInt(4, Integer.parseInt(jsonPlan.get("monedero").toString()));
-                actualizarPlan.setInt(5, Integer.parseInt(jsonPlan.get("idEstudiante").toString()));
+                actualizarPlan.setInt(5, Integer.parseInt(jsonPlan.get("idCliente").toString()));
                 actualizarPlan.execute();
                 //Guradar historial.
                 PreparedStatement historial = conectar.prepareStatement("INSERT INTO historialPlanes (tipoPlan, fechaInicio, fechaFin, monedero, clientes_idclientes) VALUES (?,?,?,?,?)");
@@ -920,7 +921,7 @@ public class ControladorCliente {
                 historial.setDate(2, java.sql.Date.valueOf(jsonPlan.get("fechaInicio").toString()));
                 historial.setDate(3, java.sql.Date.valueOf(jsonPlan.get("fechaFin").toString()));
                 historial.setInt(4, Integer.parseInt(jsonPlan.get("monedero").toString()));
-                historial.setInt(5, Integer.parseInt(jsonPlan.get("idEstudiante").toString()));
+                historial.setInt(5, Integer.parseInt(jsonPlan.get("idCliente").toString()));
                 historial.execute();
                 
             }catch(SQLException ex){
@@ -931,7 +932,7 @@ public class ControladorCliente {
         }
     }
     
-    public JSONObject verificarSesionesPagadas(int idEstudiante){
+    public JSONObject verificarSesionesPagadas(int idCliente){
     
         boolean plan_activo = false;
         boolean sesiones_pagadas_finalizadas = true;
@@ -942,7 +943,7 @@ public class ControladorCliente {
             try{
                 
                 PreparedStatement contador = conectar.prepareStatement("SELECT COUNT(*) AS numero FROM pagos INNER JOIN sesiones WHERE sesiones.pagos_idpagos = pagos.idpagos AND sesiones.clientes_idclientes = ?");
-                contador.setInt(1, idEstudiante);
+                contador.setInt(1, idCliente);
                 ResultSet resultadoContador = contador.executeQuery();
                 
                 if(resultadoContador.next()){
@@ -952,7 +953,7 @@ public class ControladorCliente {
                     }else{
                         //Contar las sesiones que tenemos y ver que todas esten finalizadas o valen vrg
                         PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE clientes_idclientes = ?");
-                        consulta.setInt(1, idEstudiante);
+                        consulta.setInt(1, idCliente);
                         ResultSet resultado = consulta.executeQuery();
 
                         while(resultado.next()){
@@ -964,7 +965,7 @@ public class ControladorCliente {
 
                         //Aquí obtenemos el tipo PLAN y si está activo.
                         PreparedStatement plan = conectar.prepareStatement("SELECT tipoPlan FROM planes WHERE clientes_idclientes = ?");
-                        plan.setInt(1, idEstudiante);
+                        plan.setInt(1, idCliente);
                         ResultSet resultadoPlan = plan.executeQuery();
 
                         if(resultadoPlan.next()){
@@ -1001,13 +1002,13 @@ public class ControladorCliente {
         if(conectar != null){
             try{
                 PreparedStatement consultar = conectar.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
-                consultar.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                consultar.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                 ResultSet resultado = consultar.executeQuery();
                 
                 if(resultado.next()){
                 }else{
                     PreparedStatement plan = conectar.prepareStatement("INSERT INTO planes (clientes_idclientes) VALUES (?)");
-                    plan.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                    plan.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                     plan.execute();
                 
                 }
@@ -1028,20 +1029,20 @@ public class ControladorCliente {
         
             try{
                 if(json.get("tipoPlan").toString().equalsIgnoreCase("PARTICULAR")){
-                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET costoClase = ?, costoTE = ?, estatusPago = ? WHERE idEstudiante = ? AND idSesion = ?");
-                    actualizar.setDouble(1, Double.parseDouble(json.get("costoClase").toString()));
+                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET costoServicio = ?, costoTE = ?, estatusPago = ? WHERE idCliente = ? AND idSesion = ?");
+                    actualizar.setDouble(1, Double.parseDouble(json.get("costoServicio").toString()));
                     actualizar.setDouble(2, Double.parseDouble(json.get("costoTE").toString()));
                     actualizar.setString(3, json.get("estatusPago").toString());
-                    actualizar.setInt(4, Integer.parseInt(json.get("idEstudiante").toString()));
+                    actualizar.setInt(4, Integer.parseInt(json.get("idCliente").toString()));
                     actualizar.setInt(5, Integer.parseInt(json.get("idSesion").toString()));
                     actualizar.execute();
                 }else{
-                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO pagos (token, costoClase, costoTE, estatusPago, idEstudiante, idSesion) VALUES (?,?,?,?,?,?)");
+                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO pagos (token, costoServicio, costoTE, estatusPago, idCliente, idSesion) VALUES (?,?,?,?,?,?)");
                     actualizar.setString(1, "TIPO PLAN - " + json.get("tipoPlan").toString());
-                    actualizar.setDouble(2, Double.parseDouble(json.get("costoClase").toString()));
+                    actualizar.setDouble(2, Double.parseDouble(json.get("costoServicio").toString()));
                     actualizar.setDouble(3, Double.parseDouble(json.get("costoTE").toString()));
                     actualizar.setString(4, json.get("estatusPago").toString());
-                    actualizar.setInt(5, Integer.parseInt(json.get("idEstudiante").toString()));
+                    actualizar.setInt(5, Integer.parseInt(json.get("idCliente").toString()));
                     actualizar.setInt(6, Integer.parseInt(json.get("idSesion").toString()));
                     actualizar.execute();
                 }
@@ -1056,7 +1057,7 @@ public class ControladorCliente {
         
     }
     
-    public JSONObject obtenerToken(int idSesion, int idEstudiante){
+    public JSONObject obtenerToken(int idSesion, int idCliente){
     
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
@@ -1064,9 +1065,9 @@ public class ControladorCliente {
         if(conectar != null){
         
             try{
-                PreparedStatement consulta = conectar.prepareStatement("SELECT token FROM pagos WHERE idSesion = ? AND idEstudiante = ?");
+                PreparedStatement consulta = conectar.prepareStatement("SELECT token FROM pagos WHERE idSesion = ? AND idCliente = ?");
                 consulta.setInt(1, idSesion);
-                consulta.setInt(2, idEstudiante);
+                consulta.setInt(2, idCliente);
                 ResultSet resultado = consulta.executeQuery();
                 if(resultado.next()){
                     respuesta.put("token", resultado.getString("token"));
@@ -1086,41 +1087,41 @@ public class ControladorCliente {
     
     }
     
-    public JSONObject guardarTokenPagoClase(JSONObject jsonToken){
+    public JSONObject guardarTokenPagoServicio(JSONObject jsonToken){
         JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
         
             try{
-                PreparedStatement guardar = conectar.prepareStatement("INSERT INTO pagos (token, costoClase, costoTE, estatusPago, idEstudiante) VALUES (?,?,?,?,?)");
+                PreparedStatement guardar = conectar.prepareStatement("INSERT INTO pagos (token, costoServicio, costoTE, estatusPago, idCliente) VALUES (?,?,?,?,?)");
                 guardar.setString(1, jsonToken.get("token").toString());
-                guardar.setDouble(2, Double.parseDouble(jsonToken.get("costoClase").toString()));
+                guardar.setDouble(2, Double.parseDouble(jsonToken.get("costoServicio").toString()));
                 guardar.setDouble(3, Double.parseDouble(jsonToken.get("costoTE").toString()));
                 guardar.setString(4, jsonToken.get("estatusPago").toString());
-                guardar.setInt(5, Integer.parseInt(jsonToken.get("idEstudiante").toString()));
+                guardar.setInt(5, Integer.parseInt(jsonToken.get("idCliente").toString()));
                 guardar.execute();
                 
                 respuesta.put("respuesta", true);
                 respuesta.put("mensaje", "Pago guardado exitosamente.");
                 /*
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM pagos WHERE idSesion = ? AND idEstudiante = ?");
+                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM pagos WHERE idSesion = ? AND idCliente = ?");
                 consulta.setInt(1, Integer.parseInt(jsonToken.get("idSesion").toString()));
-                consulta.setInt(2, Integer.parseInt(jsonToken.get("idEstudiante").toString()));
+                consulta.setInt(2, Integer.parseInt(jsonToken.get("idCliente").toString()));
                 ResultSet resultado = consulta.executeQuery();
                 
                 if(resultado.next()){
                 
-                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET token = ? WHERE idEstudiante = ? AND  idSesion = ?");
+                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET token = ? WHERE idCliente = ? AND  idSesion = ?");
                     actualizar.setString(1, jsonToken.get("token").toString());
-                    actualizar.setInt(2, Integer.parseInt(jsonToken.get("idEstudiante").toString()));
+                    actualizar.setInt(2, Integer.parseInt(jsonToken.get("idCliente").toString()));
                     actualizar.setInt(3, Integer.parseInt(jsonToken.get("idSesion").toString()));
                     actualizar.execute();
                     
                 }else{
                 
-                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO pagos (token, idEstudiante, idSesion) VALUES (?,?,?)");
+                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO pagos (token, idCliente, idSesion) VALUES (?,?,?)");
                     actualizar.setString(1, jsonToken.get("token").toString());
-                    actualizar.setInt(2, Integer.parseInt(jsonToken.get("idEstudiante").toString()));
+                    actualizar.setInt(2, Integer.parseInt(jsonToken.get("idCliente").toString()));
                     actualizar.setInt(3, Integer.parseInt(jsonToken.get("idSesion").toString()));
                     actualizar.execute();
                 
@@ -1140,7 +1141,7 @@ public class ControladorCliente {
         return respuesta;
     }
     
-    public JSONObject obtenerPreOrden(int idEstudiante, int idSesion){
+    public JSONObject obtenerPreOrden(int idCliente, int idSesion){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         if(conectar != null){
@@ -1151,21 +1152,21 @@ public class ControladorCliente {
                 
                 if(resultadoSesiones.next()){   
                     
-                    PreparedStatement consultaEstudiante = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
-                    consultaEstudiante.setInt(1, idEstudiante);
-                    ResultSet resultadoEstudiante = consultaEstudiante.executeQuery();
+                    PreparedStatement consultaCliente = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
+                    consultaCliente.setInt(1, idCliente);
+                    ResultSet resultadoCliente = consultaCliente.executeQuery();
                         
-                    if(resultadoEstudiante.next()){
+                    if(resultadoCliente.next()){
 
                         PreparedStatement consultaDatosBancarios = conectar.prepareStatement("SELECT * FROM datosbancariosclientes WHERE clientes_idclientes = ?");
-                        consultaDatosBancarios.setInt(1, idEstudiante);
+                        consultaDatosBancarios.setInt(1, idCliente);
                         ResultSet resultadoDatosBancarios = consultaDatosBancarios.executeQuery();
 
                         if(resultadoDatosBancarios.next()){
-                            respuesta.put("idEstudiante", idEstudiante);
+                            respuesta.put("idCliente", idCliente);
                             respuesta.put("idSesion", idSesion);
-                            respuesta.put("nombreEstudiante", resultadoEstudiante.getString("nombre"));
-                            respuesta.put("correo", resultadoEstudiante.getString("correo"));
+                            respuesta.put("nombreCliente", resultadoCliente.getString("nombre"));
+                            respuesta.put("correo", resultadoCliente.getString("correo"));
                             respuesta.put("nombreTitular", resultadoDatosBancarios.getString("nombreTitular"));
                             respuesta.put("tarjeta", resultadoDatosBancarios.getString("tarjeta"));
                             respuesta.put("mes", resultadoDatosBancarios.getString("mes"));
@@ -1175,10 +1176,10 @@ public class ControladorCliente {
                             respuesta.put("idBloque", resultadoSesiones.getInt("idBloque"));
                             respuesta.put("tiempo", resultadoSesiones.getInt("tiempo"));
                         }else{
-                            respuesta.put("idEstudiante", idEstudiante);
+                            respuesta.put("idCliente", idCliente);
                             respuesta.put("idSesion", idSesion);
-                            respuesta.put("nombreEstudiante", resultadoEstudiante.getString("nombre"));
-                            respuesta.put("correo", resultadoEstudiante.getString("correo"));
+                            respuesta.put("nombreCliente", resultadoCliente.getString("nombre"));
+                            respuesta.put("correo", resultadoCliente.getString("correo"));
                             respuesta.put("nombreTitular", "");
                             respuesta.put("tarjeta", "");
                             respuesta.put("mes", "");
@@ -1213,15 +1214,15 @@ public class ControladorCliente {
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
             try{
-                
+                System.out.println(json.get("idCliente").toString());
                 PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE clientes_idclientes = ?");
-                consulta.setInt(1, Integer.valueOf(json.get("idEstudiante").toString()));
+                consulta.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                 ResultSet resultado = consulta.executeQuery();
                 
                 if(resultado.next()){
                 }else{
                     PreparedStatement iniciar = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
-                    iniciar.setInt(1, Integer.parseInt(json.get("idEstudiante").toString()));
+                    iniciar.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                     iniciar.setInt(2, 1);
                     iniciar.setInt(3, 1);
                     iniciar.setInt(4, 1);
@@ -1250,7 +1251,7 @@ public class ControladorCliente {
         sesion.setIdNivel(Integer.parseInt(datos.get("idNivel").toString()));
         sesion.setIdBloque(Integer.parseInt(datos.get("idBloque").toString()));
         sesion.setExtras(String.valueOf(datos.get("extras")));
-        sesion.setTipoClase(String.valueOf(datos.get("tipoClase")));
+        sesion.setTipoServicio(String.valueOf(datos.get("tipoServicio")));
         sesion.setLatitud(Double.valueOf(String.valueOf(datos.get("latitud"))));
         sesion.setLongitud(Double.valueOf(String.valueOf(datos.get("longitud"))));
         sesion.setFecha(datos.get("fecha").toString());
@@ -1276,23 +1277,23 @@ public class ControladorCliente {
                 
                 if(resultado.next()){
                     
-                    if(resultado.getString("profesores_idprofesores") == null){
-                        jsonDetalles.put("profesor", "Sin profesor asignado.");
-                        jsonDetalles.put("fotoProfesor", "Sin foto");
-                        jsonDetalles.put("descripcionProfesor", "Sin descripcion");
-                        jsonDetalles.put("correoProfesor", "Sin correo");
-                        jsonDetalles.put("idProfesor", 0);
+                    if(resultado.getString("profesionales_idprofesionales") == null){
+                        jsonDetalles.put("profesional", "Sin profesional asignado.");
+                        jsonDetalles.put("fotoProfesional", "Sin foto");
+                        jsonDetalles.put("descripcionProfesional", "Sin descripcion");
+                        jsonDetalles.put("correoProfesional", "Sin correo");
+                        jsonDetalles.put("idProfesional", 0);
                     }else{
-                        PreparedStatement profesor = conectar.prepareStatement("SELECT * FROM profesores WHERE idprofesores = ?");
-                        profesor.setInt(1 , resultado.getInt("profesores_idprofesores"));
-                        ResultSet resultadoProfesor = profesor.executeQuery();
+                        PreparedStatement profesional = conectar.prepareStatement("SELECT * FROM profesionales WHERE idprofesionales = ?");
+                        profesional.setInt(1 , resultado.getInt("profesionales_idprofesionales"));
+                        ResultSet resultadoProfesional = profesional.executeQuery();
                         
-                        if(resultadoProfesor.next()){
-                            jsonDetalles.put("profesor", resultadoProfesor.getString("nombre"));
-                            jsonDetalles.put("fotoProfesor", resultadoProfesor.getString("foto"));
-                            jsonDetalles.put("descripcionProfesor", resultadoProfesor.getString("descripcion"));
-                            jsonDetalles.put("correoProfesor", resultadoProfesor.getString("correo"));
-                            jsonDetalles.put("idProfesor", resultadoProfesor.getInt("idprofesores"));
+                        if(resultadoProfesional.next()){
+                            jsonDetalles.put("profesional", resultadoProfesional.getString("nombre"));
+                            jsonDetalles.put("fotoProfesional", resultadoProfesional.getString("foto"));
+                            jsonDetalles.put("descripcionProfesional", resultadoProfesional.getString("descripcion"));
+                            jsonDetalles.put("correoProfesional", resultadoProfesional.getString("correo"));
+                            jsonDetalles.put("idProfesional", resultadoProfesional.getInt("idprofesionales"));
                         }
                     }
                     
@@ -1304,7 +1305,7 @@ public class ControladorCliente {
                     jsonDetalles.put("idNivel", resultado.getInt("idNivel"));
                     jsonDetalles.put("idBloque", resultado.getInt("idBloque"));
                     jsonDetalles.put("extras", resultado.getString("extras"));
-                    jsonDetalles.put("tipoClase", resultado.getString("tipoClase"));
+                    jsonDetalles.put("tipoServicio", resultado.getString("tipoServicio"));
                     jsonDetalles.put("latitud", resultado.getDouble("latitud"));
                     jsonDetalles.put("longitud", resultado.getDouble("longitud"));
                     jsonDetalles.put("actualizado", resultado.getDate("actualizado"));
@@ -1344,7 +1345,7 @@ public class ControladorCliente {
                 ResultSet resultado = token.executeQuery();
                 
                 if(resultado.next()){
-                    String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoClase,"
+                    String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoServicio,"
                         + " latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso, sumar, tipoPlan, personas, pagos_idpagos) "
                         + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
                     PreparedStatement agregarDatos = conectar.prepareStatement(query);
@@ -1353,7 +1354,7 @@ public class ControladorCliente {
                     agregarDatos.setString(3, sesion.getLugar());
                     agregarDatos.setInt(4, sesion.getTiempo());
                     agregarDatos.setString(5, sesion.getExtras());
-                    agregarDatos.setString(6, sesion.getTipoClase());
+                    agregarDatos.setString(6, sesion.getTipoServicio());
                     agregarDatos.setDouble(7, sesion.getLatitud());
                     agregarDatos.setDouble(8, sesion.getLongitud());
                     agregarDatos.setString(9, sesion.getActualizado());
@@ -1468,7 +1469,7 @@ public class ControladorCliente {
          Connection conectar = ConexionMySQL.connection();
         if (conectar != null) {
             try {
-                
+                System.out.println(contrasena);
                 MD5 md5 = new MD5();
                 String pass = md5.getMD5(contrasena);
                 String query = "SELECT * FROM clientes WHERE BINARY correo = ? AND contrasena = ?";
@@ -1659,7 +1660,7 @@ public class ControladorCliente {
 
                     respuesta.put("token", token);
                     respuesta.put("respuesta", true);
-                    respuesta.put("mensaje", "Estudiante registrado exitosamente.");
+                    respuesta.put("mensaje", "Cliente registrado exitosamente.");
                 }
                 
             } catch (SQLException ex) {
@@ -1766,8 +1767,8 @@ public class ControladorCliente {
         cliente.evaluacion.setHorario(String.valueOf(jsonEvaluacionCliente.get("horario")));
         cliente.evaluacion.setLugar(String.valueOf(jsonEvaluacionCliente.get("lugar")));
         cliente.evaluacion.setNivelIdioma(Integer.parseInt(String.valueOf(jsonEvaluacionCliente.get("idNivelIdioma"))));
-        cliente.evaluacion.setTiempoClase(String.valueOf(jsonEvaluacionCliente.get("tiempoClase")));
-        cliente.evaluacion.setTipoClase(String.valueOf(jsonEvaluacionCliente.get("tipoClase")));
+        cliente.evaluacion.setTiempoServicio(String.valueOf(jsonEvaluacionCliente.get("tiempoServicio")));
+        cliente.evaluacion.setTipoServicio(String.valueOf(jsonEvaluacionCliente.get("tipoServicio")));
 
     }//Fin método nuevaEvaluacion.
 
@@ -1779,12 +1780,12 @@ public class ControladorCliente {
 
             try {
 
-                String query = "INSERT INTO evaluacioncliente (clientes_idclientes, tipoClase, horario, tiempoClase, lugar, nivelIdioma_idnivelidioma) VALUES (?,?,?,?,?,?)";
+                String query = "INSERT INTO evaluacioncliente (clientes_idclientes, tipoServicio, horario, tiempoServicio, lugar, nivelIdioma_idnivelidioma) VALUES (?,?,?,?,?,?)";
                 PreparedStatement agregarDatos = conectar.prepareStatement(query);
                 agregarDatos.setInt(1, idCliente);
-                agregarDatos.setString(2, cliente.evaluacion.getTipoClase());
+                agregarDatos.setString(2, cliente.evaluacion.getTipoServicio());
                 agregarDatos.setString(3, cliente.evaluacion.getHorario());
-                agregarDatos.setString(4, cliente.evaluacion.getTiempoClase());
+                agregarDatos.setString(4, cliente.evaluacion.getTiempoServicio());
                 agregarDatos.setString(5, cliente.evaluacion.getLugar());
                 agregarDatos.setInt(6, cliente.evaluacion.getNivelIdioma());
                 agregarDatos.execute();
