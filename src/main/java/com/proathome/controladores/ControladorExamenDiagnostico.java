@@ -188,11 +188,24 @@ public class ControladorExamenDiagnostico {
     }    
     
     public JSONObject estatusExamenDiagnostico(int idCliente){
-
         examen.clear();
         conectar = ConexionMySQL.connection();
+        boolean sesionesFinalizadas = true;
+        
         if(conectar != null){
             try{
+                
+                //VALIDAR QUE NO EXISTAN SESIONES PENDIENTES DE FINALIZAR
+                PreparedStatement sesiones = conectar.prepareStatement("SELECT finalizado FROM sesiones WHERE clientes_idclientes = ?");
+                sesiones.setInt(1, idCliente);
+                ResultSet resultadoSesiones = sesiones.executeQuery();
+                while(resultadoSesiones.next()){
+                    if(!resultadoSesiones.getBoolean("finalizado")){
+                        sesionesFinalizadas = false;
+                        break;
+                    }
+                }
+                
                 PreparedStatement estatus = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
                 estatus.setInt(1, idCliente);
                 ResultSet resultado = estatus.executeQuery();
@@ -207,6 +220,7 @@ public class ControladorExamenDiagnostico {
                 }else{
                      examen.put("estatus", ControladorExamenDiagnostico.INICIO);
                 }
+                examen.put("sesionesFinalizadas", sesionesFinalizadas);
                 
             }catch(SQLException ex){
                 ex.printStackTrace();

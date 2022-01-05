@@ -205,7 +205,7 @@ public class ControladorAdmin {
             guardar.setString(1, jsonDatos.get("descripcionReporte").toString());
             guardar.setInt(2, Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()));
             guardar.setString(3, jsonDatos.get("tipoUsuarioReportado").toString());
-            guardar.setDate(4, java.sql.Date.valueOf("2020-02-21"));
+            guardar.setDate(4, java.sql.Date.valueOf(ControladorFechaActual.getFechaActual()));
             guardar.setInt(5, Integer.parseInt(jsonDatos.get("idTicket").toString()));
             guardar.execute();
         }catch(SQLException ex){
@@ -1117,6 +1117,7 @@ public class ControladorAdmin {
                         jsonProf.put("certificado7", resultado.getString("certificado7"));
                         jsonProf.put("certificado8", resultado.getString("certificado8"));
                         jsonProf.put("ine", resultado.getString("ine"));
+                        jsonProf.put("vacunacion", resultado.getString("vacunacion_covid"));
                         jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
                         jsonProf.put("idProfesional", resultado.getInt("profesionales_idprofesionales"));
                         jsonAsignados.add(jsonProf);
@@ -1216,6 +1217,7 @@ public class ControladorAdmin {
                     jsonProf.put("certificado3", resultado.getString("certificado3"));
                     jsonProf.put("ine", resultado.getString("ine"));
                     jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
+                    jsonProf.put("vacunacion", resultado.getString("vacunacion_covid"));
                     jsonSolicitudes.add(jsonProf);
                 }
             }catch(SQLException ex){

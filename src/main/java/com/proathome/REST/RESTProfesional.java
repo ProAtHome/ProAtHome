@@ -343,7 +343,7 @@ public class RESTProfesional {
     @PUT
     @Path("/servicioDisponible/{idSesion}/{idProfesional}/{disponible}")
     public void servicioDsiponible(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional, @PathParam("disponible") boolean dsiponible){
-        
+        System.out.println(idSesion);
         sesiones.servicioDisponibleProfesional(idSesion, idProfesional, dsiponible);
         
     }

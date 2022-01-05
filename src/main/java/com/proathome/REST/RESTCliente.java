@@ -300,13 +300,15 @@ public class RESTCliente {
     
     @POST
     @Path("/sumarServicioRuta")
-    public void sumarServicioRuta(String datos){
+    public JSONObject sumarServicioRuta(String datos){
+        JSONObject json = null;
         try{
-            JSONObject json = (JSONObject) parser.parse(datos);
-            ruta.sumarServicioRuta(json);
+            json = (JSONObject) parser.parse(datos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }  
+        
+        return ruta.sumarServicioRuta(json);
     }
     
     @POST
@@ -568,7 +570,7 @@ public class RESTCliente {
     @PUT
     @Path("/servicioDisponible/{idSesion}/{idCliente}/{disponible}")
     public void servicioDsiponible(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente, @PathParam("disponible") boolean dsiponible){
-        
+        System.out.println(idSesion);
         sesiones.servicioDisponible(idSesion, idCliente, dsiponible);
         
     }

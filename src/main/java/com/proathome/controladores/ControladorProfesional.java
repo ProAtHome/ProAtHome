@@ -662,7 +662,7 @@ public class ControladorProfesional {
     }
     
     public JSONArray obtenerValoracion(int idCliente){
-        
+   
         Connection conectar = ConexionMySQL.connection();
         JSONObject clienteJSON = new JSONObject();
         JSONArray jsonArray = new JSONArray();
@@ -1061,7 +1061,7 @@ public class ControladorProfesional {
         profesional.setContrasena(String.valueOf(jsonProfesional.get("contrasena")));
         java.sql.Date dateFechaNacimiento = (java.sql.Date.valueOf(String.valueOf(jsonProfesional.get("fechaNacimiento"))));
         profesional.setFechaNacimiento(dateFechaNacimiento);
-        profesional.setFechaRegistro(java.sql.Date.valueOf("2021-01-27"));
+        profesional.setFechaRegistro(java.sql.Date.valueOf(ControladorFechaActual.getFechaActual()));
         profesional.setCelular(jsonProfesional.get("celular").toString());
         profesional.setTelefonoLocal(jsonProfesional.get("telefono").toString());
         profesional.setDireccion(jsonProfesional.get("direccion").toString());
@@ -1084,32 +1084,44 @@ public class ControladorProfesional {
                     respuesta.put("respuesta", false);
                     respuesta.put("mensaje", "Correo electronico ya registrado.");
                 }else{
-                    //CREAMOS TOKEN
-                    MD5 md5 = new MD5();
-                    String token = md5.getMD5(profesional.getCorreo() + profesional.getNombre());
-                    String pass = md5.getMD5(profesional.getContrasena());
-                    String query = "INSERT INTO profesionales (nombre, correo, contrasena, fechaNacimiento, fechaDeRegistro, apellidoPaterno, apellidoMaterno,"
-                            + " celular, telefonoLocal, direccion, genero, token_verificacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
-                    PreparedStatement agregarDatos = conectar.prepareStatement(query);
-                    agregarDatos.setString(1, profesional.getNombre());
-                    agregarDatos.setString(2, profesional.getCorreo());
-                    agregarDatos.setString(3, pass);
-                    agregarDatos.setDate(4, profesional.getFechaNacimiento());
-                    agregarDatos.setDate(5, profesional.getFechaRegistro());
-                    agregarDatos.setString(6, profesional.getApellidoPaterno());
-                    agregarDatos.setString(7, profesional.getApellidMaterno());
-                    agregarDatos.setString(8, profesional.getCelular());
-                    agregarDatos.setString(9, profesional.getTelefonoLocal());
-                    agregarDatos.setString(10, profesional.getDireccion());
-                    agregarDatos.setString(11, profesional.getGenero());
-                    agregarDatos.setString(12, token);
-                    agregarDatos.execute();
+                    
+                    //VALIDAMOS QUE NO EXISTA EL TELEFONO
+                    PreparedStatement consultaTel = conectar.prepareStatement("SELECT * FROM profesionales WHERE celular = ? || telefonoLocal = ?");
+                    consultaTel.setString(1, profesional.getCelular());
+                    consultaTel.setString(2, profesional.getTelefonoLocal());
+                    ResultSet resultadoTelefono = consultaTel.executeQuery();
+                    
+                    if(resultadoTelefono.next()){
+                        respuesta.put("respuesta", false);
+                        respuesta.put("mensaje", "Teléfono celular o local ya registrado.");
+                    }else{
+                        //CREAMOS TOKEN
+                        MD5 md5 = new MD5();
+                        String token = md5.getMD5(profesional.getCorreo() + profesional.getNombre());
+                        String pass = md5.getMD5(profesional.getContrasena());
+                        String query = "INSERT INTO profesionales (nombre, correo, contrasena, fechaNacimiento, fechaDeRegistro, apellidoPaterno, apellidoMaterno,"
+                                + " celular, telefonoLocal, direccion, genero, token_verificacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                        PreparedStatement agregarDatos = conectar.prepareStatement(query);
+                        agregarDatos.setString(1, profesional.getNombre());
+                        agregarDatos.setString(2, profesional.getCorreo());
+                        agregarDatos.setString(3, pass);
+                        agregarDatos.setDate(4, profesional.getFechaNacimiento());
+                        agregarDatos.setDate(5, profesional.getFechaRegistro());
+                        agregarDatos.setString(6, profesional.getApellidoPaterno());
+                        agregarDatos.setString(7, profesional.getApellidMaterno());
+                        agregarDatos.setString(8, profesional.getCelular());
+                        agregarDatos.setString(9, profesional.getTelefonoLocal());
+                        agregarDatos.setString(10, profesional.getDireccion());
+                        agregarDatos.setString(11, profesional.getGenero());
+                        agregarDatos.setString(12, token);
+                        agregarDatos.execute();
 
-                    respuesta.put("token", token);
-                    respuesta.put("respuesta", true);
-                    respuesta.put("mensaje", "Profesional registrado exitosamente.");
+                        respuesta.put("token", token);
+                        respuesta.put("respuesta", true);
+                        respuesta.put("mensaje", "Profesional registrado exitosamente.");
+                    }
+                    
                 }
-            
             } catch (SQLException ex) {
                 ex.printStackTrace();
                 respuesta.put("respuesta", false);

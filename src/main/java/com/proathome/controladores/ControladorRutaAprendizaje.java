@@ -25,20 +25,63 @@ public class ControladorRutaAprendizaje {
     public static final int BASICO = 2;
     public static final int INTERMEDIO = 3;
     
+    public boolean esRutaMenor(int idSeccionRecomendado, int idNivelRecomendado, int idBloqueRecomendado, int idCliente){
+        boolean menor = false;
+        
+        //CONSULTAMOS NIVEL ACTUAL.
+        JSONObject jsonNivelActual = obtenerSesionActual(idCliente);
+        int idSeccionActual = Integer.parseInt(jsonNivelActual.get("idSeccion").toString());
+        int idNivelActual = Integer.parseInt(jsonNivelActual.get("idNivel").toString());
+        int idBloqueActual = Integer.parseInt(jsonNivelActual.get("idBloque").toString());
+        
+        if(idSeccionActual < idSeccionRecomendado){
+            //REGISTRAMOS POR QUE LA SECCION RECOMENDADA ES MAYOR Y NO EXISTEN REGISTRO DE ESA NUEVA SECCION.
+            menor = false;
+        }else if(idSeccionActual == idSeccionRecomendado){
+            //EVALUAMOS EL NIVEL
+            if(idNivelActual < idNivelRecomendado){
+                //REGISTRAMOS POR QUE EL NIVEL RECOMENDADO ES MAYOR Y NO EXISTEN REGISTRO DE ESA NUEVA SECCION.
+                menor = false;
+            }else if(idNivelActual == idNivelRecomendado){
+                    //NO REGISTRAMOS POR QUE SI EL BLOQUE ACTUAL ES 0, ENTONCES NO VAMOS A REPETIR REGISTRO
+                    // Y SI EL BLOQUE ACTUAL TIENE HORAS REALIZADAS ES MAYOR Y VAMOS ADELANTADOS.
+                     System.out.println("NO REGISTRAMOS POR EL BLOQUE");
+                menor = true;
+            }else if(idNivelActual > idNivelRecomendado){
+                //NO REGISTRAMOS POR QUE VAMOS ADELANTADOS Y SOLO TENDREMOS QUE REPASAR.
+                System.out.println("NO REGISTRAMOS");
+                menor = true;
+            }
+        }else if(idSeccionActual > idSeccionRecomendado){
+            //NO REGISTRAMOS POR QUE VAMOS ADELANTADOS Y SOLO TENDREMOS QUE REPASAR.
+             System.out.println("NO REGISTRAMOS");
+            menor = true;
+        }
+         
+        
+        return menor;
+    }
+    
     public void nuevaRuta(JSONObject json){
         conectar = ConexionMySQL.connection();
         
         if(conectar != null){
             try{
-                PreparedStatement nueva = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
-                nueva.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
-                nueva.setInt(2, Integer.parseInt(json.get("idBloque").toString()));
-                nueva.setInt(3, Integer.parseInt(json.get("idNivel").toString()));
-                nueva.setInt(4, Integer.parseInt(json.get("idSeccion").toString()));
-                nueva.setInt(5, Integer.parseInt(json.get("horas").toString()));
-                nueva.setString(6, json.get("fecha_registro").toString());
-                nueva.setBoolean(7, Boolean.parseBoolean(json.get("sumar").toString()));
-                nueva.execute();
+                
+                //EVALUAR QUE la RUTA RECOMENTADA NO SEA MENOR QUE LA RUTA ACTUAL
+                if(!esRutaMenor(Integer.parseInt(json.get("idSeccion").toString()), Integer.parseInt(json.get("idNivel").toString()),
+                        Integer.parseInt(json.get("idBloque").toString()), Integer.parseInt(json.get("idCliente").toString()))){
+                    PreparedStatement nueva = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
+                    nueva.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
+                    nueva.setInt(2, Integer.parseInt(json.get("idBloque").toString()));
+                    nueva.setInt(3, Integer.parseInt(json.get("idNivel").toString()));
+                    nueva.setInt(4, Integer.parseInt(json.get("idSeccion").toString()));
+                    nueva.setInt(5, Integer.parseInt(json.get("horas").toString()));
+                    nueva.setString(6, json.get("fecha_registro").toString());
+                    nueva.setBoolean(7, Boolean.parseBoolean(json.get("sumar").toString()));
+                    nueva.execute();
+                }
+              
             }catch(SQLException ex){
                 ex.printStackTrace();
             }
@@ -48,9 +91,10 @@ public class ControladorRutaAprendizaje {
         
     }
     
-    public void sumarServicioRuta(JSONObject json){
+    public JSONObject sumarServicioRuta(JSONObject json){
         conectar = ConexionMySQL.connection();
         rutaSumar.clear();
+        JSONObject respuesta = new JSONObject();
         
         if(conectar != null){
             try{
@@ -106,6 +150,7 @@ public class ControladorRutaAprendizaje {
                 int horasDeBloque = Constantes.obtenerHorasBloque(Integer.parseInt(json.get("idSeccion").toString()), Integer.parseInt(json.get("idNivel").toString()), Integer.parseInt(json.get("idBloque").toString()));
                 int horasA_sumar = Integer.parseInt(json.get("horasA_sumar").toString());
                 int horasRegistradas = Integer.parseInt(rutaSumar.get("horas").toString());
+                boolean ultimaSesion = false;
                 
                 int horasTotalesA_sumar = horasRegistradas + horasA_sumar;
                 System.out.println("Horar totales a sumar: " + horasTotalesA_sumar);
@@ -125,17 +170,31 @@ public class ControladorRutaAprendizaje {
                         enCurso.execute();
 
                     }else{
-                        //Registro de un nuevo bloque.
-                        JSONObject nuevoRegistro = Constantes.nuevoRegistro(Integer.parseInt(json.get("idSeccion").toString()), Integer.parseInt(json.get("idNivel").toString()), Integer.parseInt(json.get("idBloque").toString()));
-                        PreparedStatement enCurso = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
-                        enCurso.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
-                        enCurso.setInt(2, Integer.parseInt(nuevoRegistro.get("idBloque").toString()));
-                        enCurso.setInt(3, Integer.parseInt(nuevoRegistro.get("idNivel").toString()));
-                        enCurso.setInt(4, Integer.parseInt(nuevoRegistro.get("idSeccion").toString()));
-                        enCurso.setInt(5, 0);
-                        enCurso.setString(6, json.get("fecha_registro").toString());
-                        enCurso.setBoolean(7, true);
-                        enCurso.execute();
+                        
+                        //Si es el último nivel
+                        if(Integer.parseInt(json.get("idSeccion").toString()) == 3 && Integer.parseInt(json.get("idNivel").toString()) == 5
+                                && Integer.parseInt(json.get("idBloque").toString()) == 2)
+                                    ultimaSesion = true;
+                        //Registro de un nuevo bloque siempre y cuando no sea el último.
+                        if(ultimaSesion){
+                            //CAMBIAR A FALSE EL ESTATUS DE LA RUTA
+                            System.out.println("FALSE ESTATUS RUTA");
+                            PreparedStatement estatusRuta = conectar.prepareStatement("UPDATE clientes SET ruta_finalizada = ? WHERE idclientes = ?");
+                            estatusRuta.setBoolean(1, true);
+                            estatusRuta.setInt(2, Integer.parseInt(json.get("idCliente").toString()));
+                            estatusRuta.execute();
+                        }else{
+                            JSONObject nuevoRegistro = Constantes.nuevoRegistro(Integer.parseInt(json.get("idSeccion").toString()), Integer.parseInt(json.get("idNivel").toString()), Integer.parseInt(json.get("idBloque").toString()));
+                            PreparedStatement enCurso = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
+                            enCurso.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
+                            enCurso.setInt(2, Integer.parseInt(nuevoRegistro.get("idBloque").toString()));
+                            enCurso.setInt(3, Integer.parseInt(nuevoRegistro.get("idNivel").toString()));
+                            enCurso.setInt(4, Integer.parseInt(nuevoRegistro.get("idSeccion").toString()));
+                            enCurso.setInt(5, 0);
+                            enCurso.setString(6, json.get("fecha_registro").toString());
+                            enCurso.setBoolean(7, true);
+                            enCurso.execute();
+                        }
                     }
                 }else{//Registro sin sumar
                     System.out.println("Registro sin sumar.");
@@ -149,12 +208,38 @@ public class ControladorRutaAprendizaje {
                         enCurso.execute();
                 }
                 
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", ultimaSesion);
+                
             }catch(SQLException ex){
                 ex.printStackTrace();
             }
         }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error, intente de nuevo más tarde.");
             System.out.println("Error en sumarServicioRuta.");
         }
+        
+        return respuesta;
+    }
+    
+    public boolean getEstatusRutaFinalizada(int idCliente, Connection conectar){
+        boolean finalizado = false;
+        
+        if(conectar != null){
+            try{
+                PreparedStatement consulta = conectar.prepareStatement("SELECT ruta_finalizada FROM clientes WHERE idclientes = ?");
+                consulta.setInt(1, idCliente);
+                ResultSet resultado = consulta.executeQuery();
+            if(resultado.next())
+                finalizado = resultado.getBoolean("ruta_finalizada");
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }else
+            System.out.println("Error en getEstatusRutaFinalizada");
+        
+        return finalizado;
     }
     
     public JSONObject obtenerSesionActual(int idCliente){
@@ -164,6 +249,9 @@ public class ControladorRutaAprendizaje {
         if(conectar != null){
             
             try{
+                //Obtener valor RUTA_FINALIZADA
+                boolean estatusRuta = getEstatusRutaFinalizada(idCliente, conectar);
+                
                 //CHECAREMOS PRIMERO EL NIVEL 3
                 PreparedStatement estado = conectar.prepareStatement("SELECT * FROM rutaaprendizaje WHERE idrutaAprendizaje = (SELECT MAX(idrutaAprendizaje) FROM rutaaprendizaje WHERE clientes_idclientes = ? AND idSeccion = ? AND enruta = ?)");
                 estado.setInt(1, idCliente);
@@ -216,6 +304,8 @@ public class ControladorRutaAprendizaje {
                         }
                     }
                 }
+                
+                ruta.put("rutaFinalizada", estatusRuta);
         
             }catch(SQLException ex){
                 ex.printStackTrace();

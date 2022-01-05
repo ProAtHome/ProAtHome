@@ -1617,7 +1617,7 @@ public class ControladorCliente {
         java.sql.Date dateFechaNacimiento = (java.sql.Date.valueOf(String.valueOf(jsonCliente.get("fechaNacimiento"))));
 
         cliente.setFechaNacimiento(dateFechaNacimiento);
-        cliente.setFechaRegistro(java.sql.Date.valueOf("2021-01-27"));
+        cliente.setFechaRegistro(java.sql.Date.valueOf(ControladorFechaActual.getFechaActual()));
 
     }//Fin Constructor.
 
@@ -1637,30 +1637,41 @@ public class ControladorCliente {
                     respuesta.put("respuesta", false);
                     respuesta.put("mensaje", "Correo electronico ya registrado.");
                 }else{
-                    //CREAMOS TOKEN
-                    MD5 md5 = new MD5();
-                    String token = md5.getMD5(cliente.getCorreo() + cliente.getNombre());
-                    String pass = md5.getMD5(cliente.getContrasena());
-                    String query = "INSERT INTO clientes (nombre, apellidoPaterno, apellidoMaterno, correo, celular, telefonoLocal, direccion, fechaNacimiento, genero, fechaDeRegistro, contrasena, estado, token_verificacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-                    PreparedStatement agregarDatos = conectar.prepareStatement(query);
-                    agregarDatos.setString(1, cliente.getNombre());
-                    agregarDatos.setString(2, cliente.getApellidoPaterno());
-                    agregarDatos.setString(3, cliente.getApellidoMaterno());
-                    agregarDatos.setString(4, cliente.getCorreo());
-                    agregarDatos.setString(5, cliente.getCelular());
-                    agregarDatos.setString(6, cliente.getTelefonoLocal());
-                    agregarDatos.setString(7, cliente.getDireccion());
-                    agregarDatos.setDate(8, cliente.getFechaNacimiento());
-                    agregarDatos.setString(9, cliente.getGenero());
-                    agregarDatos.setDate(10, cliente.getFechaRegistro());
-                    agregarDatos.setString(11, pass);
-                    agregarDatos.setString(12, cliente.getEstado());
-                    agregarDatos.setString(13, token);
-                    agregarDatos.execute();
+                    //VALIDAMOS QUE NO EXISTA TELEFONO
+                    PreparedStatement consultaTel = conectar.prepareStatement("SELECT * FROM clientes WHERE celular = ? || telefonoLocal = ?");
+                    consultaTel.setString(1, cliente.getCelular());
+                    consultaTel.setString(2, cliente.getTelefonoLocal());
+                    ResultSet resultadoTelefono = consultaTel.executeQuery();
+                    
+                    if(resultadoTelefono.next()){
+                        respuesta.put("respuesta", false);
+                        respuesta.put("mensaje", "Teléfono celular o local ya registrado.");
+                    }else{
+                        //CREAMOS TOKEN
+                        MD5 md5 = new MD5();
+                        String token = md5.getMD5(cliente.getCorreo() + cliente.getNombre());
+                        String pass = md5.getMD5(cliente.getContrasena());
+                        String query = "INSERT INTO clientes (nombre, apellidoPaterno, apellidoMaterno, correo, celular, telefonoLocal, direccion, fechaNacimiento, genero, fechaDeRegistro, contrasena, estado, token_verificacion) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                        PreparedStatement agregarDatos = conectar.prepareStatement(query);
+                        agregarDatos.setString(1, cliente.getNombre());
+                        agregarDatos.setString(2, cliente.getApellidoPaterno());
+                        agregarDatos.setString(3, cliente.getApellidoMaterno());
+                        agregarDatos.setString(4, cliente.getCorreo());
+                        agregarDatos.setString(5, cliente.getCelular());
+                        agregarDatos.setString(6, cliente.getTelefonoLocal());
+                        agregarDatos.setString(7, cliente.getDireccion());
+                        agregarDatos.setDate(8, cliente.getFechaNacimiento());
+                        agregarDatos.setString(9, cliente.getGenero());
+                        agregarDatos.setDate(10, cliente.getFechaRegistro());
+                        agregarDatos.setString(11, pass);
+                        agregarDatos.setString(12, cliente.getEstado());
+                        agregarDatos.setString(13, token);
+                        agregarDatos.execute();
 
-                    respuesta.put("token", token);
-                    respuesta.put("respuesta", true);
-                    respuesta.put("mensaje", "Cliente registrado exitosamente.");
+                        respuesta.put("token", token);
+                        respuesta.put("respuesta", true);
+                        respuesta.put("mensaje", "Cliente registrado exitosamente.");
+                    }
                 }
                 
             } catch (SQLException ex) {
