@@ -1057,20 +1057,21 @@ public class ControladorAdmin {
                     cita.setString(2, "ACTIVO");
                     ResultSet resultadoCita = cita.executeQuery();
                     if(!resultadoCita.next()){
-                        JSONObject jsonProf = new JSONObject();
-                        jsonProf.put("nombre", resultado.getString("nombre") + " " + resultado.getString("apellidoPaterno") + " " + resultado.getString("apellidoMaterno"));
-                        jsonProf.put("correo", resultado.getString("correo"));
-                        jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro").toString());
-                        jsonProf.put("direccion", resultado.getString("direccion"));
-                        jsonProf.put("celular", resultado.getString("celular"));
-                        jsonProf.put("telefono", resultado.getString("telefonoLocal"));
-                        jsonProf.put("fechaNacimiento", resultado.getDate("fechaNacimiento").toString());
-                        jsonProf.put("foto", resultado.getString("foto"));
-                        jsonProf.put("ineFrontal", resultado.getString("ineFrontal"));
-                        jsonProf.put("ineTrasera", resultado.getString("ineTrasera"));
-                        jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
-                        jsonProf.put("idCliente", resultado.getInt("clientes_idclientes"));
-                        jsonAsignados.add(jsonProf);
+                        JSONObject jsonCliente = new JSONObject();
+                        jsonCliente.put("nombre", resultado.getString("nombre") + " " + resultado.getString("apellidoPaterno") + " " + resultado.getString("apellidoMaterno"));
+                        jsonCliente.put("correo", resultado.getString("correo"));
+                        jsonCliente.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro").toString());
+                        jsonCliente.put("direccion", resultado.getString("direccion"));
+                        jsonCliente.put("celular", resultado.getString("celular"));
+                        jsonCliente.put("telefono", resultado.getString("telefonoLocal"));
+                        jsonCliente.put("fechaNacimiento", resultado.getDate("fechaNacimiento").toString());
+                        jsonCliente.put("foto", resultado.getString("foto"));
+                        jsonCliente.put("ineFrontal", resultado.getString("ineFrontal"));
+                        jsonCliente.put("ineTrasera", resultado.getString("ineTrasera"));
+                        jsonCliente.put("vacunacion", resultado.getString("vacunacion_covid"));
+                        jsonCliente.put("idDocumentacion", resultado.getInt("idDocumentacion"));
+                        jsonCliente.put("idCliente", resultado.getInt("clientes_idclientes"));
+                        jsonAsignados.add(jsonCliente);
                     } 
                 }
             }catch(SQLException ex){
@@ -1175,15 +1176,16 @@ public class ControladorAdmin {
                 solicitudes.setString(1, "DOCUMENTACION");
                 ResultSet resultado = solicitudes.executeQuery();
                 while(resultado.next()){
-                    JSONObject jsonProf = new JSONObject();
-                    jsonProf.put("nombre", resultado.getString("nombre"));
-                    jsonProf.put("correo", resultado.getString("correo"));
-                    jsonProf.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro").toString());
-                    jsonProf.put("foto", resultado.getString("foto"));
-                    jsonProf.put("ineFrontal", resultado.getString("ineFrontal"));
-                     jsonProf.put("ineTrasera", resultado.getString("ineTrasera"));
-                    jsonProf.put("idDocumentacion", resultado.getInt("idDocumentacion"));
-                    jsonSolicitudes.add(jsonProf);
+                    JSONObject jsonCliente = new JSONObject();
+                    jsonCliente.put("nombre", resultado.getString("nombre"));
+                    jsonCliente.put("correo", resultado.getString("correo"));
+                    jsonCliente.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro").toString());
+                    jsonCliente.put("foto", resultado.getString("foto"));
+                    jsonCliente.put("ineFrontal", resultado.getString("ineFrontal"));
+                    jsonCliente.put("ineTrasera", resultado.getString("ineTrasera"));
+                    jsonCliente.put("vacinacion", resultado.getString("vacunacion_covid"));
+                    jsonCliente.put("idDocumentacion", resultado.getInt("idDocumentacion"));
+                    jsonSolicitudes.add(jsonCliente);
                 }
             }catch(SQLException ex){
                 ex.printStackTrace();

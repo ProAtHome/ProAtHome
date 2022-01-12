@@ -34,8 +34,8 @@ public class FotoPerfilProfesional extends HttpServlet{
             
             System.out.println("Cargado...");
             
-            //response.sendRedirect("http://localhost/ProAtHome/perfil/profesional");
-            response.sendRedirect("https://www.proathome.com.mx/perfil/profesional");
+            response.sendRedirect("http://localhost/ProAtHome/perfil/profesional");
+            //response.sendRedirect("https://www.proathome.com.mx/perfil/profesional");
             
         }catch(ServletException ex){
             
