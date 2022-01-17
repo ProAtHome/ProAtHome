@@ -325,7 +325,7 @@ public class ControladorAdmin {
                     datosSesion.put("idSeccion", resultado.getInt("idSeccion"));
                     datosSesion.put("idNivel", resultado.getInt("idNivel"));
                     datosSesion.put("idBloque", resultado.getInt("idBloque"));
-                    datosSesion.put("fecha", resultado.getDate("fecha"));
+                    datosSesion.put("fecha", resultado.getDate("fecha").toString());
                     datosSesion.put("estatus", resultado.getInt("estatus"));
                     datosSesion.put("progreso", resultado.getInt("progreso"));
                     datosSesion.put("progresoSegundos", resultado.getInt("progresoSegundos"));
@@ -516,8 +516,8 @@ public class ControladorAdmin {
                       JSONObject planesJSON = new JSONObject();
                       planesJSON.put("idPlan", resPlanes.getInt("idHistorialPlanes"));
                       planesJSON.put("tipoPlan", resPlanes.getString("tipoPlan"));
-                      planesJSON.put("fechaInicio", resPlanes.getDate("fechaInicio"));
-                      planesJSON.put("fechFin", resPlanes.getDate("fechaFin"));
+                      planesJSON.put("fechaInicio", resPlanes.getDate("fechaInicio").toString());
+                      planesJSON.put("fechFin", resPlanes.getDate("fechaFin").toString());
                       planesJSON.put("monedero", resPlanes.getInt("monedero"));
                       planesArray.add(planesJSON);
                   }
@@ -870,7 +870,7 @@ public class ControladorAdmin {
                 
                 while(resultado.next()){
                     JSONObject datos = new JSONObject();
-                    datos.put("fechaAcordada", resultado.getDate("fechaAcordada"));
+                    datos.put("fechaAcordada", resultado.getDate("fechaAcordada").toString());
                     datos.put("horarioAcordado", resultado.getString("horarioAcordado"));
                     datos.put("profesional", resultado.getString("nombre"));
                     datos.put("correo", resultado.getString("correo"));
@@ -1330,7 +1330,7 @@ public class ControladorAdmin {
                     ticket.put("noTicket", "00" + resultado.getInt("idtickets_ayuda"));
                     ticket.put("topico", resultado.getString("topico"));
                     ticket.put("descripcion", resultado.getString("descripcion"));
-                    ticket.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    ticket.put("fechaCreacion", resultado.getDate("fechaCreacion").toString());
                     ticket.put("estatus", resultado.getInt("estatus"));
                     ticket.put("idUsuario", resultado.getInt("idUsuario"));
                     ticket.put("tipoUsuario", resultado.getInt("tipoUsuario"));
@@ -1366,7 +1366,7 @@ public class ControladorAdmin {
                     jsonObject.put("tipoUsuario", resultado.getInt("tipoUsuario"));
                     jsonObject.put("descripcion", resultado.getString("descripcion"));
                     jsonObject.put("topico", resultado.getString("topico"));
-                    jsonObject.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    jsonObject.put("fechaCreacion", resultado.getDate("fechaCreacion").toString());
                     jsonObject.put("estatus", resultado.getInt("estatus"));
                     jsonObject.put("idUsuario", resultado.getInt("idUsuario"));
                     jsonObject.put("idSesion", resultado.getInt("sesiones_idsesiones"));
@@ -1425,7 +1425,7 @@ public class ControladorAdmin {
                     ticketInfo.put("tipoUsuario", resultado.getInt("tipoUsuario"));
                     ticketInfo.put("topico", resultado.getString("topico"));
                     ticketInfo.put("descripcion", resultado.getString("descripcion"));
-                    ticketInfo.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    ticketInfo.put("fechaCreacion", resultado.getDate("fechaCreacion").toString());
                     ticketInfo.put("categoria", resultado.getString("categoria"));
                     ticketInfo.put("idSesion", resultado.getInt("sesiones_idsesiones"));
                 }
@@ -1459,7 +1459,7 @@ public class ControladorAdmin {
                     jsonObject.put("tipoUsuario", resultado.getInt("tipoUsuario"));
                     jsonObject.put("descripcion", resultado.getString("descripcion"));
                     jsonObject.put("topico", resultado.getString("topico"));
-                    jsonObject.put("fechaCreacion", resultado.getDate("fechaCreacion"));
+                    jsonObject.put("fechaCreacion", resultado.getDate("fechaCreacion").toString());
                     jsonObject.put("estatus", resultado.getInt("estatus"));
                     jsonObject.put("idUsuario", resultado.getInt("idUsuario"));
                     jsonObject.put("idSesion", resultado.getInt("sesiones_idsesiones"));
@@ -1492,7 +1492,7 @@ public class ControladorAdmin {
                 if(ticketRes.next()){//Datos ticket
                     jsonObjectTicket.put("topico", ticketRes.getString("topico"));
                     jsonObjectTicket.put("descripcion", ticketRes.getString("descripcion"));
-                    jsonObjectTicket.put("fechaCreacion", ticketRes.getDate("fechaCreacion"));
+                    jsonObjectTicket.put("fechaCreacion", ticketRes.getDate("fechaCreacion").toString());
                     jsonObjectTicket.put("estatus", ticketRes.getInt("estatus"));
                     jsonObjectTicket.put("operador", ticketRes.getInt("operadores_idoperadores"));
                     JSONObject jsonTicket = new JSONObject();

@@ -14,6 +14,8 @@ import com.proathome.mysql.ConexionMySQL;
 import java.sql.Date;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -455,7 +457,7 @@ public class ControladorProfesional {
                     cita.put("fecha2", resultado.getDate("fecha2").toString());
                     cita.put("horario1", resultado.getString("horario1"));
                     cita.put("horario2", resultado.getString("horario2"));
-                    cita.put("fechaAcordada", resultado.getDate("fechaAcordada"));
+                    cita.put("fechaAcordada", resultado.getDate("fechaAcordada").toString());
                     cita.put("horarioAcordado", resultado.getString("horarioAcordado"));
                     cita.put("tipoCita", resultado.getString("tipoCita"));
                     cita.put("datosAdicionales", resultado.getString("datosAdicionales"));
@@ -678,7 +680,7 @@ public class ControladorProfesional {
                     clienteJSON.put("idCliente", resultado.getInt("idclientes"));
                     clienteJSON.put("nombre", resultado.getString("nombre"));
                     clienteJSON.put("correo", resultado.getString("correo"));
-                    clienteJSON.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro"));
+                    clienteJSON.put("fechaDeRegistro", resultado.getDate("fechaDeRegistro").toString());
                     clienteJSON.put("foto", resultado.getString("foto"));
                     clienteJSON.put("descripcion", resultado.getString("descripcion"));
                     clienteJSON.put("valoraciones", false);
@@ -737,6 +739,7 @@ public class ControladorProfesional {
                 ResultSet resultado = obtenerDatos.executeQuery();
 
                 if (resultado.next()) {
+                    profesional.setToken(JWT.getInstance().getToken(String.valueOf(resultado.getInt("idprofesionales")), JWT.PERFIL_PROFESIONAL));
                     profesional.setIdProfesional(resultado.getInt("idprofesionales"));
                     profesional.setNombre(resultado.getString("nombre"));
                     profesional.setEstado(resultado.getString("estado"));
@@ -837,8 +840,8 @@ public class ControladorProfesional {
                     jsonSesionesMatchProfesional.put("nombreCliente", resultado.getString("nombre") + " " + resultado.getString("apellidoPaterno") + " " + resultado.getString("apellidoMaterno"));
                     jsonSesionesMatchProfesional.put("idCliente", resultado.getInt("clientes_idclientes"));
                     jsonSesionesMatchProfesional.put("descripcion", resultado.getString("descripcion"));
-                    jsonSesionesMatchProfesional.put("actualizado", resultado.getDate("actualizado"));
-                    jsonSesionesMatchProfesional.put("fecha", resultado.getDate("fecha"));
+                    jsonSesionesMatchProfesional.put("actualizado", resultado.getDate("actualizado").toString());
+                    jsonSesionesMatchProfesional.put("fecha", resultado.getDate("fecha").toString());
                     jsonSesionesMatchProfesional.put("correo", resultado.getString("correo"));
                     jsonSesionesMatchProfesional.put("latitud", resultado.getDouble("latitud"));
                     jsonSesionesMatchProfesional.put("longitud", resultado.getDouble("longitud"));
@@ -938,21 +941,33 @@ public class ControladorProfesional {
                 }
                 ResultSet resultado = sesiones.executeQuery();             
                 while(resultado.next()){ 
+                    //VALIDAR QUE LA FECHA SEA VALIDA.
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Calendar calendar = Calendar.getInstance();
+                    String fechaHoy = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);        
+                    java.util.Date fechaActual = sdf.parse(fechaHoy);
+                    java.util.Date fechaServicio = sdf.parse(resultado.getDate("fecha").toString());
+                    
                     JSONObject json = new JSONObject();
-                    json.put("idSesion", resultado.getInt("idsesiones"));
-                    json.put("latitud", resultado.getDouble("latitud"));
-                    json.put("longitud", resultado.getDouble("longitud"));
-                    json.put("nombre", resultado.getString("nombre"));
-                    json.put("lugar", resultado.getString("lugar"));
-                    json.put("idSeccion", resultado.getInt("idSeccion"));
-                    json.put("idNivel", resultado.getInt("idNivel"));
-                    json.put("idBloque", resultado.getInt("idBloque"));
-                    json.put("tipoPlan", resultado.getString("tipoPlan"));
-                    arrayJson.add(json);
+                    if(fechaServicio.equals(fechaActual) || fechaServicio.after(fechaActual)){
+                        json.put("idSesion", resultado.getInt("idsesiones"));
+                        json.put("latitud", resultado.getDouble("latitud"));
+                        json.put("longitud", resultado.getDouble("longitud"));
+                        json.put("nombre", resultado.getString("nombre"));
+                        json.put("lugar", resultado.getString("lugar"));
+                        json.put("idSeccion", resultado.getInt("idSeccion"));
+                        json.put("idNivel", resultado.getInt("idNivel"));
+                        json.put("idBloque", resultado.getInt("idBloque"));
+                        json.put("tipoPlan", resultado.getString("tipoPlan"));
+                        arrayJson.add(json);
+                    }
+                    
                     json = null;  
                 }  
             }catch(SQLException ex){
                 ex.printStackTrace();
+            } catch (ParseException ex) {
+                Logger.getLogger(ControladorProfesional.class.getName()).log(Level.SEVERE, null, ex);
             }
             
         }else{ 
@@ -1029,8 +1044,8 @@ public class ControladorProfesional {
                     profesional.setTelefonoLocal(resultado.getString("telefonoLocal"));
                     profesional.setDireccion(resultado.getString("direccion"));
                     profesional.setCorreo(resultado.getString("correo"));
-                    profesional.setFechaNacimiento(resultado.getDate("fechaNacimiento"));
-                    profesional.setFechaRegistro(resultado.getDate("fechaDeRegistro"));
+                    profesional.setFechaNacimiento(resultado.getDate("fechaNacimiento").toString());
+                    profesional.setFechaRegistro(resultado.getDate("fechaDeRegistro").toString());
                     profesional.setFoto(resultado.getString("foto"));
                     profesional.setDescripcion(resultado.getString("descripcion"));  
                     profesionalRegistrado = true;
@@ -1060,8 +1075,8 @@ public class ControladorProfesional {
         profesional.setCorreo(String.valueOf(jsonProfesional.get("correo")));
         profesional.setContrasena(String.valueOf(jsonProfesional.get("contrasena")));
         java.sql.Date dateFechaNacimiento = (java.sql.Date.valueOf(String.valueOf(jsonProfesional.get("fechaNacimiento"))));
-        profesional.setFechaNacimiento(dateFechaNacimiento);
-        profesional.setFechaRegistro(java.sql.Date.valueOf(ControladorFechaActual.getFechaActual()));
+        profesional.setFechaNacimiento(dateFechaNacimiento.toString());
+        profesional.setFechaRegistro(ControladorFechaActual.getFechaActual());
         profesional.setCelular(jsonProfesional.get("celular").toString());
         profesional.setTelefonoLocal(jsonProfesional.get("telefono").toString());
         profesional.setDireccion(jsonProfesional.get("direccion").toString());
@@ -1105,8 +1120,8 @@ public class ControladorProfesional {
                         agregarDatos.setString(1, profesional.getNombre());
                         agregarDatos.setString(2, profesional.getCorreo());
                         agregarDatos.setString(3, pass);
-                        agregarDatos.setDate(4, profesional.getFechaNacimiento());
-                        agregarDatos.setDate(5, profesional.getFechaRegistro());
+                        agregarDatos.setDate(4, java.sql.Date.valueOf(profesional.getFechaNacimiento()));
+                        agregarDatos.setDate(5, java.sql.Date.valueOf(profesional.getFechaRegistro()));
                         agregarDatos.setString(6, profesional.getApellidoPaterno());
                         agregarDatos.setString(7, profesional.getApellidMaterno());
                         agregarDatos.setString(8, profesional.getCelular());

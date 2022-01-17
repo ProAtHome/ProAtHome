@@ -5,6 +5,7 @@ import com.proathome.controladores.ControladorCliente;
 import com.proathome.controladores.ControladorExamenDiagnostico;
 import com.proathome.controladores.ControladorRutaAprendizaje;
 import com.proathome.controladores.ControladorSesion;
+import com.proathome.controladores.JWT;
 import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -20,7 +21,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-@Path("/apiProAtHome/cliente")
+@Path("/cliente")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON) 
 public class RESTCliente {
@@ -40,32 +41,32 @@ public class RESTCliente {
     
     @GET
     @Path("/getVerificacion/{token}/{correo}")
-    public JSONObject getVerificacion(@PathParam("token") String token, @PathParam("correo") String correo){
-        return cliente.getVerificacion(token, correo);
+    public String getVerificacion(@PathParam("token") String token, @PathParam("correo") String correo){
+        return cliente.getVerificacion(token, correo).toJSONString();
     }
     
     @GET
     @Path("/getDisponibilidadServicio/{idCliente}")
-    public JSONObject getDisponibilidadServicios(@PathParam("idCliente") int idCliente){
-        return cliente.getDisponibilidadServicio(idCliente);
+    public String getDisponibilidadServicios(@PathParam("idCliente") int idCliente){
+        return cliente.getDisponibilidadServicio(idCliente).toJSONString();
     }
     
     @GET
     @Path("/getDatosFiscales/{idCliente}")
-    public JSONObject getDatosFiscales(@PathParam("idCliente") int idCliente){
-        return cliente.getDatosFiscales(idCliente);
+    public String getDatosFiscales(@PathParam("idCliente") int idCliente){
+        return cliente.getDatosFiscales(idCliente).toJSONString();
     }
     
     @GET
     @Path("/getReportes/{idCliente}")
-    public JSONObject getReportes(@PathParam("idCliente") int idCliente){
-        return cliente.getReportes(idCliente);
+    public String getReportes(@PathParam("idCliente") int idCliente){
+        return cliente.getReportes(idCliente).toJSONString();
     }
     
     @GET
     @Path("/estatusDocumentos/{idCliente}")
-    public JSONObject estatusDocumentos(@PathParam("idCliente") int idCliente){
-        return cliente.estatusDocumentos(idCliente);
+    public String estatusDocumentos(@PathParam("idCliente") int idCliente){
+        return cliente.estatusDocumentos(idCliente).toJSONString();
     }
     
     @GET
@@ -76,98 +77,101 @@ public class RESTCliente {
     
     @GET
     @Path("/obtenerTickets/{idCliente}")
-    public JSONArray obtenerTickets(@PathParam("idCliente") int idCliente){
-        return cliente.obtenerTickets(idCliente);
+    public String obtenerTickets(@PathParam("idCliente") int idCliente){
+        return cliente.obtenerTickets(idCliente).toJSONString();
     }
     
     @GET
     @Path("/bloquearPerfil/{idCliente}")
-    public JSONObject bloquearPerfil(@PathParam("idCliente") int idCliente){
-        return cliente.bloquearPerfil(idCliente);
+    public String bloquearPerfil(@PathParam("idCliente") int idCliente){
+        return cliente.bloquearPerfil(idCliente).toJSONString();
     }
     
     @GET
     @Path("/validarValoracion/{idSesion}/{idProfesional}")
-    public JSONObject validarValoracion(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional){
-        return cliente.validarValoracion(idSesion, idProfesional);
+    public String validarValoracion(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional){
+        return cliente.validarValoracion(idSesion, idProfesional).toJSONString();
     }
     
     @GET
     @Path("/obtenerValoracion/{idProfesional}")
-    public JSONArray obtenerValoracion(@PathParam("idProfesional") int idProfesional){
-        return cliente.obtenerValoracion(idProfesional);
+    public String obtenerValoracion(@PathParam("idProfesional") int idProfesional){
+        return cliente.obtenerValoracion(idProfesional).toJSONString();
     }
     
     @GET
-    @Path("/verificarPlan/{idCliente}")
-    public JSONObject verificarPlan(@PathParam("idCliente") int idCliente){
-        return cliente.verificarPlan(idCliente);        
+    @Path("/verificarPlan/{idCliente}/{token}")
+    public String verificarPlan(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWT.getInstance().tokenValido(token, String.valueOf(idCliente), JWT.PERFIL_CLIENTE))
+            return cliente.verificarPlan(idCliente).toJSONString();        
+        else
+            return JWT.getInstance().getError().toJSONString();
     }
     
     @GET
     @Path("/verificarSesionesPagadas/{idCliente}")
-    public JSONObject verificarSesionesPagadas(@PathParam("idCliente") int idCliente){  
-        return cliente.verificarSesionesPagadas(idCliente);     
+    public String verificarSesionesPagadas(@PathParam("idCliente") int idCliente){  
+        return cliente.verificarSesionesPagadas(idCliente).toJSONString();     
     }
     
     @GET
     @Path("/obtenerToken/{idSesion}/{idCliente}")
-    public JSONObject obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){  
-        return cliente.obtenerToken(idSesion, idCliente);
+    public String obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){  
+        return cliente.obtenerToken(idSesion, idCliente).toJSONString();
     }
     
     @GET
     @Path("/obtenerPreOrden/{idCliente}/{idSesion}")
-    public JSONObject obtenerPreOrden(@PathParam("idCliente") int idCliente, @PathParam("idSesion") int idSesion){       
-        return cliente.obtenerPreOrden(idCliente, idSesion); 
+    public String obtenerPreOrden(@PathParam("idCliente") int idCliente, @PathParam("idSesion") int idSesion){       
+        return cliente.obtenerPreOrden(idCliente, idSesion).toJSONString(); 
     }
     
     @GET
     @Path("/validarServicioFinalizada/{idSesion}/{idCliente}")
-    public JSONObject validarServicioFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){      
-        return sesiones.validarServicioFinalizadaCliente(idSesion, idCliente);     
+    public String validarServicioFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){      
+        return sesiones.validarServicioFinalizadaCliente(idSesion, idCliente).toJSONString();     
     }
     
     @GET
     @Path("/validarEstatusServicio/{idSesion}/{idCliente}")
-    public JSONObject validarEstatusServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){
-        return sesiones.validarEstatusServicioCliente(idSesion, idCliente);      
+    public String validarEstatusServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){
+        return sesiones.validarEstatusServicioCliente(idSesion, idCliente).toJSONString();      
     }
     
     @GET
     @Path("/sincronizarServicio/{idSesion}/{idCliente}")
-    public JSONObject sincronizarServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){       
-       return sesiones.sincronizarServicio(idSesion, idCliente);      
+    public String sincronizarServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){       
+       return sesiones.sincronizarServicio(idSesion, idCliente).toJSONString();      
     }
     
     @GET
     @Path("/obtenerSesionActual/{idCliente}")
-    public JSONObject obtenerRutaAprendizaje(@PathParam("idCliente") int idCliente){     
-        return ruta.obtenerSesionActual(idCliente);   
+    public String obtenerRutaAprendizaje(@PathParam("idCliente") int idCliente){     
+        return ruta.obtenerSesionActual(idCliente).toJSONString();   
     }
     
     @GET
     @Path("estadoRutaAprendizaje/{idCliente}/{tipo}")
-    public JSONObject estadoRutaAprendizaje(@PathParam("idCliente") int idCliente, @PathParam("tipo") int tipo){    
-        return ruta.estadoRutaAprendizaje(idCliente, tipo); 
+    public String estadoRutaAprendizaje(@PathParam("idCliente") int idCliente, @PathParam("tipo") int tipo){    
+        return ruta.estadoRutaAprendizaje(idCliente, tipo).toJSONString(); 
     }
     
     @GET
     @Path("/estatusExamenDiagnostico/{idCliente}")
-    public JSONObject estatusExamenDiagnostico(@PathParam("idCliente") int idCliente){      
-        return examen.estatusExamenDiagnostico(idCliente);    
+    public String estatusExamenDiagnostico(@PathParam("idCliente") int idCliente){      
+        return examen.estatusExamenDiagnostico(idCliente).toJSONString();    
     }//Fin método enCursoExamenDiagnostico.
     
     @GET
     @Path("infoExamenDiagnostico/{idCliente}")
-    public JSONObject infoExamenDiagnostico(@PathParam("idCliente") int idCliente){     
-        return examen.infoExamenDiagnostico(idCliente);     
+    public String infoExamenDiagnostico(@PathParam("idCliente") int idCliente){     
+        return examen.infoExamenDiagnostico(idCliente).toJSONString();     
     }//Fin método infoExamenDiagnostico.
     
     @GET
     @Path("infoExamenDiagnosticoFinal/{idCliente}")
-    public JSONObject infoExamenDiagnosticoFinal(@PathParam("idCliente") int idCliente){ 
-        return examen.infoExamenDiagnosticoFinal(idCliente);    
+    public String infoExamenDiagnosticoFinal(@PathParam("idCliente") int idCliente){ 
+        return examen.infoExamenDiagnosticoFinal(idCliente).toJSONString();    
     }//Fin método infoExamenDiagnostico.
     
     @GET
@@ -197,15 +201,15 @@ public class RESTCliente {
     
     @GET
     @Path("/obtenerDatosBancarios/{idCliente}")
-    public JSONObject obtenerDatosBancarios(@PathParam("idCliente") int idCliente) {
-        return cliente.obtenerCuentaBancaria(idCliente);
+    public String obtenerDatosBancarios(@PathParam("idCliente") int idCliente) {
+        return cliente.obtenerCuentaBancaria(idCliente).toJSONString();
     }//Fin método obtenerDatosBancarios.
     
 
     @GET
     @Path("/detallesSesion/{idSesion}")
-    public JSONObject detallesSesion(@PathParam("idSesion") int idSesion){
-        return cliente.detallesSesion(idSesion);
+    public String detallesSesion(@PathParam("idSesion") int idSesion){
+        return cliente.detallesSesion(idSesion).toJSONString();
     }//Fin método detallesSesion.
     
     @GET
@@ -221,7 +225,7 @@ public class RESTCliente {
     
     @POST
     @Path("/guardarDatosFiscales")
-    public JSONObject guardarDatosFiscales(String datos){
+    public String guardarDatosFiscales(String datos){
         JSONObject respuesta = null;
         
         try{
@@ -231,25 +235,40 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return respuesta;
+        return respuesta.toJSONString();
     }
     
     @POST
     @Path("/enviarMsgTicket")
-    public void enviarMsgTicket(JSONObject jsonDatos){
-        cliente.enviarMsgTicket(jsonDatos);
+    public void enviarMsgTicket(String jsonDatos){
+        try{
+            JSONObject json = (JSONObject) parser.parse(jsonDatos);
+            cliente.enviarMsgTicket(json);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
     }
     
     @POST
     @Path("/nuevoTicket")
-    public void nueboTicket(JSONObject jsonDatos){
-        cliente.nuevoTicket(jsonDatos);
+    public void nueboTicket(String jsonDatos){
+        try{
+            JSONObject json = (JSONObject) parser.parse(jsonDatos);
+            cliente.nuevoTicket(json);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
     }
     
     @POST
     @Path("/valorarProfesional")
-    public void valorarProfesional(JSONObject jsonDatos){
-        cliente.valorarProfesional(jsonDatos);
+    public void valorarProfesional(String jsonDatos){
+        try{
+            JSONObject json = (JSONObject) parser.parse(jsonDatos);
+            cliente.valorarProfesional(json);
+        }catch(ParseException ex){
+            ex.printStackTrace();
+        }
     }
     
     @POST
@@ -300,7 +319,7 @@ public class RESTCliente {
     
     @POST
     @Path("/sumarServicioRuta")
-    public JSONObject sumarServicioRuta(String datos){
+    public String sumarServicioRuta(String datos){
         JSONObject json = null;
         try{
             json = (JSONObject) parser.parse(datos);
@@ -308,12 +327,12 @@ public class RESTCliente {
             ex.printStackTrace();
         }  
         
-        return ruta.sumarServicioRuta(json);
+        return ruta.sumarServicioRuta(json).toJSONString();
     }
     
     @POST
     @Path("/rutaEnCurso")
-    public JSONObject rutaEnCurso(String datos){
+    public String rutaEnCurso(String datos){
         JSONObject estado = new JSONObject();
         estado.put("estado", ControladorRutaAprendizaje.RUTA_ACTUALIZADA);
         
@@ -324,7 +343,7 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return estado; 
+        return estado.toJSONString(); 
     }
 
     @POST
@@ -340,7 +359,7 @@ public class RESTCliente {
 
     @POST
     @Path("/agregarCliente")
-    public JSONObject agregarCliente(String datos) {
+    public String agregarCliente(String datos) {
         JSONObject respuesta = new JSONObject();
         try {
             JSONObject jsonCliente = (JSONObject) parser.parse(datos);
@@ -350,16 +369,21 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return respuesta;
+        return respuesta.toJSONString();
     }//Fin método agregarCliente.
     
     @POST
     @Path("/eliminarSesion")
-    public JSONObject eliminarSesion(JSONObject jsonDatos){
+    public String eliminarSesion(String jsonDatos){
         JSONObject respuesta = null;
-        respuesta = sesiones.eliminarSesion(jsonDatos);
+        try{
+            JSONObject json = (JSONObject) parser.parse(jsonDatos);
+            respuesta = sesiones.eliminarSesion(json);
+        }catch(ParseException e){
+            e.printStackTrace();
+        }
         
-        return respuesta;
+        return respuesta.toJSONString();
     }
     
     @POST
@@ -388,7 +412,7 @@ public class RESTCliente {
 
     @POST
     @Path("/agregarSesion")
-    public JSONObject agregarSesion(String datos) {
+    public String agregarSesion(String datos) {
         JSONObject respuesta = null;
         try {
             JSONObject datosJSON = (JSONObject)parser.parse(datos);
@@ -398,12 +422,12 @@ public class RESTCliente {
             ex.printStackTrace();  
         }
         
-        return respuesta;
+        return respuesta.toJSONString();
     }//Fin método agregarSesion.
     
     @POST
     @Path("/examenDiagnostico")
-    public JSONObject examenDiagnostico(String datos){
+    public String examenDiagnostico(String datos){
         JSONObject estatus = new JSONObject();
         estatus.clear();
         
@@ -421,12 +445,12 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return estatus; 
+        return estatus.toJSONString(); 
     }//Fin método examenDiagnostico.
     
     @PUT
     @Path("/actualizarPass")
-    public JSONObject actualizarPass(String datos){
+    public String actualizarPass(String datos){
         JSONObject respuesta = null;
         try{
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
@@ -435,13 +459,13 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return respuesta;
+        return respuesta.toJSONString();
         
     }
     
     @PUT
     @Path("/sumarMonedero")
-    public JSONObject sumarMonedero(String datos){
+    public String sumarMonedero(String datos){
         JSONObject respuesta = null;
         try{
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
@@ -450,7 +474,7 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return respuesta;
+        return respuesta.toJSONString();
     }
     
     @PUT
@@ -491,7 +515,7 @@ public class RESTCliente {
     
     @PUT
     @Path("/guardarTokenPagoServicio")
-    public JSONObject guardarToken(String datos){
+    public String guardarToken(String datos){
         JSONObject respuesta  = null;
         try{
             JSONObject jsonToken = (JSONObject) parser.parse(datos);
@@ -500,12 +524,12 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return respuesta;
+        return respuesta.toJSONString();
     }
     
     @PUT
     @Path("/actualizarPagoTE")
-    public JSONObject actualizarPagoTE(String datos){
+    public String actualizarPagoTE(String datos){
         JSONObject respuesta = null;
         try{
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
@@ -514,7 +538,7 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return respuesta;
+        return respuesta.toJSONString();
     }
     
     @PUT
@@ -590,7 +614,7 @@ public class RESTCliente {
     
     @PUT
     @Path("/reiniciarExamenDiagnostico")
-    public JSONObject reiniciarExamenDiagnostico(String datos){
+    public String reiniciarExamenDiagnostico(String datos){
         
         JSONObject estatus = null;
         try{
@@ -600,13 +624,13 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return estatus;
+        return estatus.toJSONString();
         
     }
     
     @PUT
     @Path("/enCursoExamenDiagnostico")
-    public JSONObject enCursoExamenDiagnostico(String datos){
+    public String enCursoExamenDiagnostico(String datos){
         
         JSONObject estatus = new JSONObject();
         estatus.clear();
@@ -619,7 +643,7 @@ public class RESTCliente {
         
         estatus.put("estatus", ControladorExamenDiagnostico.EXAMEN_GUARDADO);
         
-        return estatus;
+        return estatus.toJSONString();
         
     }//Fin método enCursoExamenDiagnostico.
     
@@ -640,9 +664,13 @@ public class RESTCliente {
     
     @PUT
     @Path("/actualizarSesion")
-    public Response actualizarSesion(JSONObject jsonDatos){
-        
-        sesiones.actualizarSesion(jsonDatos);
+    public Response actualizarSesion(String jsonDatos){
+        try{
+            JSONObject json = (JSONObject) parser.parse(jsonDatos);
+            sesiones.actualizarSesion(json);
+        }catch(ParseException e){
+            e.printStackTrace();
+        }    
         
         return Response.ok("Sesión actualizada correctamente", MediaType.APPLICATION_JSON).build();
         
@@ -650,7 +678,7 @@ public class RESTCliente {
     
     @PUT
     @Path("/actualizarCuentaCliente")
-    public JSONObject actualizarCuentaCliente(String datos) {
+    public String actualizarCuentaCliente(String datos) {
         JSONObject respuesta = new JSONObject();
         try{
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
@@ -660,12 +688,12 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return respuesta;
+        return respuesta.toJSONString();
     }//Fin método agregarCuentaBancaria.
 
     @PUT
     @Path("/actualizarPerfil")
-    public JSONObject actualizaDatosPerfil(String datos) {
+    public String actualizaDatosPerfil(String datos) {
         JSONObject respuesta = null;
         try {
             JSONObject datosJSON = (JSONObject) parser.parse(datos);
@@ -675,7 +703,7 @@ public class RESTCliente {
             ex.printStackTrace();
         }
         
-        return respuesta;
+        return respuesta.toJSONString();
     }//Fin método actualizarInfoPerfil.
 
 }

@@ -10,8 +10,7 @@ import java.sql.Date;
 
 public class Profesional {
 
-    private String nombre, apellidoPaterno, apellidMaterno, celular, telefonoLocal, direccion, genero, correo, contrasena, clv, foto, descripcion, estado;
-    private java.sql.Date fechaNacimiento, fechaRegistro;
+    private String token, nombre, apellidoPaterno, apellidMaterno, celular, telefonoLocal, direccion, genero, correo, contrasena, clv, foto, descripcion, estado, fechaNacimiento, fechaRegistro;
     private int idProfesional, rangoServicio;
     public static CuentaBancaria cuenta;
     public static EvaluacionProfesional evaluacion;
@@ -20,6 +19,14 @@ public class Profesional {
 
     public Profesional() {
         
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public boolean isVerificado() {
@@ -118,19 +125,19 @@ public class Profesional {
         this.clv = clv;
     }
 
-    public Date getFechaNacimiento() {
+    public String getFechaNacimiento() {
         return fechaNacimiento;
     }
 
-    public void setFechaNacimiento(Date fechaNacimiento) {
+    public void setFechaNacimiento(String fechaNacimiento) {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public Date getFechaRegistro() {
+    public String getFechaRegistro() {
         return fechaRegistro;
     }
 
-    public void setFechaRegistro(Date fechaRegistro) {
+    public void setFechaRegistro(String fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
     }
 

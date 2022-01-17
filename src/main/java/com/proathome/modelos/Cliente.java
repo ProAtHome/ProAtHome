@@ -11,8 +11,7 @@ import java.sql.Date;
 public class Cliente {
    
     private String nombre, apellidoPaterno, apellidoMaterno, correo, celular, telefonoLocal, direccion, genero,
-            contrasena, foto, descripcion, tipoPlan, estado;
-    private java.sql.Date fechaNacimiento, fechaRegistro;
+            contrasena, foto, descripcion, tipoPlan, estado, fechaNacimiento, fechaRegistro, token;
     private int idCliente, monedero;
     public static CuentaBancaria cuenta;
     public static EvaluacionCliente evaluacion;
@@ -21,6 +20,14 @@ public class Cliente {
     
     public Cliente(){
         
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public boolean isVerificado() {
@@ -175,19 +182,19 @@ public class Cliente {
         this.contrasena = contrasena;
     }
 
-    public Date getFechaNacimiento() {
+    public String getFechaNacimiento() {
         return fechaNacimiento;
     }
 
-    public void setFechaNacimiento(Date fechaNacimiento) {
+    public void setFechaNacimiento(String fechaNacimiento) {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public Date getFechaRegistro() {
+    public String getFechaRegistro() {
         return fechaRegistro;
     }
 
-    public void setFechaRegistro(Date fechaRegistro) {
+    public void setFechaRegistro(String fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
     }
     
