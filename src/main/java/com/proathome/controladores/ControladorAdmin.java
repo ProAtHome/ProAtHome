@@ -5,6 +5,7 @@ import com.proathome.modelos.Admin;
 import com.proathome.modelos.Constantes;
 import com.proathome.modelos.Profesional;
 import com.proathome.mysql.ConexionMySQL;
+import com.proathome.mysql.DBController;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,18 +24,13 @@ public class ControladorAdmin {
     public static final int PROFESIONAL = 2;
     
     public void latidoSQL(){
-        Connection conectar = ConexionMySQL.connection();
-        
-        if(conectar != null){
-            try{
-                PreparedStatement latido = conectar.prepareStatement("SELECT * FROM clientes");
-                ResultSet resultado = latido.executeQuery();
-                while(resultado.next()){
-                    System.out.println("Latido SQL");
-                }
-            }catch(SQLException ex){
-                ex.printStackTrace();
-            }
+        try{
+            PreparedStatement latido = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM clientes");
+            ResultSet resultado = latido.executeQuery();
+            while(resultado.next()){}
+            System.out.println("Latido SQL");
+        }catch(SQLException ex){
+            ex.printStackTrace();
         }
     }
     

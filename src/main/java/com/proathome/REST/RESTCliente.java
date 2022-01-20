@@ -5,7 +5,7 @@ import com.proathome.controladores.ControladorCliente;
 import com.proathome.controladores.ControladorExamenDiagnostico;
 import com.proathome.controladores.ControladorRutaAprendizaje;
 import com.proathome.controladores.ControladorSesion;
-import com.proathome.controladores.JWT;
+import com.proathome.controladores.JWTController;
 import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -102,10 +102,10 @@ public class RESTCliente {
     @GET
     @Path("/verificarPlan/{idCliente}/{token}")
     public String verificarPlan(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
-        if(JWT.getInstance().tokenValido(token, String.valueOf(idCliente), JWT.PERFIL_CLIENTE))
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
             return cliente.verificarPlan(idCliente).toJSONString();        
         else
-            return JWT.getInstance().getError().toJSONString();
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET

@@ -457,7 +457,7 @@ public class ControladorProfesional {
                     cita.put("fecha2", resultado.getDate("fecha2").toString());
                     cita.put("horario1", resultado.getString("horario1"));
                     cita.put("horario2", resultado.getString("horario2"));
-                    cita.put("fechaAcordada", resultado.getDate("fechaAcordada").toString());
+                    cita.put("fechaAcordada", resultado.getDate("fechaAcordada") == null ? null : resultado.getDate("fechaAcordada").toString());
                     cita.put("horarioAcordado", resultado.getString("horarioAcordado"));
                     cita.put("tipoCita", resultado.getString("tipoCita"));
                     cita.put("datosAdicionales", resultado.getString("datosAdicionales"));
@@ -739,7 +739,7 @@ public class ControladorProfesional {
                 ResultSet resultado = obtenerDatos.executeQuery();
 
                 if (resultado.next()) {
-                    profesional.setToken(JWT.getInstance().getToken(String.valueOf(resultado.getInt("idprofesionales")), JWT.PERFIL_PROFESIONAL));
+                    profesional.setToken(JWTController.getInstance().getToken(String.valueOf(resultado.getInt("idprofesionales")), JWTController.PERFIL_PROFESIONAL));
                     profesional.setIdProfesional(resultado.getInt("idprofesionales"));
                     profesional.setNombre(resultado.getString("nombre"));
                     profesional.setEstado(resultado.getString("estado"));

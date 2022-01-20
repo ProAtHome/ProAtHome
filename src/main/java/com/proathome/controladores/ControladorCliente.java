@@ -16,6 +16,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -1217,15 +1219,17 @@ public class ControladorCliente {
                 consulta.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                 ResultSet resultado = consulta.executeQuery();
                 
-                if(resultado.next()){
-                }else{
+                if(!resultado.next()){
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Calendar calendar = Calendar.getInstance();
+                    String fechaHoy = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);
                     PreparedStatement iniciar = conectar.prepareStatement("INSERT INTO rutaaprendizaje (clientes_idclientes, idBloque, idNivel, idSeccion, horas, fecha_registro, enruta) VALUES (?,?,?,?,?,?,?)");
                     iniciar.setInt(1, Integer.parseInt(json.get("idCliente").toString()));
                     iniciar.setInt(2, 1);
                     iniciar.setInt(3, 1);
                     iniciar.setInt(4, 1);
                     iniciar.setInt(5, 0);
-                    iniciar.setString(6, "Hoy");
+                    iniciar.setString(6, fechaHoy);
                     iniciar.setBoolean(7, true);
                     iniciar.execute();
                 }
@@ -1476,7 +1480,7 @@ public class ControladorCliente {
             System.out.println(pass);
 
             if (resultado.next()) {
-                cliente.setToken(JWT.getInstance().getToken(String.valueOf(resultado.getInt("idclientes")), JWT.PERFIL_CLIENTE));
+                cliente.setToken(JWTController.getInstance().getToken(String.valueOf(resultado.getInt("idclientes")), JWTController.PERFIL_CLIENTE));
                 cliente.setIdCliente(resultado.getInt("idclientes"));
                 cliente.setNombre(resultado.getString("nombre"));
                 cliente.setEstado(resultado.getString("estado"));

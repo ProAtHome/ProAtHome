@@ -12,27 +12,27 @@ import org.json.simple.JSONObject;
  *
  * @author Marvin
  */
-public class JWT {
+public class JWTController {
     
     private static String CLAVE_PRIVADA = "ProAtHome_2022*";
     public static final String PERFIL_PROFESIONAL = "PROFESIONAL";
     public static final String PERFIL_CLIENTE = "CLIENTE";
     public static final String ADMIN = "ADMIN";
-    public static JWT instance;
+    public static JWTController instance;
     private Algorithm algorithm;
     private JSONObject errorJSON;
     private JWTVerifier verifier;
     private DecodedJWT originToken;
     
-    private JWT(){
+    private JWTController(){
         // Dado un algoritmo, como HmacSHA-256
         algorithm = Algorithm.HMAC256(CLAVE_PRIVADA);
         errorJSON = new JSONObject();
     }
     
-    public static JWT getInstance(){
+    public static JWTController getInstance(){
         if(instance == null)
-            instance = new JWT();
+            instance = new JWTController();
         
         return instance;
     }
@@ -86,7 +86,7 @@ public class JWT {
                 .withAudience(perfil) // Unidades de usuario
                 .withIssuedAt(currentTime) // hora de emisión
                 .withExpiresAt(new Date(currentTime.getTime() + 24*3600*1000L)) // Validez de un día
-                .withJWTId(idCliente) // Asignar ID de JWT
+                .withJWTId(idCliente) // Asignar ID de JWTController
                 .withClaim("PublicClaim", "ProAtHome Server") // Definir información de dominio público
                 .sign(algorithm);
 
