@@ -244,10 +244,10 @@ public class ControladorRutaAprendizaje {
     
     public JSONObject obtenerSesionActual(int idCliente){
         conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
         ruta.clear();
         
-        if(conectar != null){
-            
+        if(conectar != null){           
             try{
                 //Obtener valor RUTA_FINALIZADA
                 boolean estatusRuta = getEstatusRutaFinalizada(idCliente, conectar);
@@ -306,16 +306,18 @@ public class ControladorRutaAprendizaje {
                 }
                 
                 ruta.put("rutaFinalizada", estatusRuta);
-        
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", ruta);
             }catch(SQLException ex){
                 ex.printStackTrace();
-            }
-            
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error, intente de nuevo más tarde.");
+            }           
         }else{
             System.out.println("Error en obtenerSesionActual.");
         }
         
-        return ruta;
+        return respuesta;
     }
     
     public void rutaEnCurso(JSONObject datos){
@@ -341,7 +343,7 @@ public class ControladorRutaAprendizaje {
     }
     
     public JSONObject estadoRutaAprendizaje(int idCliente, int tipo){
-        
+        JSONObject respuesta = new JSONObject();
         rutaAprendizaje.clear();
         conectar = ConexionMySQL.connection();
         
@@ -401,15 +403,18 @@ public class ControladorRutaAprendizaje {
                         }
                     }
                 }
-               
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", rutaAprendizaje);
             }catch(SQLException ex){
                ex.printStackTrace();
+               respuesta.put("respuesta", false);
+               respuesta.put("mensaje", "Error en la conexion a BD.");
             }          
         }else{
             System.out.println("Error en estadoRutaAprendizaje.");
         }
         
-        return rutaAprendizaje;
+        return respuesta;
         
     }
     

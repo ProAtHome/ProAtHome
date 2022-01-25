@@ -190,11 +190,11 @@ public class ControladorExamenDiagnostico {
     public JSONObject estatusExamenDiagnostico(int idCliente){
         examen.clear();
         conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
         boolean sesionesFinalizadas = true;
         
         if(conectar != null){
-            try{
-                
+            try{               
                 //VALIDAR QUE NO EXISTAN SESIONES PENDIENTES DE FINALIZAR
                 PreparedStatement sesiones = conectar.prepareStatement("SELECT finalizado FROM sesiones WHERE clientes_idclientes = ?");
                 sesiones.setInt(1, idCliente);
@@ -222,15 +222,18 @@ public class ControladorExamenDiagnostico {
                 }
                 examen.put("sesionesFinalizadas", sesionesFinalizadas);
                 
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", examen);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion en BD.");
             }
         }else{
             System.out.println("Error en statusExamenDiagnostico.");
         }
 
-        return examen;
-       
+        return respuesta;      
     }
     
 }

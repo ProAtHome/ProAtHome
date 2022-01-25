@@ -3,6 +3,7 @@ package com.proathome.REST;
 import com.google.gson.Gson;
 import com.proathome.controladores.ControladorProfesional;
 import com.proathome.controladores.ControladorSesion;
+import com.proathome.controladores.JWTController;
 import com.proathome.modelos.ObjetoUbicacion;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -104,20 +105,21 @@ public class RESTProfesional {
     }
     
     @GET
-    @Path("/validarEstatusServicio/{idSesion}/{idProfesional}")
-    public String validarEstatusServicio(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional){
-        
-        JSONObject json = sesiones.validarEstatusServicioProfesional(idSesion, idProfesional);
-        System.out.println(json);
-        
-        return json.toJSONString();
-        
+    @Path("/validarEstatusServicio/{idSesion}/{idProfesional}/{token}")
+    public String validarEstatusServicio(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return sesiones.validarEstatusServicioProfesional(idSesion, idProfesional).toJSONString();
+        else
+            return JWTController.getInstance().getError().toJSONString();      
     }
     
     @GET
-    @Path("/sincronizarServicio/{idSesion}/{idProfesional}")
-    public String sincronizarServicio(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional){    
-       return sesiones.sincronizarServicioProfesional(idSesion, idProfesional).toJSONString();  
+    @Path("/sincronizarServicio/{idSesion}/{idProfesional}/{token}")
+    public String sincronizarServicio(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional, @PathParam("token") String token){    
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return sesiones.sincronizarServicioProfesional(idSesion, idProfesional).toJSONString();          
+        else
+            return JWTController.getInstance().getError().toJSONString(); 
     }
     
     @GET

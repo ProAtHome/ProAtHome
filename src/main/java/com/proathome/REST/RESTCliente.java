@@ -40,65 +40,84 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
-    @Path("/getVerificacion/{token}/{correo}")
+    @Path("/getVerificacion/{token}/{correo}")//NO REQUIERE VERIFICACION TOKEN JWT
     public String getVerificacion(@PathParam("token") String token, @PathParam("correo") String correo){
         return cliente.getVerificacion(token, correo).toJSONString();
     }
     
     @GET
-    @Path("/getDisponibilidadServicio/{idCliente}")
-    public String getDisponibilidadServicios(@PathParam("idCliente") int idCliente){
-        return cliente.getDisponibilidadServicio(idCliente).toJSONString();
+    @Path("/getDisponibilidadServicio/{idCliente}/{token}")
+    public String getDisponibilidadServicios(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.getDisponibilidadServicio(idCliente).toJSONString();      
+        else
+            return JWTController.getInstance().getError().toJSONString();
+
     }
     
     @GET
-    @Path("/getDatosFiscales/{idCliente}")
-    public String getDatosFiscales(@PathParam("idCliente") int idCliente){
-        return cliente.getDatosFiscales(idCliente).toJSONString();
+    @Path("/getDatosFiscales/{idCliente}/{token}")
+    public String getDatosFiscales(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.getDatosFiscales(idCliente).toJSONString();     
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/getReportes/{idCliente}")
-    public String getReportes(@PathParam("idCliente") int idCliente){
-        return cliente.getReportes(idCliente).toJSONString();
+    @Path("/getReportes/{idCliente}/{token}")
+    public String getReportes(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.getReportes(idCliente).toJSONString();    
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/estatusDocumentos/{idCliente}")
-    public String estatusDocumentos(@PathParam("idCliente") int idCliente){
-        return cliente.estatusDocumentos(idCliente).toJSONString();
+    @Path("/estatusDocumentos/{idCliente}/{token}")
+    public String estatusDocumentos(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.estatusDocumentos(idCliente).toJSONString();  
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/finalizarTicket/{idTicket}")
+    @Path("/finalizarTicket/{idTicket}")//NO REQUIERE VERIFICACION TOKEN JWT
     public void solicitudTicketFinalizado(@PathParam("idTicket") int idTicket){
         cliente.finalizarTicket(idTicket);
     }
     
     @GET
-    @Path("/obtenerTickets/{idCliente}")
-    public String obtenerTickets(@PathParam("idCliente") int idCliente){
-        return cliente.obtenerTickets(idCliente).toJSONString();
+    @Path("/obtenerTickets/{idCliente}/{token}")
+    public String obtenerTickets(@PathParam("idCliente") int idCliente,  @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.obtenerTickets(idCliente).toJSONString();  
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/bloquearPerfil/{idCliente}")
-    public String bloquearPerfil(@PathParam("idCliente") int idCliente){
-        return cliente.bloquearPerfil(idCliente).toJSONString();
+    @Path("/bloquearPerfil/{idCliente}/{token}")
+    public String bloquearPerfil(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.bloquearPerfil(idCliente).toJSONString(); 
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/validarValoracion/{idSesion}/{idProfesional}")
+    @Path("/validarValoracion/{idSesion}/{idProfesional}")//NO REQUIERE VERIFICACION JWT
     public String validarValoracion(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional){
         return cliente.validarValoracion(idSesion, idProfesional).toJSONString();
     }
     
     @GET
-    @Path("/obtenerValoracion/{idProfesional}")
+    @Path("/obtenerValoracion/{idProfesional}")//NO REQUIERE VERIFICACION JWT
     public String obtenerValoracion(@PathParam("idProfesional") int idProfesional){
         return cliente.obtenerValoracion(idProfesional).toJSONString();
     }
-    
+    //SEGUNDO SET
     @GET
     @Path("/verificarPlan/{idCliente}/{token}")
     public String verificarPlan(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
@@ -109,59 +128,87 @@ public class RESTCliente {
     }
     
     @GET
-    @Path("/verificarSesionesPagadas/{idCliente}")
-    public String verificarSesionesPagadas(@PathParam("idCliente") int idCliente){  
-        return cliente.verificarSesionesPagadas(idCliente).toJSONString();     
+    @Path("/verificarSesionesPagadas/{idCliente}/{token}")
+    public String verificarSesionesPagadas(@PathParam("idCliente") int idCliente, @PathParam("token") String token){  
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.verificarSesionesPagadas(idCliente).toJSONString();           
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/obtenerToken/{idSesion}/{idCliente}")
-    public String obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){  
-        return cliente.obtenerToken(idSesion, idCliente).toJSONString();
+    @Path("/obtenerToken/{idSesion}/{idCliente}/{token}")//SIN USO
+    public String obtenerToken(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente, @PathParam("token") String token){ 
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.obtenerToken(idSesion, idCliente).toJSONString();           
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/obtenerPreOrden/{idCliente}/{idSesion}")
-    public String obtenerPreOrden(@PathParam("idCliente") int idCliente, @PathParam("idSesion") int idSesion){       
-        return cliente.obtenerPreOrden(idCliente, idSesion).toJSONString(); 
+    @Path("/obtenerPreOrden/{idCliente}/{idSesion}/{token}")
+    public String obtenerPreOrden(@PathParam("idCliente") int idCliente, @PathParam("idSesion") int idSesion, @PathParam("token") String token){   
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.obtenerPreOrden(idCliente, idSesion).toJSONString();            
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/validarServicioFinalizada/{idSesion}/{idCliente}")
-    public String validarServicioFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){      
-        return sesiones.validarServicioFinalizadaCliente(idSesion, idCliente).toJSONString();     
+    @Path("/validarServicioFinalizada/{idSesion}/{idCliente}/{token}")
+    public String validarServicioFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente, @PathParam("token") String token){ 
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return sesiones.validarServicioFinalizadaCliente(idSesion, idCliente).toJSONString();            
+        else
+            return JWTController.getInstance().getError().toJSONString();     
     }
     
     @GET
-    @Path("/validarEstatusServicio/{idSesion}/{idCliente}")
-    public String validarEstatusServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){
-        return sesiones.validarEstatusServicioCliente(idSesion, idCliente).toJSONString();      
+    @Path("/validarEstatusServicio/{idSesion}/{idCliente}/{token}")
+    public String validarEstatusServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente, @PathParam("token") String token){    
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return sesiones.validarEstatusServicioCliente(idSesion, idCliente).toJSONString();            
+        else
+            return JWTController.getInstance().getError().toJSONString();  
     }
     
     @GET
-    @Path("/sincronizarServicio/{idSesion}/{idCliente}")
-    public String sincronizarServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){       
-       return sesiones.sincronizarServicio(idSesion, idCliente).toJSONString();      
+    @Path("/sincronizarServicio/{idSesion}/{idCliente}/{token}")
+    public String sincronizarServicio(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente, @PathParam("token") String token){   
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return sesiones.sincronizarServicio(idSesion, idCliente).toJSONString();             
+        else
+            return JWTController.getInstance().getError().toJSONString();       
     }
     
     @GET
-    @Path("/obtenerSesionActual/{idCliente}")
-    public String obtenerRutaAprendizaje(@PathParam("idCliente") int idCliente){     
-        return ruta.obtenerSesionActual(idCliente).toJSONString();   
+    @Path("/obtenerSesionActual/{idCliente}/{token}")
+    public String obtenerRutaAprendizaje(@PathParam("idCliente") int idCliente, @PathParam("token") String token){   
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return ruta.obtenerSesionActual(idCliente).toJSONString();            
+        else
+            return JWTController.getInstance().getError().toJSONString();    
     }
     
     @GET
-    @Path("estadoRutaAprendizaje/{idCliente}/{tipo}")
-    public String estadoRutaAprendizaje(@PathParam("idCliente") int idCliente, @PathParam("tipo") int tipo){    
-        return ruta.estadoRutaAprendizaje(idCliente, tipo).toJSONString(); 
+    @Path("estadoRutaAprendizaje/{idCliente}/{tipo}/{token}")
+    public String estadoRutaAprendizaje(@PathParam("idCliente") int idCliente, @PathParam("tipo") int tipo, @PathParam("token") String token){  
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return ruta.estadoRutaAprendizaje(idCliente, tipo).toJSONString();            
+        else
+            return JWTController.getInstance().getError().toJSONString();    
     }
     
     @GET
-    @Path("/estatusExamenDiagnostico/{idCliente}")
-    public String estatusExamenDiagnostico(@PathParam("idCliente") int idCliente){      
-        return examen.estatusExamenDiagnostico(idCliente).toJSONString();    
+    @Path("/estatusExamenDiagnostico/{idCliente}/{token}")
+    public String estatusExamenDiagnostico(@PathParam("idCliente") int idCliente, @PathParam("token") String token){      
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return examen.estatusExamenDiagnostico(idCliente).toJSONString();            
+        else
+            return JWTController.getInstance().getError().toJSONString();      
     }//Fin método enCursoExamenDiagnostico.
     
+    //SET 3
     @GET
     @Path("infoExamenDiagnostico/{idCliente}")
     public String infoExamenDiagnostico(@PathParam("idCliente") int idCliente){     

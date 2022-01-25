@@ -127,6 +127,7 @@ public class ControladorCliente {
     
     public JSONObject getDisponibilidadServicio(int idCliente){
         Connection conectar = ConexionMySQL.connection();
+        JSONObject data = new JSONObject();
         JSONObject respuesta = new JSONObject();
         
         if(conectar != null){
@@ -162,14 +163,14 @@ public class ControladorCliente {
                         int horasDisponibles = horasRestantes-horasEspera;
                         
                         if(horasDisponibles >= 1){
-                            respuesta.put("disponibilidad", true);
-                            respuesta.put("horasDisponibles", horasDisponibles);
-                            respuesta.put("respuesta", true);
+                            data.put("disponibilidad", true);
+                            data.put("horasDisponibles", horasDisponibles);
                         }else{
-                            respuesta.put("disponibilidad", false);
-                            respuesta.put("horasDisponibles", horasDisponibles);
-                            respuesta.put("respuesta", true);
+                            data.put("disponibilidad", false);
+                            data.put("horasDisponibles", horasDisponibles);
                         }
+                        respuesta.put("mensaje", data);
+                        respuesta.put("respuesta", true);
                         /*
                         respuesta.put("idNivel", resultadoNivel.getInt("idNivel"));
                         respuesta.put("idSeccion", resultadoNivel.getInt("idSeccion"));
@@ -436,7 +437,7 @@ public class ControladorCliente {
     
     public JSONObject estatusDocumentos(int idCliente){
         Connection conectar = ConexionMySQL.connection();
-        JSONObject estatus = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         
         if(conectar != null){
             try{
@@ -444,17 +445,21 @@ public class ControladorCliente {
                 documentos.setInt(1, idCliente  );
                 ResultSet resultado = documentos.executeQuery();
                 
+                respuesta.put("respuesta", true);
+                
                 if(resultado.next())
-                    estatus.put("estatus", true);
+                    respuesta.put("estatus", true);
                 else
-                    estatus.put("estatus", false);
+                    respuesta.put("estatus", false);
             }catch(SQLException ex){
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD");
                 ex.printStackTrace();
             }
         }else
             System.out.println("Error en estatusDocumentos.");
         
-        return estatus;
+        return respuesta;
     }
     
     public void finalizarTicket(int idTicket){
@@ -493,9 +498,10 @@ public class ControladorCliente {
         }
     }
     
-    public JSONArray obtenerTickets(int idCliente){
+    public JSONObject obtenerTickets(int idCliente){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonTickets = new JSONArray();
+        JSONObject respuesta = new JSONObject();
         boolean vacio = true;
         
         if(conectar != null){
@@ -527,14 +533,19 @@ public class ControladorCliente {
                     jsonSinTickets.put("sinTickets", true);
                     jsonTickets.add(jsonSinTickets);
                 }
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", jsonTickets);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD");
             }
         }else{
             System.out.println("Error en obtenerTickets.");
         }
 
-        return jsonTickets;
+        return respuesta;
     }
     
     public void nuevoTicket(JSONObject jsonDatos){
@@ -584,9 +595,9 @@ public class ControladorCliente {
     }
     
     public JSONObject bloquearPerfil(int idCliente){
-        
         Connection conectar = ConexionMySQL.connection();
         JSONObject bloquearJSON = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         boolean bloquear = false;
         if(conectar != null){
             try{
@@ -618,14 +629,18 @@ public class ControladorCliente {
                 }
                 
                 bloquearJSON.put("bloquear", bloquear);
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", bloquearJSON);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD");
             }
         }else{
             System.out.println("Error en bloquearPerfil.");
         }
         
-        return bloquearJSON;
+        return respuesta;
     }
     
     public JSONObject validarValoracion(int idSesion, int idProfesional){
@@ -933,15 +948,13 @@ public class ControladorCliente {
     }
     
     public JSONObject verificarSesionesPagadas(int idCliente){
-    
         boolean plan_activo = false;
         boolean sesiones_pagadas_finalizadas = true;
         JSONObject jsonDatos = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
         if(conectar != null){
-        
             try{
-                
                 PreparedStatement contador = conectar.prepareStatement("SELECT COUNT(*) AS numero FROM pagos INNER JOIN sesiones WHERE sesiones.pagos_idpagos = pagos.idpagos AND sesiones.clientes_idclientes = ?");
                 contador.setInt(1, idCliente);
                 ResultSet resultadoContador = contador.executeQuery();
@@ -957,10 +970,8 @@ public class ControladorCliente {
                         ResultSet resultado = consulta.executeQuery();
 
                         while(resultado.next()){
-                            if(!resultado.getBoolean("finalizado")){
-                    System.out.println(resultadoContador.getInt("numero"));
+                            if(!resultado.getBoolean("finalizado"))
                                 sesiones_pagadas_finalizadas = false;
-                            }
                         }
 
                         //Aquí obtenemos el tipo PLAN y si está activo.
@@ -971,9 +982,8 @@ public class ControladorCliente {
                         if(resultadoPlan.next()){
                             if(!resultadoPlan.getString("tipoPlan").equals("PARTICULAR"))
                                 plan_activo = true;
-                        }else{
+                        }else
                             plan_activo = false;
-                        }
                     }
                 }else{
                     plan_activo = false;
@@ -982,18 +992,18 @@ public class ControladorCliente {
                 
                 jsonDatos.put("plan_activo", plan_activo);
                 jsonDatos.put("sesiones_pagadas_finalizadas", sesiones_pagadas_finalizadas);
-                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", jsonDatos);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Eror en el servidor.");
             }
-            
         }else{
             System.out.println("Error en verificarSesionesPagadas.");
         }
         
-        System.out.println(jsonDatos);
-        return jsonDatos;
-        
+        return respuesta; 
     }
     
     public void iniciarPlan(JSONObject json){
@@ -1058,33 +1068,33 @@ public class ControladorCliente {
     }
     
     public JSONObject obtenerToken(int idSesion, int idCliente){
-    
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
+        JSONObject data = new JSONObject();
         
         if(conectar != null){
-        
             try{
                 PreparedStatement consulta = conectar.prepareStatement("SELECT token FROM pagos WHERE idSesion = ? AND idCliente = ?");
                 consulta.setInt(1, idSesion);
                 consulta.setInt(2, idCliente);
                 ResultSet resultado = consulta.executeQuery();
-                if(resultado.next()){
-                    respuesta.put("token", resultado.getString("token"));
-                }else{
-                    respuesta.put("token", null);
-                }
-        
+                if(resultado.next())
+                    data.put("token", resultado.getString("token"));
+                else
+                    data.put("token", null);
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", data);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Eror en el servidor.");
             }
-            
         }else{
             System.out.println("Error en obtenerToken.");
         }
         
         return respuesta;
-    
     }
     
     public JSONObject guardarTokenPagoServicio(JSONObject jsonToken){
@@ -1144,20 +1154,19 @@ public class ControladorCliente {
     public JSONObject obtenerPreOrden(int idCliente, int idSesion){
         Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
+        JSONObject dataResponse = new JSONObject();
         if(conectar != null){
             try{
                 PreparedStatement consultaSesion = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ?");
                 consultaSesion.setInt(1, idSesion);
                 ResultSet resultadoSesiones = consultaSesion.executeQuery();
                 
-                if(resultadoSesiones.next()){   
-                    
+                if(resultadoSesiones.next()){                      
                     PreparedStatement consultaCliente = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
                     consultaCliente.setInt(1, idCliente);
                     ResultSet resultadoCliente = consultaCliente.executeQuery();
-                        
+                    
                     if(resultadoCliente.next()){
-
                         PreparedStatement consultaDatosBancarios = conectar.prepareStatement("SELECT * FROM datosbancariosclientes WHERE clientes_idclientes = ?");
                         consultaDatosBancarios.setInt(1, idCliente);
                         ResultSet resultadoDatosBancarios = consultaDatosBancarios.executeQuery();
@@ -1189,24 +1198,29 @@ public class ControladorCliente {
                             respuesta.put("idBloque", resultadoSesiones.getInt("idBloque"));
                             respuesta.put("tiempo", resultadoSesiones.getInt("tiempo"));
                         }
-
-                    }else{  
-
-                        respuesta.put("error", "Error en los datos de Sesión.");
-
-                    }
-                
+                        
+                        dataResponse.put("respuesta", true);
+                        dataResponse.put("mensaje", respuesta);
+                    }else{
+                        dataResponse.put("respuesta", false);
+                        dataResponse.put("mensaje", "Error en la conexión a BD.");
+                        respuesta.put("error", "Error en los datos de Sesión."); 
+                    }                                     
                 }else{
-                    respuesta.put("error", "Error en los datos de Sesión.");
+                    dataResponse.put("respuesta", false);
+                    dataResponse.put("mensaje", "Error en la conexión a BD.");
+                    respuesta.put("error", "Error en los datos de Sesión."); 
                 }
             }catch(SQLException ex){
                 ex.printStackTrace();
+                dataResponse.put("respuesta", false);
+                dataResponse.put("mensaje", "Error en la conexión a BD.");
             }
         }else{
             System.out.println("Error obtenerPreOrden.");
         }
         
-        return respuesta;
+        return dataResponse;
     }
     
     public void iniciarProcesoRuta(JSONObject json){

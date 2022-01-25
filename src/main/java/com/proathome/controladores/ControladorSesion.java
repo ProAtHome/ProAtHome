@@ -36,9 +36,9 @@ public class ControladorSesion {
         
     }
     
-    public JSONObject validarServicioFinalizadaCliente(int idSesion, int idCliente){
-        
+    public JSONObject validarServicioFinalizadaCliente(int idSesion, int idCliente){       
         JSONObject validar = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
@@ -48,21 +48,23 @@ public class ControladorSesion {
                 consultar.setInt(2, idCliente);
                 ResultSet resultado = consultar.executeQuery();
                 
-                if(resultado.next()){
+                if(resultado.next())
                     validar.put("finalizado", resultado.getBoolean("finalizado"));
-                }else{
+                else
                     validar.put("error", "Error al consultar finalizado.");
-                }
                 
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", validar);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
             }
         }else{
             System.out.println("Error en validarServicioFinalizada.");
         }
         
-        return validar;
-        
+        return respuesta;       
     }
     
     public JSONObject validarServicioFinalizada(int idSesion, int idProfesional){
@@ -215,10 +217,10 @@ public class ControladorSesion {
         
     }
     
-       public JSONObject validarEstatusServicioProfesional(int idSesion, int idProfesional){
-        
+       public JSONObject validarEstatusServicioProfesional(int idSesion, int idProfesional){       
         Connection conectar = ConexionMySQL.connection();
         JSONObject datosSesion = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         
         if(conectar != null){
             try{
@@ -239,26 +241,30 @@ public class ControladorSesion {
                     datosSesion.put("TE", resultado.getBoolean("TE"));
                     datosSesion.put("progresoTE", resultado.getInt("progresoTE"));
                     datosSesion.put("progresoSegundosTE", resultado.getInt("progresoSegundosTE"));
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", datosSesion);
                 }else{
                     datosSesion.put("error", "Error en la consulta.");
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", datosSesion);
                 }
                 
             }catch(SQLException ex){
                 ex.printStackTrace();
-            }
-         
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", datosSesion);
+            }      
         }else{
             System.out.println("Error en validarEstatusServicio.");
         }
         
-        return datosSesion;
-        
+        return respuesta;      
     }
     
     public JSONObject validarEstatusServicioCliente(int idSesion, int idCliente){
-        
         Connection conectar = ConexionMySQL.connection();
         JSONObject datosSesion = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         
         if(conectar != null){
             try{
@@ -280,20 +286,23 @@ public class ControladorSesion {
                     datosSesion.put("progresoSegundosTE", resultado.getInt("progresoSegundosTE"));
                     datosSesion.put("tiempo", resultado.getInt("tiempo"));
                     datosSesion.put("sumar", resultado.getInt("sumar"));
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", datosSesion);
                 }else{
                     datosSesion.put("error", "Error en la consulta.");
-                }
-                
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", datosSesion);
+                }             
             }catch(SQLException ex){
                 ex.printStackTrace();
-            }
-         
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
+            }       
         }else{
             System.out.println("Error en validarEstatusServicio.");
         }
         
-        return datosSesion;
-        
+        return respuesta;     
     }
     
     public void servicioDisponibleProfesional(int idSesion, int idProfesional, boolean disponible){
@@ -317,7 +326,7 @@ public class ControladorSesion {
     }
     
     public JSONObject sincronizarServicioProfesional(int idSesion, int idPrfoesor){
-    
+        JSONObject respuesta = new JSONObject();
         JSONObject jsonResultado = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
         PreparedStatement consulta;
@@ -329,20 +338,23 @@ public class ControladorSesion {
                 consulta.setInt(2, idPrfoesor);
                 ResultSet resultado = consulta.executeQuery();
                 
-                if(resultado.next()){
+                if(resultado.next())
                     jsonResultado.put("dispCliente", resultado.getBoolean("estDisponible"));
-                }else{
+                else
                     jsonResultado.put("error", "Error en la consulta.");
-                }
                 
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", jsonResultado);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
             }
         }else{
             System.out.println("Error en sincronixarServicio.");
         }
         
-        return jsonResultado;
+        return respuesta;
         
     }
     
@@ -366,10 +378,10 @@ public class ControladorSesion {
         
     }
     
-    public JSONObject sincronizarServicio(int idSesion, int idCliente){
-    
+    public JSONObject sincronizarServicio(int idSesion, int idCliente){   
         Connection conectar = ConexionMySQL.connection();
         JSONObject jsonResultado = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         
         if(conectar != null){
             try{
@@ -380,20 +392,24 @@ public class ControladorSesion {
                 
                 if(resultado.next()){
                     jsonResultado.put("dispProfesional", resultado.getBoolean("profDisponible"));
+                    respuesta.put("respuesta", true);
+                    respuesta.put("mensaje", jsonResultado);
                 }else{
                     jsonResultado.put("error", "Error en la consulta.");
+                    respuesta.put("respuesta", false);
+                    respuesta.put("mensaje", jsonResultado);
                 }
-             
-                
+                         
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
             }
         }else{
             System.out.println("Error en sincronixarServicio.");
         }
         
-        return jsonResultado;
-        
+        return respuesta;  
     }
 
     public void obtenerSesiones(int idCliente) {
