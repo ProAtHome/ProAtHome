@@ -37,6 +37,17 @@ public class RESTProfesional {
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
     
+    @GET
+    @Path("/validarTokenSesion/{idProfesional}/{token}")
+    public String validarTokenSesion(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL)){
+            JSONObject valido = new JSONObject();
+            valido.put("respuesta", true);
+            
+            return valido.toJSONString();
+        }else
+            return JWTController.getInstance().getError().toJSONString();
+    }
     
     @GET
     @Path("/getVerificacion/{token}/{correo}")

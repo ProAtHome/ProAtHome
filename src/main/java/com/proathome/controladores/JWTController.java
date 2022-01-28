@@ -40,7 +40,7 @@ public class JWTController {
     public JSONObject getError(){
         errorJSON.clear();
         errorJSON.put("respuesta", false);
-        errorJSON.put("mensaje", "Token de sesion no valido.");
+        errorJSON.put("mensaje", "Token de sesión no valido o expirado.");
         
         return errorJSON;
     }

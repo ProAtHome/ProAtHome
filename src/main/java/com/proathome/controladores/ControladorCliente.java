@@ -1378,7 +1378,7 @@ public class ControladorCliente {
                     agregarDatos.setInt(11, sesion.getIdNivel());
                     agregarDatos.setInt(12, sesion.getIdBloque());
                     agregarDatos.setString(13, sesion.getFecha());
-                    agregarDatos.setInt(14, sesion.getTiempo());
+                    agregarDatos.setInt(14, 3);
                     agregarDatos.setBoolean(15, sesion.getSumar());
                     agregarDatos.setString(16, sesion.getTipoPlan());
                     agregarDatos.setInt(17, sesion.getPersonas());

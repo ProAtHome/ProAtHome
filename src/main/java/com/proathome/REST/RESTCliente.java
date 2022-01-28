@@ -40,6 +40,18 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/validarTokenSesion/{idCliente}/{token}")
+    public String validarTokenSesion(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE)){
+            JSONObject valido = new JSONObject();
+            valido.put("respuesta", true);
+            
+            return valido.toJSONString();
+        }else
+            return JWTController.getInstance().getError().toJSONString();
+    }
+    
+    @GET
     @Path("/getVerificacion/{token}/{correo}")//NO REQUIERE VERIFICACION TOKEN JWT
     public String getVerificacion(@PathParam("token") String token, @PathParam("correo") String correo){
         return cliente.getVerificacion(token, correo).toJSONString();

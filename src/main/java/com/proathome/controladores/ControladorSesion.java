@@ -22,7 +22,7 @@ public class ControladorSesion {
                 PreparedStatement activar = conectar.prepareStatement("UPDATE sesiones SET estatus = ?, TE = ?, progresoTE = ?, progresoSegundosTE = ? WHERE idsesiones = ? AND clientes_idclientes = ?");
                 activar.setInt(1,14);
                 activar.setBoolean(2, true);
-                activar.setInt(3, progresoTotal);
+                activar.setInt(3, 3);
                 activar.setInt(4, 0);
                 activar.setInt(5, idSesion);
                 activar.setInt(6, idCliente);
