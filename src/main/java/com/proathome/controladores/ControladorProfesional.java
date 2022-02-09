@@ -445,6 +445,7 @@ public class ControladorProfesional {
     public JSONObject obtenerCita(int idProfesional){
         Connection conectar = ConexionMySQL.connection();
         JSONObject cita = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         
         if(conectar != null){
             try{
@@ -462,19 +463,25 @@ public class ControladorProfesional {
                     cita.put("tipoCita", resultado.getString("tipoCita"));
                     cita.put("datosAdicionales", resultado.getString("datosAdicionales"));
                 }
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", cita);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
             }
         }else{
             System.out.println("Error en obtenerCita.");
         }
         
-        return cita;
+        return respuesta;
     }
     
     public JSONObject estatusDocumentos(int idProfesional){
         Connection conectar = ConexionMySQL.connection();
         JSONObject estatus = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         
         if(conectar != null){
             try{
@@ -486,13 +493,18 @@ public class ControladorProfesional {
                     estatus.put("estatus", true);
                 else
                     estatus.put("estatus", false);
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", estatus);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
             }
         }else
             System.out.println("Error en estatusDocumentos.");
         
-        return estatus;
+        return respuesta;
     }
     
     public void nuevoTicket(JSONObject jsonDatos){
@@ -542,15 +554,16 @@ public class ControladorProfesional {
         }
     }
     
-    public JSONArray obtenerTickets(int idCliente){
+    public JSONObject obtenerTickets(int idProfesional){
         Connection conectar = ConexionMySQL.connection();
         JSONArray jsonTickets = new JSONArray();
+        JSONObject respuesta = new JSONObject();
         boolean vacio = true;
         
         if(conectar != null){
             try{
                 PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE idUsuario = ? AND tipoUsuario = ? ORDER BY idtickets_ayuda DESC");
-                consulta.setInt(1, idCliente);
+                consulta.setInt(1, idProfesional);
                 consulta.setInt(2, Constantes.TIPO_USUARIO_PROFESIONAL);
                 ResultSet resultado = consulta.executeQuery();
                 
@@ -576,14 +589,19 @@ public class ControladorProfesional {
                     jsonSinTickets.put("sinTickets", true);
                     jsonTickets.add(jsonSinTickets);
                 }
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", jsonTickets);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
             }
         }else{
             System.out.println("Error en obtenerTickets.");
         }
 
-        return jsonTickets;
+        return respuesta;
     }
     
     public void finalizarTicket(int idTicket){
@@ -795,46 +813,34 @@ public class ControladorProfesional {
     }//Fin método matchSesion.
     
     public void matchSesion(JSONObject jsonDatos){
-        
         conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
-            
-            try{
-                
+        if(conectar != null){   
+            try{        
                 PreparedStatement match = conectar.prepareStatement("UPDATE sesiones SET profesionales_idprofesionales = ? WHERE idsesiones = ?");
                 match.setInt(1 , Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                 match.setInt(2 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
-                match.execute();
-                
-                
+                match.execute();      
             }catch(SQLException ex){
                 ex.printStackTrace();
-            }
-            
+            }   
         }else{
-            
-            System.out.println("Error en matchSesion.");
-            
+            System.out.println("Error en matchSesion."); 
         }
-        
     }//Fin método matchSesion.
     
-    public JSONArray sesionesMatchProfesional(int idProfesional){
-        
+    public JSONObject sesionesMatchProfesional(int idProfesional){
         conectar = ConexionMySQL.connection();
+        JSONObject respuesta = new JSONObject();
         JSONArray jsonArrayMatch = new JSONArray();
         
         if(conectar != null){
-            
-            try{
-                
+            try{             
                 PreparedStatement sesionesMatch = conectar.prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE sesiones.clientes_idclientes = clientes.idclientes AND profesionales_idprofesionales = ? ORDER BY idsesiones DESC");
                 sesionesMatch.setInt(1 , idProfesional);
                 ResultSet resultado = sesionesMatch.executeQuery();
                 
-                while(resultado.next()){
-                    
+                while(resultado.next()){       
                     JSONObject jsonSesionesMatchProfesional = new JSONObject();
                     jsonSesionesMatchProfesional.put("idsesiones", resultado.getInt("idsesiones"));
                     jsonSesionesMatchProfesional.put("nombreCliente", resultado.getString("nombre") + " " + resultado.getString("apellidoPaterno") + " " + resultado.getString("apellidoMaterno"));
@@ -856,22 +862,21 @@ public class ControladorProfesional {
                     jsonSesionesMatchProfesional.put("horario", resultado.getString("horario")); 
                     jsonSesionesMatchProfesional.put("tipoPlan", resultado.getString("tipoPlan"));
                     jsonSesionesMatchProfesional.put("finalizado", resultado.getBoolean("finalizado"));
-                    jsonArrayMatch.add(jsonSesionesMatchProfesional);
-                    
+                    jsonArrayMatch.add(jsonSesionesMatchProfesional); 
                 }
- 
+                
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", jsonArrayMatch);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
             }
-            
         }else{     
             System.out.println("Error en sesionesMatchProfesional.");     
         }
         
-        System.out.println(jsonArrayMatch);
-        
-        return jsonArrayMatch;
-        
+        return respuesta;   
     }//Fin método sesionesMatchProfesional.
     
     public JSONObject informacionSesionMatch(int idSesion){

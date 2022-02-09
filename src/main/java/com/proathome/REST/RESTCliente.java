@@ -7,6 +7,8 @@ import com.proathome.controladores.ControladorRutaAprendizaje;
 import com.proathome.controladores.ControladorSesion;
 import com.proathome.controladores.JWTController;
 import com.proathome.modelos.ObjetoUbicacion;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -222,19 +224,25 @@ public class RESTCliente {
     
     //SET 3
     @GET
-    @Path("infoExamenDiagnostico/{idCliente}")
-    public String infoExamenDiagnostico(@PathParam("idCliente") int idCliente){     
-        return examen.infoExamenDiagnostico(idCliente).toJSONString();     
+    @Path("infoExamenDiagnostico/{idCliente}/{token}")
+    public String infoExamenDiagnostico(@PathParam("idCliente") int idCliente, @PathParam("token") String token){    
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return examen.infoExamenDiagnostico(idCliente).toJSONString();           
+        else
+            return JWTController.getInstance().getError().toJSONString();      
     }//Fin método infoExamenDiagnostico.
     
     @GET
-    @Path("infoExamenDiagnosticoFinal/{idCliente}")
-    public String infoExamenDiagnosticoFinal(@PathParam("idCliente") int idCliente){ 
-        return examen.infoExamenDiagnosticoFinal(idCliente).toJSONString();    
+    @Path("infoExamenDiagnosticoFinal/{idCliente}/{token}")
+    public String infoExamenDiagnosticoFinal(@PathParam("idCliente") int idCliente, @PathParam("token") String token){ 
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return examen.infoExamenDiagnosticoFinal(idCliente).toJSONString();            
+        else
+            return JWTController.getInstance().getError().toJSONString();     
     }//Fin método infoExamenDiagnostico.
     
     @GET
-    @Path("/obtenerSesionesMaps/{idSesion}")
+    @Path("/obtenerSesionesMaps/{idSesion}")//NO REQUERIMOS TOKEN
     public String obtenerSesionesMaps(@PathParam("idSesion") int idSesion){
         objetoUbicaciones.obtenerSesionesMaps(idSesion);
         String jsonUbicaciones = gson.toJson(objetoUbicaciones);
@@ -243,43 +251,61 @@ public class RESTCliente {
     }//Fin método obtenerSesionesMaps.
 
     @GET
-    @Path("/sesionCliente/{correo}/{contrasena}")
+    @Path("/sesionCliente/{correo}/{contrasena}")//NO REQUERIMOS TOKEN
     public String sesionCliente(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena) {
         cliente.iniciarSesion(correo, contrasena);
         return gson.toJson(cliente.datosSesion());
     }//Fin método sesionCliente.
 
     @GET
-    @Path("/perfilCliente/{idCliente}")
-    public String perfilCliente(@PathParam("idCliente") int idCliente) {
-        cliente.perfilCliente(idCliente);
-        String perfil = gson.toJson(cliente.datosSesion());
-
-        return perfil;
+    @Path("/perfilCliente/{idCliente}/{token}")
+    public String perfilCliente(@PathParam("idCliente") int idCliente, @PathParam("token") String token) {
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE)){
+            cliente.perfilCliente(idCliente);
+            String perfil = gson.toJson(cliente.datosSesion());
+            
+            return perfil;         
+        }else
+            return null;  
     }//Fin método perfilCliente.
     
     @GET
-    @Path("/obtenerDatosBancarios/{idCliente}")
-    public String obtenerDatosBancarios(@PathParam("idCliente") int idCliente) {
-        return cliente.obtenerCuentaBancaria(idCliente).toJSONString();
+    @Path("/obtenerDatosBancarios/{idCliente}/{token}")
+    public String obtenerDatosBancarios(@PathParam("idCliente") int idCliente, @PathParam("token") String token) {
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE)){
+           return cliente.obtenerCuentaBancaria(idCliente).toJSONString();          
+        }else
+            return JWTController.getInstance().getError().toJSONString();  
     }//Fin método obtenerDatosBancarios.
     
 
     @GET
-    @Path("/detallesSesion/{idSesion}")
+    @Path("/detallesSesion/{idSesion}")//NO REQUERIMOS TOKEN
     public String detallesSesion(@PathParam("idSesion") int idSesion){
         return cliente.detallesSesion(idSesion).toJSONString();
     }//Fin método detallesSesion.
     
     @GET
-    @Path("/obtenerSesiones/{idCliente}")
-    public String obtenerSesiones(@PathParam("idCliente") int idCliente){
-        Gson gson = new Gson();
-        String jsonArray = "";
-        sesiones.obtenerSesiones(idCliente);
-        jsonArray = gson.toJson(sesiones);
-        
-        return jsonArray;
+    @Path("/obtenerSesiones/{idCliente}/{token}")
+    public String obtenerSesiones(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE)){
+            Gson gson = new Gson();
+            String jsonArray = "";
+            sesiones.obtenerSesiones(idCliente);
+            jsonArray = gson.toJson(sesiones);
+            JSONObject sesiones = null;
+            try {
+                sesiones = (JSONObject) parser.parse(jsonArray);
+            } catch (ParseException ex) {
+                Logger.getLogger(RESTCliente.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            JSONObject respuesta = new JSONObject();
+            respuesta.put("respuesta", true);
+            respuesta.put("mensaje", sesiones);
+            
+            return respuesta.toJSONString();    
+        }else
+            return JWTController.getInstance().getError().toJSONString();  
     }//Fin método obtenerSesiones.
     
     @POST

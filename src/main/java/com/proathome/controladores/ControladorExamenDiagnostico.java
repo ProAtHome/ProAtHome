@@ -43,14 +43,13 @@ public class ControladorExamenDiagnostico {
         return estatus;
     }
     
-    public JSONObject infoExamenDiagnostico(int idCliente){
-        
+    public JSONObject infoExamenDiagnostico(int idCliente){   
         examen.clear();
         conectar = ConexionMySQL.connection();
-        if(conectar != null){
-            
-            try{
-                
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){           
+            try{               
                 PreparedStatement info = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
                 info.setInt(1, idCliente);
                 ResultSet resultado = info.executeQuery();
@@ -60,28 +59,29 @@ public class ControladorExamenDiagnostico {
                     examen.put("aciertos", resultado.getInt("aciertos"));
                     examen.put("preguntaActual", resultado.getInt("preguntaActual"));
                     examen.put("estatus", ControladorExamenDiagnostico.CONTINUAR_EXAMEN);
-                }
+                }   
                 
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", examen);
             }catch(SQLException ex){
                 ex.printStackTrace();
-            }
-            
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
+            }    
         }else{
             System.out.println("Error en infoExamenDiagnostico.");
         }
         
-        return examen;
-        
+        return respuesta; 
     }
     
-    public JSONObject infoExamenDiagnosticoFinal(int idCliente){
-        
+    public JSONObject infoExamenDiagnosticoFinal(int idCliente){       
         examen.clear();
         conectar = ConexionMySQL.connection();
-        if(conectar != null){
-            
+        JSONObject respuesta = new JSONObject();
+        
+        if(conectar != null){    
             try{
-                
                 PreparedStatement info = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
                 info.setInt(1, idCliente);
                 ResultSet resultado = info.executeQuery();
@@ -93,16 +93,18 @@ public class ControladorExamenDiagnostico {
                     examen.put("estatus", ControladorExamenDiagnostico.INFO_EXAMEN_FINAL);
                 }
                 
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", examen);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
             }
-            
         }else{
             System.out.println("Error en infoExamenDiagnostico.");
         }
         
-        return examen;
-        
+        return respuesta;
     }
     
     public void inicioExamenDiagnostico(JSONObject examen){

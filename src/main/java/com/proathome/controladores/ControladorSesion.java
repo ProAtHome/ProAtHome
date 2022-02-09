@@ -68,8 +68,8 @@ public class ControladorSesion {
     }
     
     public JSONObject validarServicioFinalizada(int idSesion, int idProfesional){
-        
         JSONObject validar = new JSONObject();
+        JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
         
         if(conectar != null){
@@ -79,20 +79,23 @@ public class ControladorSesion {
                 consultar.setInt(2, idProfesional);
                 ResultSet resultado = consultar.executeQuery();
                 
-                if(resultado.next()){
+                if(resultado.next())
                     validar.put("finalizado", resultado.getBoolean("finalizado"));
-                }else{
+                else
                     validar.put("error", "Error al consultar finalizado.");
-                }
                 
+                respuesta.put("respuesta", true);
+                respuesta.put("mensaje", validar);
             }catch(SQLException ex){
                 ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexion a BD.");
             }
         }else{
             System.out.println("Error en validarServicioFinalizada.");
         }
         
-        return validar;
+        return respuesta;
         
     }
     
@@ -413,11 +416,9 @@ public class ControladorSesion {
     }
 
     public void obtenerSesiones(int idCliente) {
-
         Connection conectar = ConexionMySQL.connection();
 
         if (conectar != null) {
-
             try {
                 Statement estado = conectar.createStatement();
                 ResultSet resultado = estado.executeQuery("SELECT * FROM sesiones WHERE clientes_idclientes = " + idCliente);
@@ -432,22 +433,18 @@ public class ControladorSesion {
                 estado = conectar.createStatement();
                 resultado = estado.executeQuery("SELECT * FROM sesiones WHERE clientes_idclientes = " + idCliente  + " ORDER BY idsesiones DESC");
                 
-                while(resultado.next()){
-                    
+                while(resultado.next()){              
                     Sesion obtenida = new Sesion();
                     obtenida.setIdsesiones(resultado.getInt("idsesiones"));
                     String idProfesional = resultado.getString("profesionales_idprofesionales");
                     
                     if(idProfesional == null){
-                        
                         obtenida.setProfesional("Sin profesional asignado.");
                         obtenida.setFotoProfesional("Sin foto");
                         obtenida.setDescripcionProfesional("Sin descripcion");
                         obtenida.setCorreoProfesional("Sin correo");
                         obtenida.setProfesionales_idprofesionales(0);
- 
                     }else{
-                        
                         PreparedStatement profesional = conectar.prepareStatement("SELECT * FROM profesionales WHERE idprofesionales = ?");
                         profesional.setInt(1 , resultado.getInt("profesionales_idprofesionales"));
                         ResultSet nombreProfesional = profesional.executeQuery();
@@ -458,10 +455,8 @@ public class ControladorSesion {
                             obtenida.setDescripcionProfesional(nombreProfesional.getString("descripcion"));
                             obtenida.setFotoProfesional(nombreProfesional.getString("foto"));
                             obtenida.setProfesionales_idprofesionales(resultado.getInt("profesionales_idprofesionales"));
-                        }else{                  
+                        }else              
                             obtenida.setProfesional("Error al obtener profesional.");                    
-                        }
-  
                     }
                     
                     obtenida.setClientes_idclientes(resultado.getInt("clientes_idclientes"));
@@ -481,22 +476,13 @@ public class ControladorSesion {
                     obtenida.setFinalizado(resultado.getBoolean("finalizado"));
                     obtenida.setTipoPlan(resultado.getString("tipoPlan"));
                     sesiones[aux] = obtenida;
-                    aux++;
-                    
+                    aux++;  
                 }
-                
-
-                
             } catch (SQLException ex) {
-
                 ex.printStackTrace();
-
             }
-
-        } else {
-
+        }else {
             System.out.println("Error en la coenxión en obtenerSesiones.");
-
         }
 
     }//Fin método obtenerSesiones.

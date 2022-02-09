@@ -29,7 +29,8 @@ public class ControladorRutaAprendizaje {
         boolean menor = false;
         
         //CONSULTAMOS NIVEL ACTUAL.
-        JSONObject jsonNivelActual = obtenerSesionActual(idCliente);
+        JSONObject data = obtenerSesionActual(idCliente);
+        JSONObject jsonNivelActual = (JSONObject) data.get("mensaje");
         int idSeccionActual = Integer.parseInt(jsonNivelActual.get("idSeccion").toString());
         int idNivelActual = Integer.parseInt(jsonNivelActual.get("idNivel").toString());
         int idBloqueActual = Integer.parseInt(jsonNivelActual.get("idBloque").toString());

@@ -37,6 +37,7 @@ public class RESTProfesional {
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
     
+    //SET 1
     @GET
     @Path("/validarTokenSesion/{idProfesional}/{token}")
     public String validarTokenSesion(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
@@ -50,69 +51,91 @@ public class RESTProfesional {
     }
     
     @GET
-    @Path("/getVerificacion/{token}/{correo}")
+    @Path("/getVerificacion/{token}/{correo}")//NO REQUIETE JWT
     public String getVerificacion(@PathParam("token") String token, @PathParam("correo") String correo){
         return profesional.getVerificacion(token, correo).toJSONString();
     }
     
     @GET
-    @Path("/solicitudEliminarSesion/{idSesion}/{idProfesional}")
-    public String solicitudEliminarSesion(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional){
-        return profesional.solicitudEliminarSesion(idSesion, idProfesional).toJSONString();
+    @Path("/solicitudEliminarSesion/{idSesion}/{idProfesional}/{token}")
+    public String solicitudEliminarSesion(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return profesional.solicitudEliminarSesion(idSesion, idProfesional).toJSONString();
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/getDatosFiscales/{idProfesional}")
-    public String getDatosFiscales(@PathParam("idProfesional") int idProfesional){
-        return profesional.getDatosFiscales(idProfesional).toJSONString();
+    @Path("/getDatosFiscales/{idProfesional}/{token}")
+    public String getDatosFiscales(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return profesional.getDatosFiscales(idProfesional).toJSONString();
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/getReportes/{idProfesional}")
-    public String getReportes(@PathParam("idProfesional") int idProfesional){
-        return profesional.getReportes(idProfesional).toJSONString();
+    @Path("/getReportes/{idProfesional}/{token}")
+    public String getReportes(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return profesional.getReportes(idProfesional).toJSONString();
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/obtenerCita/{idProfesional}")
-    public String obtenerCita(@PathParam("idProfesional") int idProfesional){
-        return profesional.obtenerCita(idProfesional).toJSONString();
+    @Path("/obtenerCita/{idProfesional}/{token}")
+    public String obtenerCita(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return profesional.obtenerCita(idProfesional).toJSONString();
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/estatusDocumentos/{idProfesional}")
-    public String estatusDocumentos(@PathParam("idProfesional") int idProfesional){
-        return profesional.estatusDocumentos(idProfesional).toJSONString();
+    @Path("/estatusDocumentos/{idProfesional}/{token}")
+    public String estatusDocumentos(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return profesional.estatusDocumentos(idProfesional).toJSONString();
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/finalizarTicket/{idTicket}")
+    @Path("/finalizarTicket/{idTicket}")//NO REQUIERE JWT
     public void solicitudTicketFinalizado(@PathParam("idTicket") int idTicket){
         profesional.finalizarTicket(idTicket);
     }
     
     @GET
-    @Path("/obtenerTickets/{idCliente}")
-    public String obtenerTickets(@PathParam("idCliente") int idCliente){
-        return profesional.obtenerTickets(idCliente).toJSONString();
+    @Path("/obtenerTickets/{idProfesional}/{token}")
+    public String obtenerTickets(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return profesional.obtenerTickets(idProfesional).toJSONString();
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
-    @Path("/validarValoracion/{idSesion}/{idCliente}")
+    @Path("/validarValoracion/{idSesion}/{idCliente}")//NO REQUIERE JWT
     public String validarValoracion(@PathParam("idSesion") int idSesion, @PathParam("idCliente") int idCliente){
         return profesional.validarValoracion(idSesion, idCliente).toJSONString();
     }
     
+    //SET 2
     @GET
-    @Path("/obtenerValoracion/{idCliente}")
+    @Path("/obtenerValoracion/{idCliente}")//NO REQUIERE VERIFICACION JWT
     public String obtenerValoracion(@PathParam("idCliente") int idCliente){
         return profesional.obtenerValoracion(idCliente).toJSONString();
     }
     
     @GET
-    @Path("/validarServicioFinalizada/{idSesion}/{idProfesional}")
-    public String validarServicioFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional){      
-        return sesiones.validarServicioFinalizada(idSesion, idProfesional).toJSONString();
+    @Path("/validarServicioFinalizada/{idSesion}/{idProfesional}/{token}")
+    public String validarServicioFinalizada(@PathParam("idSesion") int idSesion, @PathParam("idProfesional") int idProfesional, @PathParam("token") String token){   
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return sesiones.validarServicioFinalizada(idSesion, idProfesional).toJSONString();
+        else
+            return JWTController.getInstance().getError().toJSONString();
     }
     
     @GET
@@ -134,13 +157,16 @@ public class RESTProfesional {
     }
     
     @GET
-    @Path("/obtenerSesionesProfesionalMatch/{idProfesional}")
-    public String obtenerSesionesProfesionalMatch(@PathParam("idProfesional") int idProfesional){
-        return profesional.sesionesMatchProfesional(idProfesional).toJSONString();
+    @Path("/obtenerSesionesProfesionalMatch/{idProfesional}/{token}")
+    public String obtenerSesionesProfesionalMatch(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return profesional.sesionesMatchProfesional(idProfesional).toJSONString();          
+        else
+            return JWTController.getInstance().getError().toJSONString(); 
     }//Fin método obtenerSesionesProfesionalMatch.
     
     @GET
-    @Path("/obtenerSesionesMaps")
+    @Path("/obtenerSesionesMaps")//NO REQUIERE JWT
     public String obtenerSesionesMaps(){
         objetoUbicaciones.obtenerSesionesClientes();
         String jsonUbicaciones = gson.toJson(objetoUbicaciones);
@@ -149,39 +175,42 @@ public class RESTProfesional {
     }//Fin método obtenerSesiones.
     
     @GET
-    @Path("/obtenerSesionesMovil/{rango}")
+    @Path("/obtenerSesionesMovil/{rango}")//NO REQUIERE JWT
     public String obtenerSesionesMovil(@PathParam("rango") int rango){   
         System.out.println(rango);
        return profesional.obtenerSesionesMovil(rango).toJSONString();  
     }//Fin método obtenerSesionesMovil.
     
     @GET
-    @Path("/sesionProfesional/{correo}/{contrasena}")
+    @Path("/sesionProfesional/{correo}/{contrasena}")//NO REQUIERE JWT
     public String sesionProfesional(@PathParam("correo") String correo, @PathParam("contrasena") String contrasena){  
         profesional.iniciarSesion(correo, contrasena);
         return gson.toJson(profesional.datosSesion());  
     }//Fin método sesionCliente.
     
     @GET
-    @Path("obtenerDatosBancarios/{idProfesional}")
-    public String obtenerDatosBancarios(@PathParam("idProfesional") int idProfesional){
-        JSONObject respuesta = profesional.obtenerCuentaBancaria(idProfesional);
-        return respuesta.toJSONString(); 
+    @Path("obtenerDatosBancarios/{idProfesional}/{token}")
+    public String obtenerDatosBancarios(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL))
+            return profesional.obtenerCuentaBancaria(idProfesional).toJSONString();         
+        else
+            return JWTController.getInstance().getError().toJSONString(); 
     }//Fin método obtenerDatosBancarios.
    
     @GET
-    @Path("perfilProfesional/{idProfesional}")
-    public String perfilProfesional(@PathParam("idProfesional") int idProfesional){
-        
-       profesional.perfilProfesional(idProfesional);
-       String perfil = gson.toJson(profesional.datosSesion());
-       
-       return perfil;
-        
+    @Path("perfilProfesional/{idProfesional}/{token}")
+    public String perfilProfesional(@PathParam("idProfesional") int idProfesional, @PathParam("token") String token){    
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idProfesional), JWTController.PERFIL_PROFESIONAL)){
+            profesional.perfilProfesional(idProfesional);
+            String perfil = gson.toJson(profesional.datosSesion());
+
+            return perfil;
+        }else
+            return null; 
     }//Fin método perfilCliente.
     
     @GET
-    @Path("informacionSesionMatch/{idSesion}")
+    @Path("informacionSesionMatch/{idSesion}")//NO REQUIERE JWT
     public String informacionSesionMatch(@PathParam("idSesion") int idSesion){  
         return profesional.informacionSesionMatch(idSesion).toJSONString();     
     }

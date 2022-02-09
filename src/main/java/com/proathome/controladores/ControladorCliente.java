@@ -1112,31 +1112,7 @@ public class ControladorCliente {
                 guardar.execute();
                 
                 respuesta.put("respuesta", true);
-                respuesta.put("mensaje", "Pago guardado exitosamente.");
-                /*
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM pagos WHERE idSesion = ? AND idCliente = ?");
-                consulta.setInt(1, Integer.parseInt(jsonToken.get("idSesion").toString()));
-                consulta.setInt(2, Integer.parseInt(jsonToken.get("idCliente").toString()));
-                ResultSet resultado = consulta.executeQuery();
-                
-                if(resultado.next()){
-                
-                    PreparedStatement actualizar = conectar.prepareStatement("UPDATE pagos SET token = ? WHERE idCliente = ? AND  idSesion = ?");
-                    actualizar.setString(1, jsonToken.get("token").toString());
-                    actualizar.setInt(2, Integer.parseInt(jsonToken.get("idCliente").toString()));
-                    actualizar.setInt(3, Integer.parseInt(jsonToken.get("idSesion").toString()));
-                    actualizar.execute();
-                    
-                }else{
-                
-                    PreparedStatement actualizar = conectar.prepareStatement("INSERT INTO pagos (token, idCliente, idSesion) VALUES (?,?,?)");
-                    actualizar.setString(1, jsonToken.get("token").toString());
-                    actualizar.setInt(2, Integer.parseInt(jsonToken.get("idCliente").toString()));
-                    actualizar.setInt(3, Integer.parseInt(jsonToken.get("idSesion").toString()));
-                    actualizar.execute();
-                
-                }*/
-                
+                respuesta.put("mensaje", "Pago guardado exitosamente.");                
             }catch(SQLException ex){
                 ex.printStackTrace();
                 respuesta.put("respuesta", false);
@@ -1597,17 +1573,10 @@ public class ControladorCliente {
     }//Fin método perfilCliente.
 
     public Cliente datosSesion() {
-
-        if (clienteRegistrado) {
-
+        if (clienteRegistrado)
             return cliente;
-
-        } else {
-
+        else
             return null;
-
-        }
-
     }//Fin método datosSesion.
 
     public void nuevoCliente(JSONObject jsonCliente) {
