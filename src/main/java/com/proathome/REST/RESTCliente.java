@@ -495,6 +495,7 @@ public class RESTCliente {
         }
     }//Fin método agregarEvaluacion.
 
+    /*
     @POST
     @Path("/agregarSesion")
     public String agregarSesion(String datos) {
@@ -502,13 +503,13 @@ public class RESTCliente {
         try {
             JSONObject datosJSON = (JSONObject)parser.parse(datos);
             cliente.nuevaSesion(datosJSON);
-            respuesta = cliente.guardarSesion(); 
+            //respuesta = cliente.guardarSesion(); 
         }catch(ParseException ex){ 
             ex.printStackTrace();  
         }
         
         return respuesta.toJSONString();
-    }//Fin método agregarSesion.
+    }//Fin método agregarSesion.*/
     
     @POST
     @Path("/examenDiagnostico")
@@ -532,6 +533,21 @@ public class RESTCliente {
         
         return estatus.toJSONString(); 
     }//Fin método examenDiagnostico.
+    
+    @POST
+    @Path("/registrarServicio")
+    public String registrarServicio(String datos){
+        JSONObject data = null;
+        JSONObject respuesta = null;
+        try {
+            data = (JSONObject) parser.parse(datos);
+            respuesta = cliente.registrarServicio(data);
+        } catch (ParseException ex) {
+            Logger.getLogger(RESTCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return respuesta.toJSONString();
+    }
     
     @PUT
     @Path("/actualizarPass")
@@ -588,14 +604,12 @@ public class RESTCliente {
     @PUT
     @Path("/actualizarPago")
     public void actualizarPago(String datos){
-    
         try{
             JSONObject jsonDatos = (JSONObject) parser.parse(datos);
             cliente.actualizarPago(jsonDatos);
         }catch(ParseException ex){
             ex.printStackTrace();
         }
-    
     }
     
     @PUT

@@ -792,17 +792,15 @@ public class ControladorCliente {
     }
     
     public void actualizarMonedero(JSONObject jsonMonedero){
-
-        Connection conectar = ConexionMySQL.connection();
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement actualizar = conectar.prepareStatement("UPDATE planes SET monedero = ? WHERE clientes_idclientes = ?");
+                PreparedStatement actualizar = DBController.getInstance().getConnection().prepareStatement("UPDATE planes SET monedero = ? WHERE clientes_idclientes = ?");
                 actualizar.setInt(1, Integer.parseInt(jsonMonedero.get("nuevoMonedero").toString()));
                 actualizar.setInt(2, Integer.parseInt(jsonMonedero.get("idCliente").toString()));
                 actualizar.execute();
                 
                 //Validar plan.
-                PreparedStatement planActivo = conectar.prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
+                PreparedStatement planActivo = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM planes WHERE clientes_idclientes = ?");
                 planActivo.setInt(1, Integer.parseInt(jsonMonedero.get("idCliente").toString()));
                 ResultSet resultadoPlanActivo = planActivo.executeQuery();
                 
@@ -828,9 +826,7 @@ public class ControladorCliente {
                             finalizarPlan(Integer.parseInt(jsonMonedero.get("idCliente").toString()));
                         }
                     }
-                    
-                }
-                
+                } 
             }catch(SQLException ex){
                 ex.printStackTrace();
             }catch(java.text.ParseException ex){
@@ -838,8 +834,7 @@ public class ControladorCliente {
             }
         }else{
             System.out.println("Error en actualizarMonedero.");
-        }
-        
+        } 
     }
     
     
@@ -915,7 +910,6 @@ public class ControladorCliente {
         }
 
         return response;
-    
     }
     
     public void generarPlan(JSONObject jsonPlan){
@@ -1097,6 +1091,51 @@ public class ControladorCliente {
         return respuesta;
     }
     
+    public JSONObject registrarServicio(JSONObject data){
+        JSONObject respuesta = new JSONObject();
+        
+        if(DBController.getInstance().getConnection() != null){
+              try{
+                //GUARDAR PAGO
+                PreparedStatement guardar = DBController.getInstance().getConnection().prepareStatement("INSERT INTO pagos (token, costoServicio, costoTE, estatusPago, idCliente) VALUES (?,?,?,?,?)");
+                guardar.setString(1, data.get("token").toString());
+                guardar.setDouble(2, Double.parseDouble(data.get("costoServicio").toString()));
+                guardar.setDouble(3, Double.parseDouble(data.get("costoTE").toString()));
+                guardar.setString(4, data.get("estatusPago").toString());
+                guardar.setInt(5, Integer.parseInt(data.get("idCliente").toString()));
+                guardar.execute();
+                
+                //GUARDAR SERVICIO
+                sesion = null;
+                sesion = new Sesion();
+                nuevaSesion(data);
+                guardarSesion(); 
+                          
+                //ACTUALIZAR MONEDERO
+                actualizarMonedero(data);
+                
+                //VALIDAR PLAN
+                JSONObject respuestaPlan = verificarPlan(Integer.parseInt(data.get("idCliente").toString()));
+
+                if(Boolean.parseBoolean(respuestaPlan.get("respuesta").toString()))
+                    respuesta.put("mensaje", respuestaPlan);
+                else
+                    respuesta.put("mensaje", "Servicio registrado exitosamente."); 
+                              
+                respuesta.put("respuesta", true);
+            }catch(SQLException ex){
+                ex.printStackTrace();
+                respuesta.put("respuesta", false);
+                respuesta.put("mensaje", "Error en la conexión a BD.");
+            }
+        }else{
+            respuesta.put("respuesta", false);
+            respuesta.put("mensaje", "Error en la conexión a BD.");
+        }
+        
+        return respuesta;
+    }
+    
     public JSONObject guardarTokenPagoServicio(JSONObject jsonToken){
         JSONObject respuesta = new JSONObject();
         Connection conectar = ConexionMySQL.connection();
@@ -1233,8 +1272,7 @@ public class ControladorCliente {
         
     }
     
-    public void nuevaSesion(JSONObject datos){
-        
+    public Sesion nuevaSesion(JSONObject datos){
         sesion.setClientes_idclientes(Integer.parseInt(String.valueOf(datos.get("idCliente"))));
         sesion.setHorario(String.valueOf(datos.get("horario")));
         sesion.setLugar(String.valueOf(datos.get("lugar")));
@@ -1253,6 +1291,7 @@ public class ControladorCliente {
         sesion.setPersonas(Integer.parseInt(datos.get("personas").toString()));
         sesion.setToken(datos.get("token").toString());
         
+        return sesion;
     }//Fin método nuevaSesion.
     
     public JSONObject detallesSesion(int idSesion){
@@ -1324,62 +1363,37 @@ public class ControladorCliente {
         
     }//Fin métod detallesSesion.
     
-    public JSONObject guardarSesion(){
-        JSONObject respuesta = new JSONObject();
-        Connection conectar = ConexionMySQL.connection();
-        
-        if(conectar != null){        
-            try{          
-                
-                //Consultamos el idPago con el token.
-                PreparedStatement token = conectar.prepareStatement("SELECT idpagos FROM pagos WHERE token = ?");
-                token.setString(1, sesion.getToken());
-                ResultSet resultado = token.executeQuery();
-                
-                if(resultado.next()){
-                    String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoServicio,"
-                        + " latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso, sumar, tipoPlan, personas, pagos_idpagos) "
-                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-                    PreparedStatement agregarDatos = conectar.prepareStatement(query);
-                    agregarDatos.setInt(1, sesion.getClientes_idclientes());
-                    agregarDatos.setString(2, sesion.getHorario());
-                    agregarDatos.setString(3, sesion.getLugar());
-                    agregarDatos.setInt(4, sesion.getTiempo());
-                    agregarDatos.setString(5, sesion.getExtras());
-                    agregarDatos.setString(6, sesion.getTipoServicio());
-                    agregarDatos.setDouble(7, sesion.getLatitud());
-                    agregarDatos.setDouble(8, sesion.getLongitud());
-                    agregarDatos.setString(9, sesion.getActualizado());
-                    agregarDatos.setInt(10, sesion.getIdSeccion());
-                    agregarDatos.setInt(11, sesion.getIdNivel());
-                    agregarDatos.setInt(12, sesion.getIdBloque());
-                    agregarDatos.setString(13, sesion.getFecha());
-                    agregarDatos.setInt(14, 3);
-                    agregarDatos.setBoolean(15, sesion.getSumar());
-                    agregarDatos.setString(16, sesion.getTipoPlan());
-                    agregarDatos.setInt(17, sesion.getPersonas());
-                    agregarDatos.setInt(18, resultado.getInt("idpagos"));
-                    agregarDatos.execute();
-                    
-                    respuesta.put("respuesta", true);
-                    respuesta.put("mensaje", "Sesión creada correctamente, revisa en tu inicio.");
-                }else{
-                    respuesta.put("respuesta", false);
-                    respuesta.put("mensaje", "Sin token de pago.");
-                }
-   
-            }catch(SQLException ex){  
-                ex.printStackTrace();
-                respuesta.put("respuesta", false);
-                respuesta.put("mensaje", "Error en la conexión a BD.");
-            }        
-            
-        }else{     
-            respuesta.put("respuesta", false);
-            respuesta.put("mensaje", "Error en la conexión a BD.");        
-        }
-        
-       return respuesta;
+    public void guardarSesion() throws SQLException{              
+        //Consultamos el idPago con el token.
+        PreparedStatement token = DBController.getInstance().getConnection().prepareStatement("SELECT idpagos FROM pagos WHERE token = ?");
+        token.setString(1, sesion.getToken());
+        ResultSet resultado = token.executeQuery();
+
+        if(resultado.next()){
+            String query = "INSERT INTO sesiones (clientes_idclientes, horario, lugar, tiempo, extras, tipoServicio,"
+                + " latitud, longitud, actualizado, idSeccion, idNivel, idBloque, fecha, progreso, sumar, tipoPlan, personas, pagos_idpagos) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            PreparedStatement agregarDatos = DBController.getInstance().getConnection().prepareStatement(query);
+            agregarDatos.setInt(1, sesion.getClientes_idclientes());
+            agregarDatos.setString(2, sesion.getHorario());
+            agregarDatos.setString(3, sesion.getLugar());
+            agregarDatos.setInt(4, sesion.getTiempo());
+            agregarDatos.setString(5, sesion.getExtras());
+            agregarDatos.setString(6, sesion.getTipoServicio());
+            agregarDatos.setDouble(7, sesion.getLatitud());
+            agregarDatos.setDouble(8, sesion.getLongitud());
+            agregarDatos.setString(9, sesion.getActualizado());
+            agregarDatos.setInt(10, sesion.getIdSeccion());
+            agregarDatos.setInt(11, sesion.getIdNivel());
+            agregarDatos.setInt(12, sesion.getIdBloque());
+            agregarDatos.setString(13, sesion.getFecha());
+            agregarDatos.setInt(14, 3);
+            agregarDatos.setBoolean(15, sesion.getSumar());
+            agregarDatos.setString(16, sesion.getTipoPlan());
+            agregarDatos.setInt(17, sesion.getPersonas());
+            agregarDatos.setInt(18, resultado.getInt("idpagos"));
+            agregarDatos.execute();
+        }       
     }//Fin método guardarSesion.
     
     public JSONObject obtenerCuentaBancaria(int idCliente){
