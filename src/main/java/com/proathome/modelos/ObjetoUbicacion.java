@@ -3,7 +3,7 @@ package com.proathome.modelos;
 import com.proathome.modelos.Features.Features;
 import com.proathome.modelos.Features.Geometry;
 import com.proathome.modelos.Features.Properties;
-import com.proathome.mysql.ConexionMySQL;
+import com.proathome.mysql.DBController;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,17 +16,9 @@ public class ObjetoUbicacion {
     public Features features[];
     
     public void obtenerSesionesMaps(int idSesiones){
-        
-        ConexionMySQL mysql = new ConexionMySQL();
-        Connection conectar;
-        
-        conectar = mysql.conectar();
-        
-        if(conectar != null){
-            
-            try{
-                
-                PreparedStatement detalles = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ?");
+        if(DBController.getInstance().getConnection() != null){
+            try{  
+                PreparedStatement detalles = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ?");
                 detalles.setInt(1 , idSesiones);
                 ResultSet resultado = detalles.executeQuery();
                 features = new Features[1];
@@ -56,26 +48,14 @@ public class ObjetoUbicacion {
                 ex.printStackTrace();
             }
             
-        }else{
-            
-            System.out.println("Error en la conexión en obtenerSesionesClientes.");
-            
-        }
-        
+        }else
+            System.out.println("Error en la conexión en obtenerSesionesClientes."); 
     }//Fin método obtenerSesionesMaps.
     
     public void obtenerSesionesClientes(){
-        
-        ConexionMySQL mysql = new ConexionMySQL();
-        Connection conectar;
-        
-        conectar = mysql.conectar();
-        
-        if(conectar != null){
-            
-            try{
-                
-                Statement obtenerDatos = conectar.createStatement();
+        if(DBController.getInstance().getConnection() != null){
+            try{         
+                Statement obtenerDatos = DBController.getInstance().getConnection().createStatement();
                 ResultSet resultado = obtenerDatos.executeQuery("SELECT * FROM sesiones");
                 
                 int numFeatures = 0;
@@ -89,7 +69,7 @@ public class ObjetoUbicacion {
                 features = new Features[numFeatures];
                 int aux = 0;
                 
-                obtenerDatos = conectar.createStatement();
+                obtenerDatos = DBController.getInstance().getConnection().createStatement();
                 resultado = obtenerDatos.executeQuery("SELECT * FROM sesiones");
                 
                 while(resultado.next()){
@@ -118,12 +98,8 @@ public class ObjetoUbicacion {
                 ex.printStackTrace();
             }
             
-        }else{
-            
+        }else      
             System.out.println("Error en la conexión en obtenerSesionesClientes.");
-            
-        }
-        
     }//Fin método obtenerSesionesClientes.
     
 }

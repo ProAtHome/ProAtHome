@@ -42,6 +42,24 @@ public class RESTCliente {
     private Gson gson = new Gson();
     
     @GET
+    @Path("/getInicioSesion/{idCliente}/{token}")
+    public String getInfoSesion(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.getInicioSesion(idCliente).toString();
+        else
+            return JWTController.getInstance().getError().toJSONString();
+    }
+    
+    @GET
+    @Path("/iniciarPerfil/{idCliente}/{token}")
+    public String iniciarPerfil(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
+        if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE))
+            return cliente.iniciarPerfil(idCliente).toJSONString();
+        else
+            return JWTController.getInstance().getError().toJSONString();
+    }
+    
+    @GET
     @Path("/validarTokenSesion/{idCliente}/{token}")
     public String validarTokenSesion(@PathParam("idCliente") int idCliente, @PathParam("token") String token){
         if(JWTController.getInstance().tokenValido(token, String.valueOf(idCliente), JWTController.PERFIL_CLIENTE)){
@@ -385,7 +403,8 @@ public class RESTCliente {
     public void iniciarProcesoRuta(String datos){
         try{
             JSONObject json = (JSONObject)parser.parse(datos);
-            cliente.iniciarProcesoRuta(json);
+            int idCliente = Integer.parseInt(json.get("idCliente").toString());
+            cliente.iniciarProcesoRuta(idCliente);
         }catch(ParseException ex){
             ex.printStackTrace();
         }

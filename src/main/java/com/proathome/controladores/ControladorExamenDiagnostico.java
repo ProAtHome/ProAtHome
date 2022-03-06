@@ -1,7 +1,6 @@
 package com.proathome.controladores;
 
-import com.proathome.mysql.ConexionMySQL;
-import java.sql.Connection;
+import com.proathome.mysql.DBController;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,7 +8,6 @@ import org.json.simple.JSONObject;
 
 public class ControladorExamenDiagnostico {
     
-    private Connection conectar;
     private JSONObject examen = new JSONObject();
     public static final int INICIO = 1;
     public static final int ENCURSO = 2;
@@ -25,11 +23,10 @@ public class ControladorExamenDiagnostico {
         
         JSONObject estatus = new JSONObject();
         estatus.clear();
-        conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{            
-                PreparedStatement reiniciar = conectar.prepareStatement("DELETE FROM diagnostico WHERE clientes_idclientes = ?");
+                PreparedStatement reiniciar = DBController.getInstance().getConnection().prepareStatement("DELETE FROM diagnostico WHERE clientes_idclientes = ?");
                 reiniciar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                 reiniciar.execute();
                 estatus.put("estatus", ControladorExamenDiagnostico.REINICIAR_EXAMEN);
@@ -45,12 +42,11 @@ public class ControladorExamenDiagnostico {
     
     public JSONObject infoExamenDiagnostico(int idCliente){   
         examen.clear();
-        conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
-        if(conectar != null){           
+        if(DBController.getInstance().getConnection() != null){           
             try{               
-                PreparedStatement info = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
+                PreparedStatement info = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
                 info.setInt(1, idCliente);
                 ResultSet resultado = info.executeQuery();
                 
@@ -77,12 +73,11 @@ public class ControladorExamenDiagnostico {
     
     public JSONObject infoExamenDiagnosticoFinal(int idCliente){       
         examen.clear();
-        conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
-        if(conectar != null){    
+        if(DBController.getInstance().getConnection() != null){    
             try{
-                PreparedStatement info = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
+                PreparedStatement info = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
                 info.setInt(1, idCliente);
                 ResultSet resultado = info.executeQuery();
                 
@@ -109,15 +104,14 @@ public class ControladorExamenDiagnostico {
     
     public void inicioExamenDiagnostico(JSONObject examen){
 
-        conectar = ConexionMySQL.connection();
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement validar = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
+                PreparedStatement validar = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
                 validar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                 ResultSet resultado = validar.executeQuery();
                 
                 if(!resultado.next()){
-                    PreparedStatement iniciar = conectar.prepareStatement("INSERT INTO diagnostico (clientes_idclientes, aciertos, preguntaActual, estatus) VALUES (?,?,?,?)");
+                    PreparedStatement iniciar = DBController.getInstance().getConnection().prepareStatement("INSERT INTO diagnostico (clientes_idclientes, aciertos, preguntaActual, estatus) VALUES (?,?,?,?)");
                     iniciar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                     iniciar.setInt(2, Integer.parseInt(examen.get("aciertos").toString()));
                     iniciar.setInt(3, Integer.parseInt(examen.get("preguntaActual").toString()));
@@ -136,15 +130,14 @@ public class ControladorExamenDiagnostico {
         
     public void cancelarExamenDiagnostico(JSONObject examen){
 
-        conectar = ConexionMySQL.connection();
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement validar = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
+                PreparedStatement validar = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
                 validar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                 ResultSet resultado = validar.executeQuery();
                 
                 if(!resultado.next()){
-                    PreparedStatement cancelar = conectar.prepareStatement("INSERT INTO diagnostico (clientes_idclientes, aciertos, preguntaActual, estatus) VALUES (?,?,?,?)");
+                    PreparedStatement cancelar = DBController.getInstance().getConnection().prepareStatement("INSERT INTO diagnostico (clientes_idclientes, aciertos, preguntaActual, estatus) VALUES (?,?,?,?)");
                     cancelar.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                     cancelar.setInt(2, Integer.parseInt(examen.get("aciertos").toString()));
                     cancelar.setInt(3, Integer.parseInt(examen.get("preguntaActual").toString()));
@@ -163,17 +156,16 @@ public class ControladorExamenDiagnostico {
         
     public void enCursoExamenDiagnostico(JSONObject examen){
 
-        conectar = ConexionMySQL.connection();
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement aciertos = conectar.prepareStatement("SELECT aciertos FROM diagnostico WHERE clientes_idclientes = ?");
+                PreparedStatement aciertos = DBController.getInstance().getConnection().prepareStatement("SELECT aciertos FROM diagnostico WHERE clientes_idclientes = ?");
                 aciertos.setInt(1, Integer.parseInt(examen.get("idCliente").toString()));
                 ResultSet resultadoAciertos = aciertos.executeQuery();
                 
                 if(resultadoAciertos.next()){
                     int aciertosAnterior = resultadoAciertos.getInt("aciertos");
                     int aciertosNuevos = aciertosAnterior + Integer.parseInt(examen.get("aciertos").toString());
-                    PreparedStatement encurso = conectar.prepareStatement("UPDATE diagnostico SET aciertos = ?, preguntaActual = ?, estatus = ? WHERE clientes_idclientes = ?");
+                    PreparedStatement encurso = DBController.getInstance().getConnection().prepareStatement("UPDATE diagnostico SET aciertos = ?, preguntaActual = ?, estatus = ? WHERE clientes_idclientes = ?");
                     encurso.setInt(1, aciertosNuevos);
                     encurso.setInt(2, Integer.parseInt(examen.get("preguntaActual").toString()));
                     encurso.setInt(3, Integer.parseInt(examen.get("estatus").toString()));
@@ -191,14 +183,13 @@ public class ControladorExamenDiagnostico {
     
     public JSONObject estatusExamenDiagnostico(int idCliente){
         examen.clear();
-        conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         boolean sesionesFinalizadas = true;
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{               
                 //VALIDAR QUE NO EXISTAN SESIONES PENDIENTES DE FINALIZAR
-                PreparedStatement sesiones = conectar.prepareStatement("SELECT finalizado FROM sesiones WHERE clientes_idclientes = ?");
+                PreparedStatement sesiones = DBController.getInstance().getConnection().prepareStatement("SELECT finalizado FROM sesiones WHERE clientes_idclientes = ?");
                 sesiones.setInt(1, idCliente);
                 ResultSet resultadoSesiones = sesiones.executeQuery();
                 while(resultadoSesiones.next()){
@@ -208,7 +199,7 @@ public class ControladorExamenDiagnostico {
                     }
                 }
                 
-                PreparedStatement estatus = conectar.prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
+                PreparedStatement estatus = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM diagnostico WHERE clientes_idclientes = ?");
                 estatus.setInt(1, idCliente);
                 ResultSet resultado = estatus.executeQuery();
                 

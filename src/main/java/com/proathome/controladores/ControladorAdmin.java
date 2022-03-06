@@ -1,12 +1,8 @@
 package com.proathome.controladores;
 
-import com.google.gson.Gson;
 import com.proathome.modelos.Admin;
 import com.proathome.modelos.Constantes;
-import com.proathome.modelos.Profesional;
-import com.proathome.mysql.ConexionMySQL;
 import com.proathome.mysql.DBController;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +15,6 @@ import org.json.simple.JSONObject;
  */
 public class ControladorAdmin {
     
-    private Connection conectar;
     public static final int CLIENTE = 1;
     public static final int PROFESIONAL = 2;
     
@@ -36,11 +31,10 @@ public class ControladorAdmin {
     
     public JSONObject historialReportes(String tipoUsuario, int idUsuario){
         JSONObject respuesta = new JSONObject();
-        Connection conectar = ConexionMySQL.connection();
         System.out.println(idUsuario);
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+                PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
                 consulta.setInt(1, idUsuario);
                 consulta.setString(2, tipoUsuario);
                 ResultSet resultado = consulta.executeQuery();
@@ -71,9 +65,8 @@ public class ControladorAdmin {
     
     public JSONObject bloquearPerfil(JSONObject jsonDatos){
         JSONObject respuesta = new JSONObject();
-        Connection conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 String query = null;
                 if(jsonDatos.get("perfil").equals("CLIENTE"))
@@ -81,7 +74,7 @@ public class ControladorAdmin {
                 else if(jsonDatos.get("perfil").equals("PROFESIONAL"))
                     query = "UPDATE profesionales SET estado = ? WHERE idprofesionales = ?";
 
-                PreparedStatement bloquear = conectar.prepareStatement(query);
+                PreparedStatement bloquear = DBController.getInstance().getConnection().prepareStatement(query);
                 bloquear.setString(1, "BLOQUEADO");
                 bloquear.setInt(2, Integer.parseInt(jsonDatos.get("idPerfil").toString()));
                 bloquear.execute();
@@ -102,9 +95,9 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public void borrarReportes(JSONObject jsonDatos, Connection conectar){
+    public void borrarReportes(JSONObject jsonDatos){
         try{
-            PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+            PreparedStatement eliminar = DBController.getInstance().getConnection().prepareStatement("DELETE FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
             eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
             if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_CLIENTE)
                 eliminar.setString(2, "CLIENTE");
@@ -118,22 +111,21 @@ public class ControladorAdmin {
     }
     
     public JSONObject desbloquearPerfil(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 PreparedStatement desbloquear = null;
                 if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_CLIENTE)
-                    desbloquear = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
+                    desbloquear = DBController.getInstance().getConnection().prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
                 else if(Integer.parseInt(jsonDatos.get("tipoPerfil").toString()) == Constantes.TIPO_USUARIO_PROFESIONAL)
-                    desbloquear = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
+                    desbloquear = DBController.getInstance().getConnection().prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                 
                 desbloquear.setString(1, "ACTIVO");
                 desbloquear.setInt(2, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
                 desbloquear.execute();
                 
-                borrarReportes(jsonDatos, conectar);
+                borrarReportes(jsonDatos);
                 
                 respuesta.put("respuesta", true);
                 respuesta.put("mensaje", "Perfil desbloqueado correctamente.");
@@ -151,9 +143,9 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public void bloqueoPerfilCliente(int idCliente, Connection conectar){
+    public void bloqueoPerfilCliente(int idCliente){
         try{
-            PreparedStatement consulta = conectar.prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+            PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
             consulta.setInt(1, idCliente);
             consulta.setString(2, "CLIENTE");
             ResultSet resultado = consulta.executeQuery();
@@ -162,7 +154,7 @@ public class ControladorAdmin {
                 int numReportes = resultado.getInt("num");
                 if(numReportes >= 3){
                     //Bloqueado
-                    PreparedStatement bloquear = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
+                    PreparedStatement bloquear = DBController.getInstance().getConnection().prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
                     bloquear.setString(1, "BLOQUEADO");
                     bloquear.setInt(2, idCliente);
                     bloquear.execute();
@@ -173,9 +165,9 @@ public class ControladorAdmin {
         }
     }
     
-    public void bloqueoPerfilProfesional(int idProfesional, Connection conectar){
+    public void bloqueoPerfilProfesional(int idProfesional){
         try{
-            PreparedStatement consulta = conectar.prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
+            PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT COUNT(*) AS num FROM reportes WHERE idUsuario = ? AND tipoUsuario = ?");
             consulta.setInt(1, idProfesional);
             consulta.setString(2, "PROFESIONAL");
             ResultSet resultado = consulta.executeQuery();
@@ -184,7 +176,7 @@ public class ControladorAdmin {
                 int numReportes = resultado.getInt("num");
                 if(numReportes >= 3){
                     //Bloqueado
-                    PreparedStatement bloquear = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
+                    PreparedStatement bloquear = DBController.getInstance().getConnection().prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                     bloquear.setString(1, "BLOQUEADO");
                     bloquear.setInt(2, idProfesional);
                     bloquear.execute();
@@ -195,9 +187,9 @@ public class ControladorAdmin {
         }
     }
     
-    public void guardarHistorialReportes(JSONObject jsonDatos, Connection conectar){
+    public void guardarHistorialReportes(JSONObject jsonDatos){
         try{
-            PreparedStatement guardar = conectar.prepareStatement("INSERT INTO historial_reportes (descripcion, idUsuario, tipoUsuario, fecha, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?,?)");
+            PreparedStatement guardar = DBController.getInstance().getConnection().prepareStatement("INSERT INTO historial_reportes (descripcion, idUsuario, tipoUsuario, fecha, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?,?)");
             guardar.setString(1, jsonDatos.get("descripcionReporte").toString());
             guardar.setInt(2, Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()));
             guardar.setString(3, jsonDatos.get("tipoUsuarioReportado").toString());
@@ -211,24 +203,23 @@ public class ControladorAdmin {
     
     public JSONObject crearReporte(JSONObject jsonDatos){
         JSONObject respuesta = new JSONObject();
-        Connection conectar = ConexionMySQL.connection();
   
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement guardar = conectar.prepareStatement("INSERT INTO reportes (descripcion, idUsuario, tipoUsuario, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?)");
+                PreparedStatement guardar = DBController.getInstance().getConnection().prepareStatement("INSERT INTO reportes (descripcion, idUsuario, tipoUsuario, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?)");
                 guardar.setString(1, jsonDatos.get("descripcionReporte").toString());
                 guardar.setInt(2, Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()));
                 guardar.setString(3, jsonDatos.get("tipoUsuarioReportado").toString());
                 guardar.setInt(4, Integer.parseInt(jsonDatos.get("idTicket").toString()));
                 guardar.execute();
                 
-                guardarHistorialReportes(jsonDatos, conectar);
+                guardarHistorialReportes(jsonDatos);
                 
                 //Validar bloqueo de perfil
                 if(jsonDatos.get("tipoUsuarioReportado").toString().equals("CLIENTE"))
-                    bloqueoPerfilCliente(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()), conectar);
+                    bloqueoPerfilCliente(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()));
                 else if(jsonDatos.get("tipoUsuarioReportado").toString().equals("PROFESIONAL"))
-                    bloqueoPerfilProfesional(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()), conectar);
+                    bloqueoPerfilProfesional(Integer.parseInt(jsonDatos.get("idUsuarioReportado").toString()));
                 
                 respuesta.put("respuesta", true);
                 respuesta.put("mensaje", "Reporte creado correctamente,");
@@ -245,10 +236,10 @@ public class ControladorAdmin {
         return respuesta;
     }
     
-    public JSONObject getCliente(int idCliente, Connection conectar){
+    public JSONObject getCliente(int idCliente){
         JSONObject cliente = new JSONObject();
         try{
-            PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
+            PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM clientes WHERE idclientes = ?");
             consulta.setInt(1, idCliente);
             ResultSet resultado = consulta.executeQuery();
             
@@ -268,10 +259,10 @@ public class ControladorAdmin {
         return cliente;
     }
     
-    public JSONObject getProfesional(int idProfesional, Connection conectar){
+    public JSONObject getProfesional(int idProfesional){
         JSONObject profesional = new JSONObject();
         try{
-            PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM profesionales WHERE idprofesionales = ?");
+            PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM profesionales WHERE idprofesionales = ?");
             consulta.setInt(1, idProfesional);
             ResultSet resultado = consulta.executeQuery();
             
@@ -293,18 +284,17 @@ public class ControladorAdmin {
     
     public JSONObject verServicio(int idSesion){
         JSONObject respuesta = new JSONObject();
-        Connection conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ?");
+                PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ?");
                 consulta.setInt(1, idSesion);
                 ResultSet resultado = consulta.executeQuery();
                 
                 if(resultado.next()){
                     JSONObject datosSesion = new JSONObject();
-                    JSONObject profesional = getProfesional(resultado.getInt("profesionales_idprofesionales"), conectar);
-                    JSONObject cliente = getCliente(resultado.getInt("clientes_idclientes"), conectar);
+                    JSONObject profesional = getProfesional(resultado.getInt("profesionales_idprofesionales"));
+                    JSONObject cliente = getCliente(resultado.getInt("clientes_idclientes"));
                     datosSesion.put("profesional", resultado.getInt("profesionales_idprofesionales") == 0 ? "Sin profesional asignado" : profesional.get("nombre").toString());
                     datosSesion.put("correo",  resultado.getInt("profesionales_idprofesionales") == 0 ? "Sin profesional asignado" : profesional.get("correo").toString());
                     datosSesion.put("idProfesional", resultado.getInt("profesionales_idprofesionales"));
@@ -333,7 +323,7 @@ public class ControladorAdmin {
                     datosSesion.put("tipoPlan", resultado.getString("tipoPlan"));
                     
                     //Consultar pago
-                    PreparedStatement consultaPago = conectar.prepareStatement("SELECT * FROM pagos WHERE idpagos = ?");
+                    PreparedStatement consultaPago = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM pagos WHERE idpagos = ?");
                     consultaPago.setInt(1, resultado.getInt("pagos_idpagos"));
                     ResultSet resultadoPago = consultaPago.executeQuery();
                     
@@ -369,14 +359,13 @@ public class ControladorAdmin {
     }
     
     public JSONObject activarCliente(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 System.out.println(jsonDatos);
                 //Cambiar el estatus activo y foto
-                PreparedStatement actualizar = conectar.prepareStatement("UPDATE clientes SET foto = ?, estado = ? WHERE idclientes = ?");
+                PreparedStatement actualizar = DBController.getInstance().getConnection().prepareStatement("UPDATE clientes SET foto = ?, estado = ? WHERE idclientes = ?");
                 actualizar.setString(1, jsonDatos.get("foto").toString());
                 actualizar.setString(2, "ACTIVO");
                 actualizar.setInt(3, Integer.parseInt(jsonDatos.get("idCliente").toString()));
@@ -398,14 +387,13 @@ public class ControladorAdmin {
     }
     
     public JSONObject getPerfilProfesional(int idProfesional){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         JSONArray sesionesArray = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             //Obtener perfil
             try{
-               PreparedStatement perfil = conectar.prepareStatement("SELECT * FROM profesionales WHERE profesionales.idprofesionales = ?");
+               PreparedStatement perfil = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM profesionales WHERE profesionales.idprofesionales = ?");
                perfil.setInt(1, idProfesional);
                ResultSet resPerfil = perfil.executeQuery();
                
@@ -419,7 +407,7 @@ public class ControladorAdmin {
                    respuesta.put("perfil", jsonPerfil);
                    
                    //Historial Sesiones.
-                  PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM sesiones WHERE profesionales_idprofesionales = ?");
+                  PreparedStatement sesiones = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM sesiones WHERE profesionales_idprofesionales = ?");
                   sesiones.setInt(1, idProfesional);
                   ResultSet resSesiones = sesiones.executeQuery();
                   
@@ -459,15 +447,14 @@ public class ControladorAdmin {
     }
     
     public JSONObject getPerfilCliente(int idCliente){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         JSONArray sesionesArray = new JSONArray();
         JSONArray planesArray = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             //Obtener perfil
             try{
-               PreparedStatement perfil = conectar.prepareStatement("SELECT * FROM clientes INNER JOIN planes WHERE clientes.idclientes = ? AND planes.clientes_idclientes = clientes.idclientes");
+               PreparedStatement perfil = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM clientes INNER JOIN planes WHERE clientes.idclientes = ? AND planes.clientes_idclientes = clientes.idclientes");
                perfil.setInt(1, idCliente);
                ResultSet resPerfil = perfil.executeQuery();
                
@@ -482,7 +469,7 @@ public class ControladorAdmin {
                    respuesta.put("perfil", jsonPerfil);
                    
                    //Historial Sesiones.
-                  PreparedStatement sesiones = conectar.prepareStatement("SELECT * FROM sesiones WHERE clientes_idclientes = ?");
+                  PreparedStatement sesiones = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM sesiones WHERE clientes_idclientes = ?");
                   sesiones.setInt(1, idCliente);
                   ResultSet resSesiones = sesiones.executeQuery();
                   
@@ -504,7 +491,7 @@ public class ControladorAdmin {
                   respuesta.put("sesiones", sesionesArray);
                   
                   //Historial de planes
-                  PreparedStatement planes = conectar.prepareStatement("SELECT * FROM historialplanes WHERE clientes_idclientes = ?");
+                  PreparedStatement planes = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM historialplanes WHERE clientes_idclientes = ?");
                   planes.setInt(1, idCliente);
                   ResultSet resPlanes = planes.executeQuery();
                   
@@ -539,13 +526,12 @@ public class ControladorAdmin {
     }
     
     public JSONObject getProfesionalesRegistrados(){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         JSONArray profesionales = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement registros = conectar.prepareStatement("SELECT * FROM profesionales");
+                PreparedStatement registros = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM profesionales");
                 ResultSet resultado = registros.executeQuery();
                 while(resultado.next()){
                     JSONObject profesional = new JSONObject();
@@ -572,13 +558,12 @@ public class ControladorAdmin {
     }
     
     public JSONObject getClientesRegistrados(){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         JSONArray clientes = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement registros = conectar.prepareStatement("SELECT * FROM clientes INNER JOIN planes WHERE planes.clientes_idclientes = clientes.idclientes");
+                PreparedStatement registros = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM clientes INNER JOIN planes WHERE planes.clientes_idclientes = clientes.idclientes");
                 ResultSet resultado = registros.executeQuery();
                 while(resultado.next()){
                     JSONObject cliente = new JSONObject();
@@ -606,12 +591,11 @@ public class ControladorAdmin {
     }
     
     public JSONObject actualizarOperador(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement actualizar = conectar.prepareStatement("UPDATE operadores SET nombres = ?, apellidoPaterno = ?, apellidoMaterno = ?, usuario = ?, contrasena = ?"
+                PreparedStatement actualizar = DBController.getInstance().getConnection().prepareStatement("UPDATE operadores SET nombres = ?, apellidoPaterno = ?, apellidoMaterno = ?, usuario = ?, contrasena = ?"
                                                                             + " WHERE idoperadores = ?");
                 actualizar.setString(1, jsonDatos.get("nombre").toString());
                 actualizar.setString(2, jsonDatos.get("paterno").toString());
@@ -636,12 +620,11 @@ public class ControladorAdmin {
     }
     
     public JSONObject eliminarOperador(int idOperador){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM operadores WHERE idoperadores = ?");
+                PreparedStatement eliminar = DBController.getInstance().getConnection().prepareStatement("DELETE FROM operadores WHERE idoperadores = ?");
                 eliminar.setInt(1, idOperador);
                 eliminar.execute();
                     respuesta.put("respuesta", true);
@@ -660,13 +643,12 @@ public class ControladorAdmin {
     }
     
     public JSONObject getOperadoresUsuario(){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray respuesta = new JSONArray();
         JSONObject mensaje = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement registros = conectar.prepareStatement("SELECT * FROM operadores WHERE rango = ?");
+                PreparedStatement registros = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM operadores WHERE rango = ?");
                 registros.setInt(1, 3);
                 ResultSet resultado = registros.executeQuery();
                 
@@ -695,13 +677,12 @@ public class ControladorAdmin {
     }
     
     public JSONObject getOperadoresSoporte(){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray respuesta = new JSONArray();
         JSONObject mensaje = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement registros = conectar.prepareStatement("SELECT * FROM operadores WHERE rango = ?");
+                PreparedStatement registros = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM operadores WHERE rango = ?");
                 registros.setInt(1, 2);
                 ResultSet resultado = registros.executeQuery();
                 
@@ -730,20 +711,19 @@ public class ControladorAdmin {
     }
     
     public JSONObject guardarOperador(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 
                 //VERIFICAR SI NO EXISTE OPERADOR EN EL MISMO RANGO.
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM operadores WHERE usuario = ?");
+                PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM operadores WHERE usuario = ?");
                 consulta.setString(1, jsonDatos.get("usuario").toString());
                 consulta.setInt(2, Integer.parseInt(jsonDatos.get("rango").toString()));
                 ResultSet resultado = consulta.executeQuery();
                 
                 if(!resultado.next()){
-                    PreparedStatement guardar = conectar.prepareStatement("INSERT INTO operadores (nombres, apellidoPaterno, apellidoMaterno, rango, usuario, contrasena)"
+                    PreparedStatement guardar = DBController.getInstance().getConnection().prepareStatement("INSERT INTO operadores (nombres, apellidoPaterno, apellidoMaterno, rango, usuario, contrasena)"
                                                                         + " VALUES(?,?,?,?,?,?)");
                     guardar.setString(1, jsonDatos.get("nombre").toString());
                     guardar.setString(2, jsonDatos.get("paterno").toString());
@@ -772,15 +752,14 @@ public class ControladorAdmin {
     }
     
     public JSONObject reagendarCita(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 
                 //Agendar nuevamente
                 //Verifricar la disponibilidad de la cita en fecha 1.
-                PreparedStatement consultaF1 = conectar.prepareStatement("SELECT * FROM citas WHERE fecha1 = ? AND horario1 = ?");
+                PreparedStatement consultaF1 = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM citas WHERE fecha1 = ? AND horario1 = ?");
                 consultaF1.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha1").toString()));
                 consultaF1.setString(2, jsonDatos.get("horario1").toString());
                 ResultSet resultadoF1 = consultaF1.executeQuery();
@@ -790,7 +769,7 @@ public class ControladorAdmin {
                     respuesta.put("mensaje", "El horario de la FECHA 1 ya tiene una posible cita agendada.");
                 }else{
                     //Validamos la fecha 2.
-                    PreparedStatement consultaF2 = conectar.prepareStatement("SELECT * FROM citas WHERE fecha2 = ? AND horario2 = ?");
+                    PreparedStatement consultaF2 = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM citas WHERE fecha2 = ? AND horario2 = ?");
                     consultaF2.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha2").toString()));
                     consultaF2.setString(2, jsonDatos.get("horario2").toString());
                     ResultSet resultadoF2 = consultaF2.executeQuery();
@@ -800,11 +779,11 @@ public class ControladorAdmin {
                         respuesta.put("mensaje", "El horario de la FECHA 2 ya tiene una posible cita agendada.");
                     }else{
                         //Eliminar previa cita.
-                        PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM citas WHERE profesionales_idprofesionales = ?");
+                        PreparedStatement eliminar = DBController.getInstance().getConnection().prepareStatement("DELETE FROM citas WHERE profesionales_idprofesionales = ?");
                         eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                         eliminar.execute();
                         //Guardar cita
-                        PreparedStatement guardar = conectar.prepareStatement("INSERT INTO citas (fecha1, fecha2, horario1, horario2,"
+                        PreparedStatement guardar = DBController.getInstance().getConnection().prepareStatement("INSERT INTO citas (fecha1, fecha2, horario1, horario2,"
                                 + " tipoCita, profesionales_idprofesionales, operadores_idoperadores, datosAdicionales) VALUES (?,?,?,?,?,?,?,?)");
                         guardar.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha1").toString()));
                         guardar.setDate(2, java.sql.Date.valueOf(jsonDatos.get("fecha2").toString()));
@@ -816,7 +795,7 @@ public class ControladorAdmin {
                         guardar.setString(8, jsonDatos.get("datosAdicionales").toString());
                         guardar.execute();
                         //Cambiar estatus
-                        PreparedStatement estatus = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
+                        PreparedStatement estatus = DBController.getInstance().getConnection().prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                         estatus.setString(1, "CITA");
                         estatus.setInt(2, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                         estatus.execute();
@@ -835,11 +814,10 @@ public class ControladorAdmin {
     }
     
     public void activarPerfil(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement activar = conectar.prepareStatement("UPDATE profesionales SET foto = ?, estado = ?, rangoServicio = ? WHERE idprofesionales = ?");
+                PreparedStatement activar = DBController.getInstance().getConnection().prepareStatement("UPDATE profesionales SET foto = ?, estado = ?, rangoServicio = ? WHERE idprofesionales = ?");
                 activar.setString(1, jsonDatos.get("foto").toString());
                 activar.setString(2, "ACTIVO");
                 activar.setInt(3, Integer.parseInt(jsonDatos.get("rango").toString()));
@@ -854,12 +832,11 @@ public class ControladorAdmin {
     }
     
     public JSONArray citasEnFecha(String date, int idOperador){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray fecha = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement fechas = conectar.prepareStatement("SELECT * FROM citas INNER JOIN profesionales WHERE citas.fechaAcordada = ? AND citas.operadores_idoperadores = ? AND profesionales.idprofesionales = citas.profesionales_idprofesionales");
+                PreparedStatement fechas = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM citas INNER JOIN profesionales WHERE citas.fechaAcordada = ? AND citas.operadores_idoperadores = ? AND profesionales.idprofesionales = citas.profesionales_idprofesionales");
                 fechas.setDate(1, java.sql.Date.valueOf(date));
                 fechas.setInt(2, idOperador);
                 ResultSet resultado = fechas.executeQuery();
@@ -874,7 +851,7 @@ public class ControladorAdmin {
                     datos.put("datosAdicionales", resultado.getString("datosAdicionales"));
                     datos.put("idProfesional", resultado.getInt("idprofesionales"));
                     
-                    PreparedStatement consultaFoto = conectar.prepareStatement("SELECT foto FROM documentacionprofesional WHERE profesionales_idprofesionales = ?");
+                    PreparedStatement consultaFoto = DBController.getInstance().getConnection().prepareStatement("SELECT foto FROM documentacionprofesional WHERE profesionales_idprofesionales = ?");
                     consultaFoto.setInt(1, resultado.getInt("idprofesionales"));
                     ResultSet resultadoFoto = consultaFoto.executeQuery();
                     
@@ -905,9 +882,9 @@ public class ControladorAdmin {
         agenda.put("dia6", citasEnFecha(jsonDatos.get("dia6").toString(), idOperador));
         agenda.put("dia7", citasEnFecha(jsonDatos.get("dia7").toString(), idOperador));
         /*
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement fechas = conectar.prepareStatement("SELECT * FROM citas INNER JOIN profesionales WHERE citas.fechaAcordada >= ? AND citas.operadores_idoperadores = ? AND profesionales.idprofesionales = citas.profesionales_idprofesionales");
+                PreparedStatement fechas = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM citas INNER JOIN profesionales WHERE citas.fechaAcordada >= ? AND citas.operadores_idoperadores = ? AND profesionales.idprofesionales = citas.profesionales_idprofesionales");
                 fechas.setDate(1, java.sql.Date.valueOf(hoy));
                 fechas.setInt(2, idOperador);
                 ResultSet resultado = fechas.executeQuery();
@@ -934,13 +911,12 @@ public class ControladorAdmin {
     }
     
     public JSONObject agendarCita(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject respuesta = new JSONObject();
     
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 //Verifricar la disponibilidad de la cita en fecha 1.
-                PreparedStatement consultaF1 = conectar.prepareStatement("SELECT * FROM citas WHERE fecha1 = ? AND horario1 = ?");
+                PreparedStatement consultaF1 = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM citas WHERE fecha1 = ? AND horario1 = ?");
                 consultaF1.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha1").toString()));
                 consultaF1.setString(2, jsonDatos.get("horario1").toString());
                 ResultSet resultadoF1 = consultaF1.executeQuery();
@@ -950,7 +926,7 @@ public class ControladorAdmin {
                     respuesta.put("mensaje", "El horario de la FECHA 1 ya tiene una posible cita agendada.");
                 }else{
                     //Validamos la fecha 2.
-                    PreparedStatement consultaF2 = conectar.prepareStatement("SELECT * FROM citas WHERE fecha2 = ? AND horario2 = ?");
+                    PreparedStatement consultaF2 = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM citas WHERE fecha2 = ? AND horario2 = ?");
                     consultaF2.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha2").toString()));
                     consultaF2.setString(2, jsonDatos.get("horario2").toString());
                     ResultSet resultadoF2 = consultaF2.executeQuery();
@@ -960,7 +936,7 @@ public class ControladorAdmin {
                         respuesta.put("mensaje", "El horario de la FECHA 2 ya tiene una posible cita agendada.");
                     }else{
                         //Guardar cita
-                        PreparedStatement guardar = conectar.prepareStatement("INSERT INTO citas (fecha1, fecha2, horario1, horario2,"
+                        PreparedStatement guardar = DBController.getInstance().getConnection().prepareStatement("INSERT INTO citas (fecha1, fecha2, horario1, horario2,"
                                 + " tipoCita, profesionales_idprofesionales, operadores_idoperadores, datosAdicionales) VALUES (?,?,?,?,?,?,?,?)");
                         guardar.setDate(1, java.sql.Date.valueOf(jsonDatos.get("fecha1").toString()));
                         guardar.setDate(2, java.sql.Date.valueOf(jsonDatos.get("fecha2").toString()));
@@ -972,7 +948,7 @@ public class ControladorAdmin {
                         guardar.setString(8, jsonDatos.get("datosAdicionales").toString());
                         guardar.execute();
                         //Cambiar estatus
-                        PreparedStatement estatus = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
+                        PreparedStatement estatus = DBController.getInstance().getConnection().prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                         estatus.setString(1, "CITA");
                         estatus.setInt(2, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                         estatus.execute();
@@ -991,17 +967,16 @@ public class ControladorAdmin {
     }
     
     public void rechazarDocumentacion(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 //Cambiar estatus a registro.
-                PreparedStatement registro = conectar.prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
+                PreparedStatement registro = DBController.getInstance().getConnection().prepareStatement("UPDATE profesionales SET estado = ? WHERE idprofesionales = ?");
                 registro.setString(1, "REGISTRO");
                 registro.setInt(2, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                 registro.execute();
                 //Eliminamos la documentación.
-                PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM documentacionprofesional WHERE idDocumentacion = ? AND profesionales_idprofesionales = ?");
+                PreparedStatement eliminar = DBController.getInstance().getConnection().prepareStatement("DELETE FROM documentacionprofesional WHERE idDocumentacion = ? AND profesionales_idprofesionales = ?");
                 eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idDocumentacion").toString()));
                 eliminar.setInt(2, Integer.parseInt(jsonDatos.get("idProfesional").toString()));
                 eliminar.execute();
@@ -1014,17 +989,16 @@ public class ControladorAdmin {
     }
     
     public void rechazarDocumentacionCliente(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 //Cambiar estatus a registro.
-                PreparedStatement registro = conectar.prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
+                PreparedStatement registro = DBController.getInstance().getConnection().prepareStatement("UPDATE clientes SET estado = ? WHERE idclientes = ?");
                 registro.setString(1, "REGISTRO");
                 registro.setInt(2, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                 registro.execute();
                 //Eliminamos la documentación.
-                PreparedStatement eliminar = conectar.prepareStatement("DELETE FROM documentacioncliente WHERE idDocumentacion = ? AND clientes_idclientes= ?");
+                PreparedStatement eliminar = DBController.getInstance().getConnection().prepareStatement("DELETE FROM documentacioncliente WHERE idDocumentacion = ? AND clientes_idclientes= ?");
                 eliminar.setInt(1, Integer.parseInt(jsonDatos.get("idDocumentacion").toString()));
                 eliminar.setInt(2, Integer.parseInt(jsonDatos.get("idCliente").toString()));
                 eliminar.execute();
@@ -1037,18 +1011,17 @@ public class ControladorAdmin {
     }
     
     public JSONArray getSolicitudesAsignadasClientes(int idOperador){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray jsonAsignados = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{ 
-                PreparedStatement asigandos = conectar.prepareStatement("SELECT * FROM documentacioncliente INNER JOIN clientes WHERE documentacioncliente.operadores_idoperadores = ? AND clientes.idclientes = documentacioncliente.clientes_idclientes");
+                PreparedStatement asigandos = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM documentacioncliente INNER JOIN clientes WHERE documentacioncliente.operadores_idoperadores = ? AND clientes.idclientes = documentacioncliente.clientes_idclientes");
                 asigandos.setInt(1, idOperador);
                 ResultSet resultado = asigandos.executeQuery();
                 
                 while(resultado.next()){
                     //Consultar primero si ya esta activo
-                    PreparedStatement cita = conectar.prepareStatement("SELECT * FROM clientes WHERE idclientes = ? AND estado = ?");
+                    PreparedStatement cita = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM clientes WHERE idclientes = ? AND estado = ?");
                     cita.setInt(1, resultado.getInt("clientes_idclientes"));
                     cita.setString(2, "ACTIVO");
                     ResultSet resultadoCita = cita.executeQuery();
@@ -1081,18 +1054,17 @@ public class ControladorAdmin {
     }
     
     public JSONArray getSolicitudesAsignadas(int idOperador){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray jsonAsignados = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{ 
-                PreparedStatement asigandos = conectar.prepareStatement("SELECT * FROM documentacionprofesional INNER JOIN profesionales WHERE documentacionprofesional.operadores_idoperadores = ? AND profesionales.idprofesionales = documentacionprofesional.profesionales_idprofesionales");
+                PreparedStatement asigandos = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM documentacionprofesional INNER JOIN profesionales WHERE documentacionprofesional.operadores_idoperadores = ? AND profesionales.idprofesionales = documentacionprofesional.profesionales_idprofesionales");
                 asigandos.setInt(1, idOperador);
                 ResultSet resultado = asigandos.executeQuery();
                 
                 while(resultado.next()){
                     //Consultar primero si ya hay cita
-                    PreparedStatement cita = conectar.prepareStatement("SELECT * FROM profesionales WHERE idprofesionales = ? AND (estado = ? OR estado = ?)");
+                    PreparedStatement cita = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM profesionales WHERE idprofesionales = ? AND (estado = ? OR estado = ?)");
                     cita.setInt(1, resultado.getInt("profesionales_idprofesionales"));
                     cita.setString(2, "cita");
                     cita.setString(3, "activo");
@@ -1131,10 +1103,9 @@ public class ControladorAdmin {
     }
     
     public void asociarSolicitudCliente(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement asociar = conectar.prepareStatement("UPDATE documentacioncliente SET operadores_idoperadores = ? WHERE idDocumentacion = ?");
+                PreparedStatement asociar = DBController.getInstance().getConnection().prepareStatement("UPDATE documentacioncliente SET operadores_idoperadores = ? WHERE idDocumentacion = ?");
                 asociar.setInt(1, Integer.parseInt(jsonDatos.get("idOperador").toString()));
                 asociar.setInt(2, Integer.parseInt(jsonDatos.get("idDocumentacion").toString()));
                 asociar.execute();
@@ -1147,10 +1118,9 @@ public class ControladorAdmin {
     }
     
     public void asociarSolicitud(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement asociar = conectar.prepareStatement("UPDATE documentacionprofesional SET operadores_idoperadores = ? WHERE idDocumentacion = ?");
+                PreparedStatement asociar = DBController.getInstance().getConnection().prepareStatement("UPDATE documentacionprofesional SET operadores_idoperadores = ? WHERE idDocumentacion = ?");
                 asociar.setInt(1, Integer.parseInt(jsonDatos.get("idOperador").toString()));
                 asociar.setInt(2, Integer.parseInt(jsonDatos.get("idDocumentacion").toString()));
                 asociar.execute();
@@ -1163,12 +1133,11 @@ public class ControladorAdmin {
     }
     
     public JSONArray obtenerSolicitudesClientes(){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray jsonSolicitudes = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement solicitudes = conectar.prepareStatement("SELECT * FROM clientes INNER JOIN documentacioncliente WHERE documentacioncliente.clientes_idclientes = clientes.idclientes AND clientes.estado = ? AND documentacioncliente.operadores_idoperadores IS NULL");
+                PreparedStatement solicitudes = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM clientes INNER JOIN documentacioncliente WHERE documentacioncliente.clientes_idclientes = clientes.idclientes AND clientes.estado = ? AND documentacioncliente.operadores_idoperadores IS NULL");
                 solicitudes.setString(1, "DOCUMENTACION");
                 ResultSet resultado = solicitudes.executeQuery();
                 while(resultado.next()){
@@ -1194,12 +1163,11 @@ public class ControladorAdmin {
     }
     
     public JSONArray obtenerSolicitudes(){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray jsonSolicitudes = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement solicitudes = conectar.prepareStatement("SELECT * FROM profesionales INNER JOIN documentacionprofesional WHERE documentacionprofesional.profesionales_idprofesionales = profesionales.idprofesionales AND profesionales.estado = ? AND documentacionprofesional.operadores_idoperadores IS NULL");
+                PreparedStatement solicitudes = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM profesionales INNER JOIN documentacionprofesional WHERE documentacionprofesional.profesionales_idprofesionales = profesionales.idprofesionales AND profesionales.estado = ? AND documentacionprofesional.operadores_idoperadores IS NULL");
                 solicitudes.setString(1, "DOCUMENTACION");
                 ResultSet resultado = solicitudes.executeQuery();
                 while(resultado.next()){
@@ -1229,12 +1197,11 @@ public class ControladorAdmin {
     }
     
     public JSONObject ticketSolucionado(int idTicket){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject ticketJSON = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement solucionado = conectar.prepareStatement("SELECT estatus FROM tickets_ayuda WHERE idtickets_ayuda = ?");
+                PreparedStatement solucionado = DBController.getInstance().getConnection().prepareStatement("SELECT estatus FROM tickets_ayuda WHERE idtickets_ayuda = ?");
                 solucionado.setInt(1, idTicket);
                 ResultSet resultado = solucionado.executeQuery();
                 
@@ -1255,11 +1222,10 @@ public class ControladorAdmin {
     }
     
     public void enviarMensaje(JSONObject jsonDatos){
-        Connection conectar = ConexionMySQL.connection();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement mensaje = conectar.prepareStatement("INSERT INTO msg_tickets (mensaje, idUsuario_Operador, operadorBool, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?)");
+                PreparedStatement mensaje = DBController.getInstance().getConnection().prepareStatement("INSERT INTO msg_tickets (mensaje, idUsuario_Operador, operadorBool, tickets_ayuda_idtickets_ayuda) VALUES (?,?,?,?)");
                 mensaje.setString(1, jsonDatos.get("mensaje").toString());
                 mensaje.setInt(2, Integer.parseInt(jsonDatos.get("idUsuario").toString()));
                 mensaje.setBoolean(3, Boolean.parseBoolean(jsonDatos.get("operador").toString()));
@@ -1274,10 +1240,9 @@ public class ControladorAdmin {
     }
     
     public JSONArray obtenerMensajes(int idTicket, int tipoUsuario){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray mensajes = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 String query = "";
                 String tipo = "";
@@ -1286,7 +1251,7 @@ public class ControladorAdmin {
                 else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESIONAL)
                     tipo = "PROFESIONAL";//query = "SELECT * FROM msg_tickets INNER JOIN profesionales WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesionales.idprofesionales = msg_tickets.idUsuario_Operador";
              
-                PreparedStatement mensajesConsulta = conectar.prepareStatement("SELECT * FROM msg_tickets WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ?");
+                PreparedStatement mensajesConsulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM msg_tickets WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ?");
                 mensajesConsulta.setInt(1, idTicket);
                 ResultSet resultado = mensajesConsulta.executeQuery();
                 
@@ -1309,12 +1274,11 @@ public class ControladorAdmin {
     }
     
     public JSONArray ticketsFinalizados(int idOperador, String categoria){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray jsonFinalizados = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement finalizados = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ? AND categoria = ?");
+                PreparedStatement finalizados = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ? AND categoria = ?");
                 finalizados.setInt(1, idOperador);
                 finalizados.setInt(2, Constantes.ESTATUS_SOLUCIONADO);
                 finalizados.setString(3, categoria);
@@ -1344,12 +1308,11 @@ public class ControladorAdmin {
     }
     
     public JSONArray obtenerTicketsAsociados(int idOperador, String categoria){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray jsonAsociados = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement asociados = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ? AND categoria = ?");
+                PreparedStatement asociados = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM tickets_ayuda WHERE operadores_idoperadores = ? AND estatus = ? AND categoria = ?");
                 asociados.setInt(1, idOperador);
                 asociados.setInt(2, Constantes.ESTATUS_EN_CURSO);
                 asociados.setString(3, categoria);
@@ -1379,10 +1342,9 @@ public class ControladorAdmin {
     }
     
     public void asociarTicketAdmin(int idTicket, int idOperador){
-        Connection conectar = ConexionMySQL.connection();
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement actualizar = conectar.prepareStatement("UPDATE tickets_ayuda SET operadores_idoperadores = ?, estatus = ? WHERE idtickets_ayuda = ?");
+                PreparedStatement actualizar = DBController.getInstance().getConnection().prepareStatement("UPDATE tickets_ayuda SET operadores_idoperadores = ?, estatus = ? WHERE idtickets_ayuda = ?");
                 actualizar.setInt(1, idOperador);
                 actualizar.setInt(2, Constantes.ESTATUS_EN_CURSO);
                 actualizar.setInt(3, idTicket);
@@ -1396,10 +1358,9 @@ public class ControladorAdmin {
     }
     
     public JSONObject infoTicketAdmin(int idTicket, int tipoUsuario){
-        Connection conectar = ConexionMySQL.connection();
         JSONObject ticketInfo = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 String consulta = "";
                 if(tipoUsuario == Constantes.TIPO_USUARIO_CLIENTE)
@@ -1408,7 +1369,7 @@ public class ControladorAdmin {
                     consulta = "SELECT * FROM tickets_ayuda INNER JOIN profesionales WHERE tickets_ayuda.idtickets_ayuda = ? AND profesionales.idprofesionales = tickets_ayuda.idUsuario";
                 
                 
-                PreparedStatement ticket = conectar.prepareStatement(consulta);
+                PreparedStatement ticket = DBController.getInstance().getConnection().prepareStatement(consulta);
                 ticket.setInt(1, idTicket);
                 ResultSet resultado = ticket.executeQuery();
 
@@ -1438,12 +1399,11 @@ public class ControladorAdmin {
     }
     
     public JSONArray obtenerTicketsAdmin(String categoria){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray tickets = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement ticketsConsulta = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE estatus = ? AND categoria = ?");
+                PreparedStatement ticketsConsulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM tickets_ayuda WHERE estatus = ? AND categoria = ?");
                 ticketsConsulta.setInt(1, Constantes.ESTATUS_SIN_OPERADOR);
                 ticketsConsulta.setString(2, categoria);
                 ResultSet resultado = ticketsConsulta.executeQuery();
@@ -1473,13 +1433,12 @@ public class ControladorAdmin {
     }
     
     public JSONArray obtenerMsgTicket(int idUsuario, int tipoUsuario, int idTicket){
-        Connection conectar = ConexionMySQL.connection();
         JSONArray mensajesArray = new JSONArray();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
                 /*Consultar Ticket*/
-                PreparedStatement ticket = conectar.prepareStatement("SELECT * FROM tickets_ayuda WHERE idtickets_ayuda = ? AND tipoUsuario = ?");
+                PreparedStatement ticket = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM tickets_ayuda WHERE idtickets_ayuda = ? AND tipoUsuario = ?");
                 ticket.setInt(1, idTicket);
                 ticket.setInt(2, tipoUsuario);
                 ResultSet ticketRes = ticket.executeQuery();
@@ -1504,7 +1463,7 @@ public class ControladorAdmin {
                 else if(tipoUsuario == Constantes.TIPO_USUARIO_PROFESIONAL)
                     tipo = "PROFESIONAL";//query = "SELECT * FROM msg_tickets INNER JOIN profesionales WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ? AND profesionales.idprofesionales = msg_tickets.idUsuario_Operador";
                 
-                PreparedStatement mensajes = conectar.prepareStatement("SELECT * FROM msg_tickets WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ?");
+                PreparedStatement mensajes = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM msg_tickets WHERE msg_tickets.tickets_ayuda_idtickets_ayuda = ?");
                 mensajes.setInt(1, idTicket);
                 ResultSet msgRes = mensajes.executeQuery();
                 JSONArray jsonMensajesTicket = new JSONArray();
@@ -1549,12 +1508,11 @@ public class ControladorAdmin {
     }
     
     public JSONObject iniciarSesion(String usuario, String contrasena){
-        conectar = ConexionMySQL.connection();
         JSONObject jsonAdmin = new JSONObject();
         
-        if(conectar != null){
+        if(DBController.getInstance().getConnection() != null){
             try{
-                PreparedStatement consulta = conectar.prepareStatement("SELECT * FROM operadores WHERE BINARY usuario = ? AND BINARY contrasena = ?");
+                PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM operadores WHERE BINARY usuario = ? AND BINARY contrasena = ?");
                 consulta.setString(1 , usuario);
                 consulta.setString(2 , contrasena);
                 ResultSet resultado = consulta.executeQuery();
