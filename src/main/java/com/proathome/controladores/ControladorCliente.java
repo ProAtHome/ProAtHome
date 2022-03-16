@@ -905,7 +905,7 @@ public class ControladorCliente {
                 
                 if(resultadoPlanActivo.next()){
                     //¿Hay plan activo?
-                    if(!resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR") || !resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR_PLAN")){
+                    if(!resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR") && !resultadoPlanActivo.getString("tipoPlan").equalsIgnoreCase("PARTICULAR_PLAN")){
                          
                         //¿Hay horas en el monedero en el PLAN activo?
                         if(resultadoPlanActivo.getInt("monedero") != 0){
