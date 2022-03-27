@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +29,308 @@ public class ControladorProfesional {
     private JSONObject jsonSesionesMatchProfesional = new JSONObject();
     private JSONArray arrayJson = new JSONArray();
     private boolean profesionalRegistrado = false;
+    
+    public JSONObject getServicios(int rango, int idProfesional){
+        JSONObject respuesta = new JSONObject();
+        
+        if(DBController.getInstance().getConnection() != null){
+            JSONObject data = new JSONObject();
+            DateTimeFormatter formateador = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            
+            String fechaActual = formateador.format(LocalDateTime.now());
+            String fecha5Dias = formateador.format(LocalDateTime.now().plusDays(4));
+            
+            data.put("fechaActual", formateador.format(LocalDateTime.now()));
+            data.put("servicios", getServiciosDisponibles(rango, fechaActual, fecha5Dias));
+            data.put("serviciosPendientes", getServiciosAgendados(idProfesional, fechaActual, fecha5Dias));
+            
+            respuesta.put("mensaje", data);
+            respuesta.put("respuesta", false);
+        }else{
+            respuesta.put("mensaje", "Error");
+            respuesta.put("respuesta", false);
+        }
+        
+        return respuesta;
+    }
+    
+    public JSONObject getServiciosDisponibles(int rango, String fechaActual, String fecha5Dias){
+        JSONObject servicios = new JSONObject();
+        JSONArray dataServicios = new JSONArray();
+        DateTimeFormatter formateador = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter formateadorHora = DateTimeFormatter.ofPattern("HH");
+        DateTimeFormatter formateadorMinutos = DateTimeFormatter.ofPattern("mm");
+        
+          String query = null;
+        
+        if(rango == Constantes.BASICO)
+            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE (fecha BETWEEN ? AND ?) AND sesiones.profesionales_idprofesionales IS NULL AND sesiones.idSeccion = ? AND sesiones.clientes_idclientes = clientes.idclientes ";
+        else if(rango == Constantes.INTERMEDIO)
+            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE (fecha BETWEEN ? AND ?) AND sesiones.profesionales_idprofesionales IS NULL AND (sesiones.idSeccion = ? OR sesiones.idSeccion = ?) AND sesiones.clientes_idclientes = clientes.idclientes";
+        else if(rango == Constantes.AVANZADO)
+            query = "SELECT * FROM sesiones INNER JOIN clientes WHERE (fecha BETWEEN ? AND ?) AND sesiones.profesionales_idprofesionales IS NULL AND (sesiones.idSeccion = ? OR sesiones.idSeccion = ? OR sesiones.idSeccion = ?) AND sesiones.clientes_idclientes = clientes.idclientes";
+        
+        if(DBController.getInstance().getConnection() != null){ 
+            try{   
+                PreparedStatement sesiones = DBController.getInstance().getConnection().prepareStatement(query);
+                sesiones.setString(1, fechaActual);
+                sesiones.setString(2, fecha5Dias);
+                sesiones.setInt(3, 1);
+                
+                if(rango == Constantes.INTERMEDIO){
+                    sesiones.setInt(4, 2);
+                }else if(rango == Constantes.AVANZADO){
+                    sesiones.setInt(4, 2);
+                    sesiones.setInt(5, 3);
+                }
+                
+                ResultSet resultado = sesiones.executeQuery();             
+                while(resultado.next()){ 
+                    //VALIDAR QUE LA FECHA SEA VALIDA.
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Calendar calendar = Calendar.getInstance();
+                    String fechaHoy = calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH);        
+                    java.util.Date fechaActualDate = sdf.parse(fechaHoy);
+                    java.util.Date fechaServicio = sdf.parse(resultado.getDate("fecha").toString());
+                    
+                    JSONObject json = new JSONObject();
+                    if(fechaServicio.equals(fechaActualDate) || fechaServicio.after(fechaActualDate)){
+                        json.put("idSesion", resultado.getInt("idsesiones"));
+                        json.put("latitud", resultado.getDouble("latitud"));
+                        json.put("longitud", resultado.getDouble("longitud"));
+                        json.put("nombre", resultado.getString("nombre"));
+                        json.put("lugar", resultado.getString("lugar"));
+                        json.put("idSeccion", resultado.getInt("idSeccion"));
+                        json.put("fecha", resultado.getDate("fecha").toString());
+                        json.put("horario", resultado.getString("horario"));
+                        json.put("idNivel", resultado.getInt("idNivel"));
+                        json.put("idBloque", resultado.getInt("idBloque"));
+                        json.put("tipoPlan", resultado.getString("tipoPlan"));
+                        dataServicios.add(json);
+                    }
+                    
+                    json = null;  
+                } 
+                
+                int horaActual = Integer.parseInt(formateadorHora.format(LocalDateTime.now()));
+                int minutosActuales = Integer.parseInt(formateadorMinutos.format(LocalDateTime.now()));
+                
+                //HOY
+                JSONArray hoy = new JSONArray();
+                for(int i = 0; i < dataServicios.size(); i++){
+                    JSONObject servicio = (JSONObject) dataServicios.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now()))){
+                        if(getHorarioNumber(servicio.get("horario").toString()) > horaActual)
+                            hoy.add(servicio);
+                    }
+                }
+                
+                servicios.put("HOY", hoy);
+                
+                //DIA 1
+                JSONArray dia1 = new JSONArray();
+                for(int i = 0; i < dataServicios.size(); i++){
+                    JSONObject servicio = (JSONObject) dataServicios.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now().plusDays(1))))
+                        dia1.add(servicio);
+                }
+                
+                servicios.put(formateador.format(LocalDateTime.now().plusDays(1)), dia1);
+                
+                //DIA 2
+                JSONArray dia2 = new JSONArray();
+                for(int i = 0; i < dataServicios.size(); i++){
+                    JSONObject servicio = (JSONObject) dataServicios.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now().plusDays(2))))
+                        dia2.add(servicio);
+                }
+                
+                servicios.put(formateador.format(LocalDateTime.now().plusDays(2)), dia2);
+                
+                //DIA 3
+                JSONArray dia3 = new JSONArray();
+                for(int i = 0; i < dataServicios.size(); i++){
+                    JSONObject servicio = (JSONObject) dataServicios.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now().plusDays(3))))
+                        dia3.add(servicio);
+                }
+                
+                servicios.put(formateador.format(LocalDateTime.now().plusDays(3)), dia3);
+                
+                //DIA 4
+                JSONArray dia4 = new JSONArray();
+                for(int i = 0; i < dataServicios.size(); i++){
+                    JSONObject servicio = (JSONObject) dataServicios.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now().plusDays(4))))
+                        dia4.add(servicio);
+                }
+                
+                servicios.put(formateador.format(LocalDateTime.now().plusDays(4)), dia4);
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            } catch (ParseException ex) {
+                Logger.getLogger(ControladorProfesional.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }else{ 
+            System.out.println("Error en obtenerSesionesMovil."); 
+        }
+        
+        return servicios;
+    }
+    
+    public JSONObject getServiciosAgendados(int idProfesional, String fechaActual, String fecha5Dias){
+        JSONObject servicios = new JSONObject();
+        JSONArray jsonArrayMatch = new JSONArray();
+        DateTimeFormatter formateador = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        
+        if(DBController.getInstance().getConnection() != null){
+            try{             
+                PreparedStatement sesionesMatch = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM sesiones INNER JOIN clientes WHERE (sesiones.fecha BETWEEN ? AND ?) AND sesiones.clientes_idclientes = clientes.idclientes AND profesionales_idprofesionales = ?");
+                sesionesMatch.setString(1, fechaActual);
+                sesionesMatch.setString(2, fecha5Dias);
+                sesionesMatch.setInt(3, idProfesional);
+                ResultSet resultado = sesionesMatch.executeQuery();
+                
+                while(resultado.next()){       
+                    JSONObject jsonSesionesMatchProfesional = new JSONObject();
+                    jsonSesionesMatchProfesional.put("idsesiones", resultado.getInt("idsesiones"));
+                    jsonSesionesMatchProfesional.put("nombreCliente", resultado.getString("nombre") + " " + resultado.getString("apellidoPaterno") + " " + resultado.getString("apellidoMaterno"));
+                    jsonSesionesMatchProfesional.put("idCliente", resultado.getInt("clientes_idclientes"));
+                    jsonSesionesMatchProfesional.put("descripcion", resultado.getString("descripcion"));
+                    jsonSesionesMatchProfesional.put("actualizado", resultado.getDate("actualizado").toString());
+                    jsonSesionesMatchProfesional.put("fecha", resultado.getDate("fecha").toString());
+                    jsonSesionesMatchProfesional.put("correo", resultado.getString("correo"));
+                    jsonSesionesMatchProfesional.put("latitud", resultado.getDouble("latitud"));
+                    jsonSesionesMatchProfesional.put("longitud", resultado.getDouble("longitud"));
+                    jsonSesionesMatchProfesional.put("foto", resultado.getString("foto"));
+                    jsonSesionesMatchProfesional.put("lugar", resultado.getString("lugar"));
+                    jsonSesionesMatchProfesional.put("tiempo", resultado.getInt("tiempo"));
+                    jsonSesionesMatchProfesional.put("idSeccion", resultado.getInt("idSeccion"));
+                    jsonSesionesMatchProfesional.put("idNivel", resultado.getInt("idNivel"));
+                    jsonSesionesMatchProfesional.put("idBloque", resultado.getInt("idBloque"));
+                    jsonSesionesMatchProfesional.put("tipoServicio", resultado.getString("tipoServicio") + ": " + resultado.getString("personas") + " Personas");
+                    jsonSesionesMatchProfesional.put("extras", resultado.getString("extras"));
+                    jsonSesionesMatchProfesional.put("horario", resultado.getString("horario")); 
+                    jsonSesionesMatchProfesional.put("tipoPlan", resultado.getString("tipoPlan"));
+                    jsonSesionesMatchProfesional.put("finalizado", resultado.getBoolean("finalizado"));
+                    jsonArrayMatch.add(jsonSesionesMatchProfesional); 
+                }
+
+                //HOY
+                JSONArray hoy = new JSONArray();
+                for(int i = 0; i < jsonArrayMatch.size(); i++){
+                    JSONObject servicio = (JSONObject) jsonArrayMatch.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now()))){
+                        hoy.add(servicio);
+                    }
+                }
+                
+                servicios.put("HOY", hoy);
+                
+                //DIA 1
+                JSONArray dia1 = new JSONArray();
+                for(int i = 0; i < jsonArrayMatch.size(); i++){
+                    JSONObject servicio = (JSONObject) jsonArrayMatch.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now().plusDays(1))))
+                        dia1.add(servicio);
+                }
+                
+                servicios.put(formateador.format(LocalDateTime.now().plusDays(1)), dia1);
+                
+                //DIA 2
+                JSONArray dia2 = new JSONArray();
+                for(int i = 0; i < jsonArrayMatch.size(); i++){
+                    JSONObject servicio = (JSONObject) jsonArrayMatch.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now().plusDays(2))))
+                        dia2.add(servicio);
+                }
+                
+                servicios.put(formateador.format(LocalDateTime.now().plusDays(2)), dia2);
+                
+                //DIA 3
+                JSONArray dia3 = new JSONArray();
+                for(int i = 0; i < jsonArrayMatch.size(); i++){
+                    JSONObject servicio = (JSONObject) jsonArrayMatch.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now().plusDays(3))))
+                        dia3.add(servicio);
+                }
+                
+                servicios.put(formateador.format(LocalDateTime.now().plusDays(3)), dia3);
+                
+                //DIA 4
+                JSONArray dia4 = new JSONArray();
+                for(int i = 0; i < jsonArrayMatch.size(); i++){
+                    JSONObject servicio = (JSONObject) jsonArrayMatch.get(i);
+                    if(servicio.get("fecha").toString().equals(formateador.format(LocalDateTime.now().plusDays(4))))
+                        dia4.add(servicio);
+                }
+                
+                servicios.put(formateador.format(LocalDateTime.now().plusDays(4)), dia4);
+                
+            }catch(SQLException ex){
+                ex.printStackTrace();
+            }
+        }
+        
+        return servicios;
+    }
+    
+    public int getHorarioNumber(String horario){
+        int hora = 0;
+
+        if(horario.equals("00:00 HRS"))
+            hora = 0;
+        else if(horario.equals("01:00 HRS"))
+            hora = 1;
+        else if(horario.equals("02:00 HRS"))
+            hora = 2;
+        else if(horario.equals("03:00 HRS"))
+            hora = 3;
+        else if(horario.equals("04:00 HRS"))
+            hora = 4;
+        else if(horario.equals("05:00 HRS"))
+            hora = 5;
+        else if(horario.equals("06:00 HRS"))
+            hora = 6;
+        else if(horario.equals("07:00 HRS"))
+            hora = 7;
+        else if(horario.equals("08:00 HRS"))
+            hora = 8;
+        else if(horario.equals("09:00 HRS"))
+            hora = 9;
+        else if(horario.equals("10:00 HRS"))
+            hora = 10;
+        else if(horario.equals("11:00 HRS"))
+            hora = 11;
+        else if(horario.equals("12:00 HRS"))
+            hora = 12;
+        else if(horario.equals("13:00 HRS"))
+            hora = 13;
+        else if(horario.equals("14:00 HRS"))
+            hora = 14;
+        else if(horario.equals("15:00 HRS"))
+            hora = 15;
+        else if(horario.equals("16:00 HRS"))
+            hora = 16;
+        else if(horario.equals("17:00 HRS"))
+            hora = 17;
+        else if(horario.equals("18:00 HRS"))
+            hora = 18;
+        else if(horario.equals("19:00 HRS"))
+            hora = 19;
+        else if(horario.equals("20:00 HRS"))
+            hora = 20;
+        else if(horario.equals("21:00 HRS"))
+            hora = 21;
+        else if(horario.equals("22:00 HRS"))
+            hora = 22;
+        else if(horario.equals("23:00 HRS"))
+            hora = 23;
+
+        return hora;
+    }
     
     public JSONObject getVerificacion(String token, String correo){
         JSONObject respuesta = new JSONObject();

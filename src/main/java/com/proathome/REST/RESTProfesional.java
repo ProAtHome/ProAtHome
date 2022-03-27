@@ -37,6 +37,12 @@ public class RESTProfesional {
     private JSONParser parser = new JSONParser();
     private Gson gson = new Gson();
     
+    @GET
+    @Path("/getServicios/{rango}/{idProfesional}")
+    public String getServicios(@PathParam("rango") int rango, @PathParam("idProfesional") int idProfesional){
+        return profesional.getServicios(rango, idProfesional).toJSONString();
+    }
+    
     //SET 1
     @GET
     @Path("/validarTokenSesion/{idProfesional}/{token}")
