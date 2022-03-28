@@ -327,6 +327,12 @@ public class RESTCliente {
     }//Fin método obtenerSesiones.
     
     @POST
+    @Path("/validarEmpalme")
+    public String validarEmpalme(String datos){
+        return cliente.validarEmpalme(datos).toJSONString();
+    }
+    
+    @POST
     @Path("/guardarDatosFiscales")
     public String guardarDatosFiscales(String datos){
         JSONObject respuesta = null;

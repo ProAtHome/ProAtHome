@@ -26,7 +26,6 @@ public class ControladorProfesional {
      */
     private Profesional profesional = new Profesional();
     private JSONObject jsonMatch = new JSONObject();
-    private JSONObject jsonSesionesMatchProfesional = new JSONObject();
     private JSONArray arrayJson = new JSONArray();
     private boolean profesionalRegistrado = false;
     
@@ -1093,20 +1092,88 @@ public class ControladorProfesional {
         
     }//Fin método matchSesion.
     
-    public void matchSesion(JSONObject jsonDatos){
-        
+    public JSONObject matchSesion(JSONObject jsonDatos){
+        JSONObject response = new JSONObject();
         if(DBController.getInstance().getConnection() != null){   
             try{        
-                PreparedStatement match = DBController.getInstance().getConnection().prepareStatement("UPDATE sesiones SET profesionales_idprofesionales = ? WHERE idsesiones = ?");
-                match.setInt(1 , Integer.parseInt(jsonDatos.get("idProfesional").toString()));
-                match.setInt(2 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
-                match.execute();      
+                //VALIDAR QUE NO TENGA PROFESIONAL TODAVIA
+                PreparedStatement consultaProfesional = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM sesiones WHERE idsesiones = ?");
+                consultaProfesional.setInt(1, Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                
+                ResultSet consultaResult = consultaProfesional.executeQuery();
+                if(consultaResult.next()){
+                    if(consultaResult.getInt("profesionales_idprofesionales") == 0){
+                        //VALIDAR NUEVAMENTE
+                        DateTimeFormatter formateador = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                        String fechaActual = formateador.format(LocalDateTime.now());
+                        String fecha5Dias = formateador.format(LocalDateTime.now().plusDays(4));
+
+                        JSONObject servicios = getServiciosDisponibles(Integer.parseInt(jsonDatos.get("rango").toString()), fechaActual, fecha5Dias);
+                        JSONObject serviciosAgendados = getServiciosAgendados(Integer.parseInt(jsonDatos.get("idProfesional").toString()), fechaActual, fecha5Dias);
+
+                        //VALIDAR SI LA FECHA DEL SERVICIO TIENE 3 PENDIENTES
+                        JSONArray serviciosFecha = (JSONArray) serviciosAgendados.get(consultaResult.getString("fecha"));
+                
+                        if(serviciosFecha.size() == 3){
+                            //AGENDA LLENA
+                            response.put("respuesta", false);
+                            response.put("mensaje", "AGENDA LLENA EN FECHA: " + consultaResult.getString("fecha"));
+                        }else if(serviciosFecha.size() == 0){
+                            //LIBRE DE AGENDAR
+                            PreparedStatement match = DBController.getInstance().getConnection().prepareStatement("UPDATE sesiones SET profesionales_idprofesionales = ? WHERE idsesiones = ?");
+                            match.setInt(1 , Integer.parseInt(jsonDatos.get("idProfesional").toString()));
+                            match.setInt(2 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                            match.execute();  
+                            
+                            response.put("respuesta", true);
+                            response.put("mensaje", "Match realizado!");
+                        }else{
+                            //RECORREMOS Y VALIDAMOS HORARIOS
+                            int horarioServicioElegido = getHorarioNumber(consultaResult.getString("horario"));
+                            boolean disponible = true;
+                            //VALIDAR SI LOS HORARIOS DE MIS SERVICIOS AGENDADOS TIENEN UYNA DIFERENCIA DE 3 HRS
+                            JSONArray serviciosAgendadosFecha = (JSONArray) serviciosAgendados.get(consultaResult.getString("fecha"));
+                            for (int i = 0; i < serviciosAgendadosFecha.size(); i++) {
+                                JSONObject servicio = (JSONObject) serviciosAgendadosFecha.get(i);
+                                int horarioServicioAgendado = getHorarioNumber(servicio.get("horario").toString());
+                                int diferencia = horarioServicioAgendado - horarioServicioElegido;
+                                diferencia = Math.abs(diferencia);
+                                if(!(diferencia >= 3))
+                                    disponible = false;
+                            }
+
+                            if(disponible){
+                                PreparedStatement match = DBController.getInstance().getConnection().prepareStatement("UPDATE sesiones SET profesionales_idprofesionales = ? WHERE idsesiones = ?");
+                                match.setInt(1 , Integer.parseInt(jsonDatos.get("idProfesional").toString()));
+                                match.setInt(2 , Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                                match.execute();  
+                                
+                                response.put("respuesta", true);
+                                response.put("mensaje", "Match realizado!");
+                            }else{
+                                response.put("respuesta", false);
+                                response.put("mensaje", "DEBES TENER UNA DIFERENCIA MINIMA DE 3 HRS ENTRE SERVICIOS EN LA FECHA ELEGIDA.");
+                            }
+                        }  
+                    }else{
+                        response.put("respuesta", false);
+                        response.put("mensaje", "El servicio elegido ya no se encuentra disponible.");
+                    }
+                }else{
+                    response.put("respuesta", false);
+                    response.put("mensaje", "Error en la conexion a BD.");
+                }
             }catch(SQLException ex){
                 ex.printStackTrace();
+                response.put("respuesta", false);
+                response.put("mensaje", "Error en la conexion a BD.");
             }   
         }else{
-            System.out.println("Error en matchSesion."); 
+            response.put("respuesta", false);
+            response.put("mensaje", "Error en la conexion a BD.");
         }
+        
+        return response;
     }//Fin método matchSesion.
     
     public JSONObject sesionesMatchProfesional(int idProfesional){

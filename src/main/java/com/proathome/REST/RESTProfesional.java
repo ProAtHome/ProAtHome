@@ -453,15 +453,15 @@ public class RESTProfesional {
     
     @PUT
     @Path("/matchSesion")
-    public Response matchSesion(String jsonDatos){
+    public String matchSesion(String jsonDatos){
+        JSONObject json = null;
         try {
-            JSONObject json = (JSONObject) parser.parse(jsonDatos);
-            profesional.matchSesion(json);
+            json = (JSONObject) parser.parse(jsonDatos);
         }catch (ParseException ex) {
             ex.printStackTrace();
         }
-        return Response.ok("Solicitud enviada.", MediaType.APPLICATION_JSON).build();
         
+        return profesional.matchSesion(json).toJSONString();
     }//Fin método matchSesion.
     
     @PUT
