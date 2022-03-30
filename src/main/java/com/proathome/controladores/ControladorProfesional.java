@@ -124,7 +124,7 @@ public class ControladorProfesional {
                     }
                 }
                 
-                servicios.put("HOY", hoy);
+                servicios.put(formateador.format(LocalDateTime.now()), hoy);
                 
                 //DIA 1
                 JSONArray dia1 = new JSONArray();
@@ -226,7 +226,7 @@ public class ControladorProfesional {
                     }
                 }
                 
-                servicios.put("HOY", hoy);
+                servicios.put(formateador.format(LocalDateTime.now()), hoy);
                 
                 //DIA 1
                 JSONArray dia1 = new JSONArray();

@@ -443,13 +443,14 @@ public class RESTProfesional {
         
     }//Fin método actualizarInfoPerfil.
      
+    /*
     @PUT
     @Path("/matchSesion/{idProfesional}/{idSesion}")
     public void matchSesionWeb(@PathParam("idProfesional") int idProfesional, @PathParam("idSesion") int idSesion){
 
         profesional.matchSesionWeb(idProfesional, idSesion);
         
-    }//Fin método matchSesion.
+    }*/ //Fin método matchSesion.
     
     @PUT
     @Path("/matchSesion")
