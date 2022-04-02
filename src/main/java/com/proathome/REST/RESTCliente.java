@@ -772,31 +772,17 @@ public class RESTCliente {
     }//Fin método enCursoExamenDiagnostico.
     
     @PUT
-    @Path("/actualizarSesionWeb")
-    public void actualizarSesionWeb(String datos){
-        
-        try{
-            
-            JSONObject actualizar = (JSONObject) parser.parse(datos);
-            sesiones.actualizarSesion(actualizar);
-            
-        }catch(ParseException ex){
-            ex.printStackTrace();
-        }
-        
-    }
-    
-    @PUT
     @Path("/actualizarSesion")
-    public Response actualizarSesion(String jsonDatos){
+    public String actualizarSesion(String jsonDatos){
+        JSONObject respuesta = new JSONObject();
         try{
             JSONObject json = (JSONObject) parser.parse(jsonDatos);
-            sesiones.actualizarSesion(json);
+            respuesta = sesiones.actualizarSesion(json);
         }catch(ParseException e){
             e.printStackTrace();
         }    
         
-        return Response.ok("Sesión actualizada correctamente", MediaType.APPLICATION_JSON).build();
+        return respuesta.toJSONString();
         
     }
     
