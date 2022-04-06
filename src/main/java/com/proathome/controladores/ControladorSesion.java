@@ -557,6 +557,8 @@ public class ControladorSesion {
         if(DBController.getInstance().getConnection() != null){
             try{
                 PreparedStatement actualizar;
+                //VALIDAR CONTRA AGENDA SI HAY CAMBIO DE FECHA U HORARIO
+                
                 
                 if(Boolean.valueOf(jsonDatos.get("existeProfesional").toString()) && (Boolean.valueOf(jsonDatos.get("cambioFecha").toString()) || Boolean.valueOf(jsonDatos.get("cambioHorario").toString()))){
                     actualizar = DBController.getInstance().getConnection().prepareStatement("UPDATE sesiones SET profesionales_idprofesionales = ?, horario = ?, lugar = ?, tiempo = ?, tipoServicio = ?, extras = ?, latitud = ?, longitud = ?, actualizado = ?, idSeccion = ?, idNivel = ?, idBloque = ?, fecha = ? WHERE idsesiones = ?");
@@ -575,7 +577,7 @@ public class ControladorSesion {
                     actualizar.setDate(13, java.sql.Date.valueOf(jsonDatos.get("fecha").toString()));
                     actualizar.setInt(14, Integer.parseInt(jsonDatos.get("idSesion").toString()));
                 }else{
-                    actualizar = DBController.getInstance().getConnection().prepareStatement("UPDATE sesiones SET horario = ?, lugar = ?, tiempo = ?, tipoServicio = ?, extras = ?, latitud = ?, longitud = ?, actualizado = ?, idSeccion = ?, idNivel = ?, idBloque = ? WHERE idsesiones = ?");
+                    actualizar = DBController.getInstance().getConnection().prepareStatement("UPDATE sesiones SET horario = ?, lugar = ?, tiempo = ?, tipoServicio = ?, extras = ?, latitud = ?, longitud = ?, actualizado = ?, idSeccion = ?, idNivel = ?, idBloque = ?, fecha = ? WHERE idsesiones = ?");
                     actualizar.setString(1 , jsonDatos.get("horario").toString());
                     actualizar.setString(2 , jsonDatos.get("lugar").toString());
                     actualizar.setString(3 , jsonDatos.get("tiempo").toString());
@@ -587,7 +589,8 @@ public class ControladorSesion {
                     actualizar.setInt(9, Integer.valueOf(jsonDatos.get("idSeccion").toString()));
                     actualizar.setInt(10, Integer.valueOf(jsonDatos.get("idNivel").toString()));
                     actualizar.setInt(11, Integer.valueOf(jsonDatos.get("idBloque").toString()));
-                    actualizar.setInt(12, Integer.parseInt(jsonDatos.get("idSesion").toString()));
+                    actualizar.setString(12, jsonDatos.get("fecha").toString());
+                    actualizar.setInt(13, Integer.parseInt(jsonDatos.get("idSesion").toString()));
                 }
 
                 actualizar.execute();

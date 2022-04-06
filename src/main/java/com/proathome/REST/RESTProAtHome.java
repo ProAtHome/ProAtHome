@@ -1,13 +1,7 @@
 package com.proathome.REST;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.proathome.controladores.ControladorAdmin;
-import com.proathome.controladores.ControladorNivelIdioma;
 import java.util.Calendar;
-import java.util.Date;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -16,7 +10,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -32,12 +25,8 @@ public class RESTProAtHome {
     *
     */
     
-    private ControladorNivelIdioma nivel = new ControladorNivelIdioma();
     private ControladorAdmin admin = new ControladorAdmin();
     private JSONParser parser = new JSONParser();
-    
-    
-    // CREAR UN LATIDO DE CORAZON MYSQL.
     
     @GET
     @Path("/latidoSQL")

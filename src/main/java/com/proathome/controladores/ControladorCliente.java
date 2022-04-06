@@ -66,7 +66,7 @@ public class ControladorCliente {
     private JSONObject validarAgenda(JSONObject data, int horarioServicioElegido){
         JSONObject respuesta = new JSONObject();
         //OBTENEMOS AGENDA DE LA FECHA ELEGIDA
-        JSONArray agenda = getAgendaFecha(Integer.parseInt(data.get("idCliente").toString()), data.get("fecha").toString());
+        JSONArray agenda = getAgendaFecha(Integer.parseInt(data.get("idCliente").toString()), data.get("fecha").toString(), Boolean.valueOf(data.get("reagendar").toString()), Integer.parseInt(data.get("idSesion").toString()));
 
         //INTERVALO DE 3HRS ENTRE SERVICIOS AGENDADOS
         if(agenda.size() == 0){
@@ -153,7 +153,7 @@ public class ControladorCliente {
         return hora;
     }
     
-    private JSONArray getAgendaFecha(int idCliente, String fechaServicio){
+    private JSONArray getAgendaFecha(int idCliente, String fechaServicio, boolean reagendar, int idSesion){
         JSONArray servicios = new JSONArray();
         
         if(DBController.getInstance().getConnection() != null){
@@ -165,9 +165,17 @@ public class ControladorCliente {
                 ResultSet result = consultaAgenda.executeQuery();
                 while(result.next()){
                     JSONObject data = new JSONObject();
-                    data.put("fecha", result.getDate("fecha").toString());
-                    data.put("horario", result.getString("horario"));
-                    servicios.add(data);
+                    if(reagendar){
+                        if(result.getInt("idsesiones") != idSesion){
+                            data.put("fecha", result.getDate("fecha").toString());
+                            data.put("horario", result.getString("horario"));
+                            servicios.add(data);   
+                        }
+                    }else{
+                        data.put("fecha", result.getDate("fecha").toString());
+                        data.put("horario", result.getString("horario"));
+                        servicios.add(data);
+                    }
                 }
             }catch(SQLException ex){
                 ex.printStackTrace();

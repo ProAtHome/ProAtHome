@@ -717,7 +717,7 @@ public class ControladorAdmin {
             try{
                 
                 //VERIFICAR SI NO EXISTE OPERADOR EN EL MISMO RANGO.
-                PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM operadores WHERE usuario = ?");
+                PreparedStatement consulta = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM operadores WHERE usuario = ? AND rango = ?");
                 consulta.setString(1, jsonDatos.get("usuario").toString());
                 consulta.setInt(2, Integer.parseInt(jsonDatos.get("rango").toString()));
                 ResultSet resultado = consulta.executeQuery();
