@@ -558,8 +558,7 @@ public class ControladorSesion {
             try{
                 PreparedStatement actualizar;
                 //VALIDAR CONTRA AGENDA SI HAY CAMBIO DE FECHA U HORARIO
-                
-                
+                                
                 if(Boolean.valueOf(jsonDatos.get("existeProfesional").toString()) && (Boolean.valueOf(jsonDatos.get("cambioFecha").toString()) || Boolean.valueOf(jsonDatos.get("cambioHorario").toString()))){
                     actualizar = DBController.getInstance().getConnection().prepareStatement("UPDATE sesiones SET profesionales_idprofesionales = ?, horario = ?, lugar = ?, tiempo = ?, tipoServicio = ?, extras = ?, latitud = ?, longitud = ?, actualizado = ?, idSeccion = ?, idNivel = ?, idBloque = ?, fecha = ? WHERE idsesiones = ?");
                     actualizar.setNull(1, 0);

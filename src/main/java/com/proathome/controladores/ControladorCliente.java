@@ -1126,6 +1126,8 @@ public class ControladorCliente {
                             if(fechaFin.equals(fechaActual) || fechaActual.after(fechaFin)){
                                 //Finalizar plan activo y pasarlo a PARTICULAR
                                 finalizarPlan(idCliente);
+                                response.put("respuesta", true);
+                                response.put("mensaje", jsonPlan);
                             }else{
                                 jsonPlan.put("tipoPlan", resultadoPlanActivo.getString("tipoPlan"));
                                 jsonPlan.put("monedero", resultadoPlanActivo.getInt("monedero"));
@@ -1152,6 +1154,9 @@ public class ControladorCliente {
                 jsonPlan.put("monedero", resultadoPlanActivo2.getInt("monedero"));
                 jsonPlan.put("fechaInicio", resultadoPlanActivo2.getDate("fechaInicio") == null ? null : resultadoPlanActivo2.getDate("fechaInicio").toString());
                 jsonPlan.put("fechaFin", resultadoPlanActivo2.getDate("fechaFin") == null ? null : resultadoPlanActivo2.getDate("fechaFin").toString());
+                response.put("respuesta", true);
+                response.put("mensaje", jsonPlan);
+            }else{
                 response.put("respuesta", true);
                 response.put("mensaje", jsonPlan);
             }

@@ -6,6 +6,9 @@ import com.proathome.mysql.DBController;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Timer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -17,9 +20,38 @@ public class ControladorAdmin {
     
     public static final int CLIENTE = 1;
     public static final int PROFESIONAL = 2;
+    public static boolean primeraVez = true;
     
     public void latidoSQL(){
         try{
+            /*
+            if(ControladorAdmin.primeraVez){
+                System.out.println("Entro por unica vez al prender el server.");
+                ControladorAdmin.primeraVez = false;
+                Date horaDespertar = new Date(System.currentTimeMillis());
+        
+                Calendar c = Calendar.getInstance();
+                c.setTime(horaDespertar);
+                System.out.println(c.get(Calendar.DAY_OF_WEEK));
+                // Si la hora es posterior a las 8am se programa la alarma para el dia siguiente
+                if (c.get(Calendar.HOUR_OF_DAY) >= 22) {
+                    c.set(Calendar.DAY_OF_YEAR, c.get(Calendar.DAY_OF_YEAR) + 1);
+                }
+
+                c.set(Calendar.HOUR_OF_DAY, 18);
+                c.set(Calendar.MINUTE, 37);
+                c.set(Calendar.SECOND, 0);
+
+                horaDespertar = c.getTime();
+                System.out.println(horaDespertar);
+                System.out.println(c.get(Calendar.DAY_OF_WEEK));
+                // El despertador suena cada 24h (una vez al dia)
+                int tiempoRepeticion = 60000; 
+
+                // Programamos el despertador para que "suene" a las 8am todos los dias 
+                Timer temporizador = new Timer();
+                temporizador.schedule(new Temporizador(), horaDespertar, tiempoRepeticion);
+            }*/
             PreparedStatement latido = DBController.getInstance().getConnection().prepareStatement("SELECT * FROM clientes");
             ResultSet resultado = latido.executeQuery();
             while(resultado.next()){}

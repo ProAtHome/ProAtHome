@@ -71,7 +71,7 @@ public class JWTController {
             }
         } catch (JWTVerificationException e) {
             valido = false;
-            e.printStackTrace();
+            System.out.println("Token expirado.");
         }
         
         return valido;
